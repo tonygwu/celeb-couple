@@ -18,7 +18,8 @@ from pathlib import Path
 from packages.ids.keys import contract_id
 
 __all__ = ["GradingContract", "load_contract", "MixedContractError",
-           "refuse_mixed_contracts"]
+           "refuse_mixed_contracts", "StaleContractError",
+           "current_contract_ids", "refuse_stale_contract"]
 
 
 class MixedContractError(RuntimeError):
@@ -77,3 +78,83 @@ def refuse_mixed_contracts(records: list[dict]) -> None:
             f"comparable, and a record with no contract_id has unknown "
             f"provenance rather than a matching one."
         )
+
+
+class StaleContractError(SystemExit):
+    """Exits with a message, like MissingArtifact in the sibling module.
+
+    A SystemExit rather than a RuntimeError because this is reached from
+    script entrypoints, where a traceback tells the operator less than a
+    sentence does.
+    """
+
+
+def current_contract_ids(repo: Path) -> dict[str, str]:
+    """Every contract id the rubrics ON DISK currently produce, id -> name.
+
+    Derived by globbing ``rubrics/*/`` rather than listing the three known
+    rubrics, so adding a fourth needs no code change. This repository has been
+    bitten twice by code that enumerated a set which later grew.
+
+    A directory without exactly one ``.md`` and one ``.schema.json`` is
+    SKIPPED, not guessed at. Which two files reach the judge is the whole
+    definition of the contract, and picking one of several candidates would
+    compute an id for bytes nobody was shown.
+    """
+    ids: dict[str, str] = {}
+    root = repo / "rubrics"
+    if not root.is_dir():
+        return ids
+    for d in sorted(root.iterdir()):
+        if not d.is_dir():
+            continue
+        md = sorted(d.glob("*.md"))
+        schema = sorted(d.glob("*.schema.json"))
+        if len(md) != 1 or len(schema) != 1:
+            continue
+        ids[contract_id(md[0].read_bytes(), schema[0].read_bytes())] = d.name
+    return ids
+
+
+def refuse_stale_contract(repo: Path, artifact: str, data: dict) -> None:
+    """Refuse an artifact scored under a rubric that no longer exists on disk.
+
+    THE HAZARD. The grading contract is sha256(rubric + schema), so a one-line
+    typo fix in a rubric gives a new contract_id and every stored estimate now
+    came from a rubric that is gone. Nothing detected that. The scores stayed
+    on disk, the analysis scripts kept reading them, and every report kept
+    presenting them as current -- a quiet wrong answer of exactly the shape
+    this project exists to avoid, and one that gets likelier the moment
+    somebody acts on docs/BACKLOG.md's three filed rubric corrections.
+
+    Why this lives inside ``require`` rather than in each analysis script:
+    ``refuse_mixed_contracts`` was written as a safety function and left with
+    no production caller for weeks. A guard that every consumer must remember
+    to invoke is a guard that a new script silently opts out of. Nine scripts
+    read scored artifacts and none of them has to know this exists.
+
+    An artifact with no ``contract`` block is not checked, because most
+    artifacts are arithmetic over records and no rubric produced them. A repo
+    with no ``rubrics/`` directory is not checked either, which is how test
+    fixtures and scratch directories pass.
+    """
+    stored = data.get("contract")
+    if not isinstance(stored, dict) or not stored.get("contract_id"):
+        return
+    ids = current_contract_ids(repo)
+    if not ids or stored["contract_id"] in ids:
+        return
+    raise StaleContractError(
+        f"\nSTALE CONTRACT: {artifact}\n"
+        f"  It was scored under contract {stored['contract_id']} "
+        f"(rubric_version {stored.get('rubric_version', 'unknown')}), and no "
+        f"rubric on disk produces that id any more.\n"
+        f"  Rubrics present now: "
+        + ", ".join(f"{name} -> {cid}" for cid, name in sorted(ids.items(),
+                                                               key=lambda kv: kv[1]))
+        + "\n"
+        f"  Estimates from different rubrics must not be pooled or reported "
+        f"together, so this artifact cannot be read as current.\n"
+        f"  Either restore the rubric these scores were produced under, or "
+        f"re-score against the new one. See docs/CONTRACT-BUMP.md.\n"
+    )

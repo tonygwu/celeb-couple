@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from packages.llmkit.contract import refuse_stale_contract
+
 __all__ = ["MissingArtifact", "require", "PRODUCERS"]
 
 
@@ -64,11 +66,22 @@ PRODUCERS = {
 }
 
 
-def require(repo: Path, relative: str) -> dict:
-    """Read a JSON artifact, or exit with the command that creates it."""
+def require(repo: Path, relative: str, *, check_contract: bool = True) -> dict:
+    """Read a JSON artifact, or exit with the command that creates it.
+
+    Also refuses an artifact whose grading contract no longer exists on disk.
+    That check lives HERE, rather than in the nine analysis scripts that read
+    scored artifacts, because a guard each caller must remember to invoke is a
+    guard a new caller silently skips -- which is exactly what happened to
+    ``refuse_mixed_contracts``. Pass ``check_contract=False`` only to inspect
+    a stale artifact deliberately, such as when deciding whether to re-score.
+    """
     path = repo / relative
     if path.exists():
-        return json.loads(path.read_text())
+        data = json.loads(path.read_text())
+        if check_contract:
+            refuse_stale_contract(repo, relative, data)
+        return data
     producer = PRODUCERS.get(relative, "the pipeline stage that writes it")
     raise MissingArtifact(
         f"\nMissing artifact: {relative}\n"

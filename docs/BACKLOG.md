@@ -159,6 +159,36 @@ fired on a downstream number. Neither would have surfaced on its own.
   defaulted, and an unknown must keep that person out of a gendered view rather
   than into a guess.
 
+- ~~A stale rubric silently invalidated the whole corpus and nothing noticed.~~
+  **Fixed 2026-09-14.** The grading contract is `sha256(rubric + schema)`, so a
+  one-line typo fix in a rubric gives a new `contract_id` and every stored
+  estimate was produced by a rubric that no longer exists. Nothing detected it.
+  The scores stayed on disk, nine analysis scripts kept reading them, and every
+  report kept presenting them as current. Three filed rubric corrections are
+  waiting in this file to be applied together, so the next person to act on any
+  of them would have hit this.
+
+  `require()` now refuses an artifact whose `contract_id` no rubric on disk
+  produces, naming the stale id, the rubrics that exist now, and
+  `docs/CONTRACT-BUMP.md`. It is in the LOADER, not in the nine scripts,
+  because a guard each caller must remember to invoke is a guard a new caller
+  silently skips -- which is exactly what happened to `refuse_mixed_contracts`.
+  The rubric list is globbed from `rubrics/*/`, so a fourth rubric needs no
+  code change, and a directory without exactly one `.md` and one
+  `.schema.json` is skipped rather than guessed at.
+
+- **`refuse_mixed_contracts` still has no production caller, and that is the
+  correct state.** It was filed as a gap. Investigating it found the premise
+  was incomplete: the function refuses to POOL records from different
+  contracts, and nothing in this codebase pools two scored artifacts. The one
+  place that reads two of them, `cross_run_stability.py`, already refuses by
+  hand, and its message is better than the generic one because it can say what
+  the comparison was FOR. The real exposure was staleness rather than mixing,
+  and that is the item above. Keep the function: the first script that
+  genuinely pools will need it, and a test asserts it refuses an unlabelled
+  record rather than skipping it. **Difficulty: not a task; recorded so it is
+  not re-filed.**
+
 - **`contract_id` concatenates its parts with no separator.** Moving text from
   the end of the rubric to the start of the schema leaves the contract id
   unchanged, so two genuinely different contracts could share an identity. Not
