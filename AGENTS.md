@@ -98,6 +98,10 @@ read-only against Wikidata and Wikipedia. The last three spend model quota.
 | `scripts/fetch_records.py` | relationship candidates + birth dates for the cohort | no |
 | `scripts/build_episodes.py` | merges progressions, flags defects, applies the adult window | no |
 | `scripts/build_partner_universe.py` | derives the outside-roster partners from scorable episodes | no |
+| `scripts/resolve_roster.py` | turns a name list into a roster file with Wikidata ids | no |
+| `scripts/scaling_report.py` | pilot vs full roster; does coverage scale | no |
+| `scripts/source_requirement.py` | how deep a source would have to be | no |
+| `scripts/reachable_products.py` | what can be built with the evidence that exists | no |
 | `scripts/fetch_observations.py` | list/award observations from Wikipedia tables, for cohort **and** partners | no |
 | `scripts/merge_prose_mentions.py` | folds prose mentions in, deduping on person+year+publisher | no |
 | `scripts/joint_coverage.py` | are BOTH sides scorable in the same period, and is the pairing comparable | no |
@@ -114,6 +118,7 @@ read-only against Wikidata and Wikipedia. The last three spend model quota.
 | `scripts/extract_prose_mentions.py` | list memberships from biographical prose | **yes** |
 | `scripts/measure_rater_noise.py` | repeat-scores unchanged dossiers | **yes** |
 | `scripts/run_pilot.py` | bounded pairing selection and coverage | **yes** |
+| `scripts/score_roster_joint.py` | scores only what the roster-scale joint pairings need | **yes** |
 
 The quota-spending scripts take `CELEB_JUDGES` (default `fable,astra`) and
 `CELEB_MAX_CALLS`, or equivalent flags. Run the whole chain in this order after
@@ -136,6 +141,26 @@ Quota rules for the three that spend:
   2026-09-14 only `~/.claude-e` had both 5-hour and weekly room.
 - Every runner takes `--max-calls` style caps and **halts at the cap**, reporting
   the halt and the work it did not reach.
+
+## Running the roster-scale chain
+
+The pilot chain defaults to `data/pilot/`. The 100-name roster uses the same
+scripts with different paths:
+
+```sh
+.venv/bin/python scripts/fetch_records.py       --cohort docs/roster-100.json --out data/roster100/records
+.venv/bin/python scripts/build_episodes.py      --records data/roster100/records/relationship_candidates.json \
+                                                --cohort docs/roster-100.json --out data/roster100/records/episodes.json
+.venv/bin/python scripts/build_partner_universe.py --episodes data/roster100/records/episodes.json \
+                                                --cohort docs/roster-100.json --out data/roster100/records/partner_universe.json
+.venv/bin/python scripts/fetch_observations.py  --cohort docs/roster-100.json \
+                                                --partners data/roster100/records/partner_universe.json \
+                                                --out data/roster100/observations
+```
+
+Everything above is free. `scripts/score_roster_joint.py` then scores only the
+dossiers the jointly covered pairings need, which is about nine rather than the
+127 a full pass would cost.
 
 ## What has been measured
 
