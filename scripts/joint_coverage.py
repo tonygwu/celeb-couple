@@ -65,9 +65,16 @@ def main() -> int:
     joint, near_misses = [], []
 
     excluded_by_romance = 0
+    skipped_no_year = []
     for c in films["candidates"]:
         a, b, y = c["male_qid"], c["female_qid"], c["release"][:4]
         if not y.isdigit():
+            # Silently dropping these shrinks the denominator with no record,
+            # so "4 of 51 candidate pairings" could quietly have been 4 of a
+            # different number.
+            skipped_no_year.append({"work": c.get("title"),
+                                    "work_qid": c.get("work_qid"),
+                                    "release": c.get("release")})
             continue
         key = (c["work_qid"], a, b)
         if qualifying is not None and key not in qualifying:
@@ -88,9 +95,17 @@ def main() -> int:
         elif ra.scored or rb.scored:
             near_misses.append({**row, "missing_side": "b" if ra.scored else "a"})
 
+    episodes_with_no_adult_year = 0
     for e in eps["episodes"]:
         a, b = e["subject_qid"], e["partner_qid"]
-        for y in [str(v) for v in e.get("adult_years", [])]:
+        _years = [str(v) for v in e.get("adult_years") or []]
+        if not _years:
+            # Correct to contribute nothing -- the episode is defective or
+            # falls outside the adult window -- but "31 episodes examined" and
+            # "31 episodes that could contribute a year" are different numbers
+            # and only the first was reported.
+            episodes_with_no_adult_year += 1
+        for y in _years:
             ra = resolve_period(y, have.get(a, {}), args.bound)
             rb = resolve_period(y, have.get(b, {}), args.bound)
             if ra.scored and rb.scored:
@@ -125,6 +140,9 @@ def main() -> int:
             "episodes_examined": len(eps["episodes"]),
             "films_examined": len(films["candidates"]),
             "films_excluded_as_not_a_romance": excluded_by_romance,
+            "episodes_contributing_no_adult_year": episodes_with_no_adult_year,
+            "films_skipped_no_parseable_year": len(skipped_no_year),
+            "films_skipped_detail": skipped_no_year,
             "films_qualifying_as_romance": (
                 len(qualifying) if qualifying is not None else None),
             "candidate_pairings": len(eps["episodes"]) + len(films["candidates"]),

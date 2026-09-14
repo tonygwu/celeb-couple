@@ -328,3 +328,33 @@ def test_every_generated_document_regenerates_identically():
         "these documents are not what their generator produces — either they "
         "were hand-edited, or their inputs moved and nobody re-ran:\n  "
         + "\n  ".join(drifted))
+
+
+def test_the_joint_coverage_denominators_reconcile():
+    """`candidate_pairings` is the headline denominator — "4 of 51" — and some
+    of those 51 can never contribute. A film with an unparseable release year
+    and an episode with no adult year were both skipped silently, so the
+    denominator could shrink with no record of it.
+
+    Both are now counted, and the episode figure must agree with the episodes
+    artifact's own count of what it excluded.
+    """
+    import json
+    from pathlib import Path
+    repo = Path(__file__).resolve().parent.parent
+    j = repo / "data/pilot/run/joint_with_nearby.json"
+    e = repo / "data/pilot/records/episodes.json"
+    if not (j.exists() and e.exists()):
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+
+    d = json.loads(j.read_text())["denominators"]
+    eps = json.loads(e.read_text())["episodes"]
+
+    assert (d["candidate_pairings"]
+            == d["episodes_examined"] + d["films_examined"])
+
+    no_year = sum(1 for ep in eps if not (ep.get("adult_years") or []))
+    assert d["episodes_contributing_no_adult_year"] == no_year, (
+        "the count of episodes that cannot contribute must match the artifact"
+    )
+    assert d["films_skipped_no_parseable_year"] == len(d["films_skipped_detail"])
