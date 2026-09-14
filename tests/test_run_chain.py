@@ -20,6 +20,26 @@ def test_the_free_stages_appear_in_dependency_order():
     )
 
 
+def test_every_free_analysis_script_is_in_the_chain():
+    """gender_shape_confound.py was written and never added, so its artifact
+    went stale relative to the others until someone ran it by hand."""
+    from pathlib import Path as _P
+    repo = _P(__file__).resolve().parent.parent
+    paid = {"score_evidenced", "classify_romance", "extract_prose_mentions",
+            "measure_rater_noise", "run_stress", "score_roster_joint",
+            "run_pilot", "resolve_roster", "merge_prose_mentions",
+            "scaling_report", "source_requirement", "reachable_products",
+            "write_m0_report", "fetch_records", "build_episodes",
+            "build_partner_universe", "fetch_observations"}
+    for script in sorted((repo / "scripts").glob("*.py")):
+        if script.stem in paid:
+            continue
+        assert script.name in CHAIN, (
+            f"{script.name} is a free analysis script and is not in "
+            "run_chain.sh, so its artifact will go stale relative to the others"
+        )
+
+
 def test_reports_run_after_the_data_stages():
     assert CHAIN.index("fetch_observations.py") < CHAIN.index("joint_coverage.py")
     assert CHAIN.index("joint_coverage.py") < CHAIN.index("write_m0_report.py")

@@ -43,6 +43,7 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   run scripts/alignment_gap.py
   run scripts/partner_eligibility.py
   run scripts/shape_confound.py
+  run scripts/gender_shape_confound.py
   run scripts/grounding_audit.py
   run scripts/offset_diagnostic.py
   run scripts/write_m0_report.py
