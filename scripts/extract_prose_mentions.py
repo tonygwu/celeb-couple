@@ -25,7 +25,8 @@ from packages.llmkit.manifest import RunManifest                      # noqa: E4
 
 RUBRIC = REPO / "rubrics/mentions/MENTIONS.md"
 SCHEMA = REPO / "rubrics/mentions/mentions.schema.json"
-UA = "celeb-couple-M1/0.1 (https://github.com/tonygwu/celeb-couple; read-only research)"
+#: Imported, not copied. This said M1, as did two other copies.
+from packages.wiki.fetch import USER_AGENT  # noqa: E402
 _JSON = re.compile(r"\{.*\}", re.S)
 
 
@@ -35,7 +36,7 @@ def extract_article(page: str, timeout: int = 45) -> tuple[str, str]:
                "action": "query", "format": "json", "formatversion": "2",
                "prop": "extracts", "explaintext": "1", "redirects": "1",
                "titles": page}))
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=timeout) as fh:
         raw = fh.read()
     pages = json.loads(raw)["query"]["pages"]

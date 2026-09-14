@@ -13,8 +13,12 @@ import argparse, json, sys, time, urllib.parse, urllib.request
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-UA = ("celeb-couple-M1/0.1 (https://github.com/tonygwu/celeb-couple; "
-      "read-only research)")
+# Needed before the import below. This script imported nothing from the repo
+# until the User-Agent moved into packages/, so it had no sys.path line and
+# adding the import broke it from any directory but the repo root.
+sys.path.insert(0, str(REPO))
+#: Imported, not copied. This said M1, as did two other copies.
+from packages.wiki.fetch import USER_AGENT  # noqa: E402
 #: Descriptions that mark the right kind of entity when a name is ambiguous.
 PREFER = ("actor", "actress", "comedian", "singer", "film", "model")
 
@@ -24,7 +28,7 @@ def resolve(name: str, timeout: int = 30):
            + urllib.parse.urlencode({
                "action": "wbsearchentities", "format": "json", "language": "en",
                "type": "item", "limit": "5", "search": name}))
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=timeout) as fh:
         hits = json.load(fh).get("search", [])
     best = next((h for h in hits

@@ -28,10 +28,8 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.llmkit.artifacts import require                      # noqa: E402
 from modules.consensus.wikipedia_lists import fetch_section_wikitext  # noqa: E402
+from packages.wiki.fetch import article_text  # noqa: E402
 
-USER_AGENT = (
-    "celeb-couple-M0/0.1 (https://github.com/tonygwu/celeb-couple; read-only research)"
-)
 #: Where each publisher's table lives. Kept beside fetch_observations.py's own
 #: source list; a publisher absent here is reported as unverifiable, never as
 #: verified.
@@ -62,14 +60,6 @@ def _norm(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
-def article_text(title: str, timeout: int = 60) -> str:
-    url = ("https://en.wikipedia.org/w/api.php?" + urllib.parse.urlencode(
-        {"action": "query", "prop": "extracts", "explaintext": "1",
-         "format": "json", "titles": title}))
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=timeout) as fh:
-        pages = json.load(fh)["query"]["pages"]
-    return next(iter(pages.values())).get("extract") or ""
 
 
 def name_at(block: str, rank: int) -> str | None:

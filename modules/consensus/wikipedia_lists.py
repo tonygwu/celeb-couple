@@ -35,9 +35,8 @@ __all__ = ["AwardRow", "TableStats", "fetch_section_wikitext", "parse_award_tabl
            "parse_award_table_with_stats", "to_records"]
 
 API = "https://en.wikipedia.org/w/api.php"
-USER_AGENT = (
-    "celeb-couple-M0/0.1 (https://github.com/tonygwu/celeb-couple; read-only research)"
-)
+#: Imported, not copied. See packages/wiki/fetch.py.
+from packages.wiki.fetch import USER_AGENT  # noqa: E402,F401
 
 #: {{dts|1985|2|4}} -> 1985-02-04 ; {{dts|1985}} -> 1985
 _DTS = re.compile(r"\{\{dts\|(\d{4})(?:\|(\d{1,2}))?(?:\|(\d{1,2}))?[^}]*\}\}")

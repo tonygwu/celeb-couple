@@ -26,9 +26,8 @@ __all__ = ["RelationshipCandidate", "fetch_relationships", "fetch_birth_dates",
            "LOOKUP_FAILURES", "LABEL_SOURCES"]
 
 SPARQL = "https://query.wikidata.org/sparql"
-USER_AGENT = (
-    "celeb-couple-M0/0.1 (https://github.com/tonygwu/celeb-couple; read-only research)"
-)
+#: Imported, not copied. See packages/wiki/fetch.py.
+from packages.wiki.fetch import USER_AGENT  # noqa: E402,F401
 #: Wikidata asks for polite pacing and will 429. Commons returned 429 after
 #: about twenty sequential calls during the feasibility probe.
 PACE_SECONDS = 1.2

@@ -20,9 +20,8 @@ __all__ = ["RomanceVerdict", "fetch_plot", "fetch_cast", "build_prompt",
            "parse_verdict", "QUALIFYING", "PlotUnavailable", "title_for_qid"]
 
 API = "https://en.wikipedia.org/w/api.php"
-USER_AGENT = (
-    "celeb-couple-M1/0.1 (https://github.com/tonygwu/celeb-couple; read-only research)"
-)
+#: Imported, not copied. This file said M1 while the other five said M0.
+from packages.wiki.fetch import USER_AGENT  # noqa: E402,F401
 
 #: The only classification that produces a scorable on-screen pairing.
 QUALIFYING = "reciprocal_romance"

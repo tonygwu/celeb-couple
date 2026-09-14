@@ -34,10 +34,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.llmkit.artifacts import require  # noqa: E402
+from packages.wiki.fetch import article_text  # noqa: E402
 
-USER_AGENT = (
-    "celeb-couple-M0/0.1 (https://github.com/tonygwu/celeb-couple; read-only research)"
-)
 #: Sentences longer than this are almost always a list or an infobox dump, and
 #: quoting one in a review sheet costs the reader more than it tells them.
 MAX_SENTENCE = 320
@@ -46,19 +44,6 @@ MAX_SENTENCE = 320
 MAX_EXCERPTS = 2
 
 
-def article_text(title: str, cache: dict[str, str], timeout: int = 60) -> str:
-    if title in cache:
-        return cache[title]
-    url = "https://en.wikipedia.org/w/api.php?" + urllib.parse.urlencode({
-        "action": "query", "prop": "extracts", "explaintext": "1",
-        "format": "json", "redirects": "1", "titles": title})
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=timeout) as fh:
-        pages = json.load(fh)["query"]["pages"]
-    text = next(iter(pages.values())).get("extract") or ""
-    cache[title] = text
-    time.sleep(0.2)
-    return text
 
 
 def sentences_naming(text: str, name: str) -> tuple[list[str], str]:

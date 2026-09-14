@@ -31,11 +31,9 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.llmkit.artifacts import require  # noqa: E402
+from packages.wiki.fetch import USER_AGENT  # noqa: E402
 
 API = "https://www.wikidata.org/w/api.php"
-USER_AGENT = (
-    "celeb-couple-M0/0.1 (https://github.com/tonygwu/celeb-couple; read-only research)"
-)
 #: Wikidata's "human". A roster entry that is not one is a category, a film or
 #: a disambiguation page, and every fact fetched under it is nonsense.
 HUMAN = "Q5"
