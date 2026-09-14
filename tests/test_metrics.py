@@ -358,3 +358,25 @@ def test_the_singleton_groups_are_visible():
     groups = json.loads(f.read_text())["groups"]
     assert sum(1 for n in groups.values() if n == 1) >= 1, groups
     assert sum(groups.values()) == 39
+
+
+def test_the_gender_offset_does_not_belong_to_one_person():
+    """It rests on eight male estimates across five people — few enough that
+    one could be carrying it. Leave-one-person-out must keep the offset on the
+    same side of zero, or the project's most consequential finding is a
+    statement about whoever that person is."""
+    import json
+    from pathlib import Path
+    f = (Path(__file__).resolve().parent.parent
+         / "data/pilot/run/gender_shape_confound.json")
+    if not f.exists():
+        import pytest
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+    blob = json.loads(f.read_text())
+    loo = blob.get("leave_one_person_out")
+    assert loo, "the leave-one-person-out must be recorded"
+    base = blob["mean_offset_male_minus_female"]
+    for who, offset in loo["offset_dropping_each_male_person"].items():
+        assert (offset > 0) == (base > 0), (
+            f"dropping {who} reverses the offset ({base} -> {offset}); the "
+            f"finding belongs to that person rather than to the corpus")

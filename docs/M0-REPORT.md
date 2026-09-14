@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `35365ac14961`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `343c21fa4c9b`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -275,7 +275,7 @@ Two things follow. Widening the bound from ±1 to ±2 would take joint coverage 
 | male | 8 | **90.75** | 4.89 | 78.0–94.0 |
 | female | 31 | **87.1** | 6.49 | 64.0–94.0 |
 
-Men hold 0 ranked observations and women 17. Because an award pins near the top of the scale and a ranked placement does not, that imbalance puts the male mean 3.65 points above the female mean before any fact about any individual enters. Every mixed-gender pairing therefore carries roughly that offset built in, in the same direction, and a signed gap that size is a statement about publishing rather than about the couple.
+Men hold 0 ranked observations and women 17. Because an award pins near the top of the scale and a ranked placement does not, that imbalance puts the male mean 3.65 points above the female mean before any fact about any individual enters. Every mixed-gender pairing therefore carries roughly that offset built in, in the same direction, and a signed gap that size is a statement about publishing rather than about the couple. Removing any single male person entirely moves the offset between 2.9 and 5.3: it never approaches zero and never reverses, so the finding does not belong to whichever person is carrying it.
 
 **A four-view product compares a man against a woman in every row. With the shapes distributed this unevenly, the sign of a typical gap is decided by which sex the person is, not by the judgments. This has to be disclosed on every row, or the board reports a publishing artifact as a finding about people.**
 

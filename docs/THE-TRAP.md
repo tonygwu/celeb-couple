@@ -25,7 +25,9 @@ not. So the imbalance shows up directly in the estimates:
 | female | 31 | **87.1** | 6.49 | 64.0–94.0 |
 
 **The male mean sits 3.65 points above the female mean before any fact about
-any individual enters**, and the male estimates are compressed (SD 4.89 against 6.49) because five of the eight are exactly 92.
+any individual enters**, and removing any single male person entirely moves
+that between 2.9 and 5.3 — it never approaches zero and never reverses, so it
+is not one person carrying it, and the male estimates are compressed (SD 4.89 against 6.49) because five of the eight are exactly 92.
 
 A four-view product compares a man against a woman in every row. With shapes
 distributed this unevenly, the sign of a typical gap is decided by which sex
