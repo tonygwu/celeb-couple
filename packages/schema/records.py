@@ -200,12 +200,25 @@ def _check_publication_rating(o: Observation) -> None:
             f"{o.observation_id}: rating_value and rating_scale are both required. "
             "This is the PUBLICATION's number on the PUBLICATION's scale."
         )
+    value = obs["rating_value"]
+    # Only presence was checked. "very high" validated and rendered into the
+    # dossier as "gave its own rating of very high on its own 0-10 scale",
+    # reaching a judge looking like a measurement.
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise SchemaError(
+            f"{o.observation_id}: rating_value {value!r} is not a number. This "
+            "field is the publication's own numeric rating; describe anything "
+            "else as qualitative_commentary."
+        )
 
 
 def _check_ballot_preference(o: Observation) -> None:
     obs = o.observed
     share = obs.get("vote_share")
-    if not isinstance(share, (int, float)) or not 0 <= share <= 1:
+    # A bool IS an int, and 0 <= True <= 1, so `"vote_share": true` validated
+    # as a share of 1.0 -- a claim that the subject took the entire ballot.
+    if (isinstance(share, bool) or not isinstance(share, (int, float))
+            or not 0 <= share <= 1):
         raise SchemaError(f"{o.observation_id}: vote_share must be in [0, 1]")
     if not obs.get("ballot_description"):
         raise SchemaError(

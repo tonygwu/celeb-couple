@@ -306,3 +306,37 @@ def test_a_boolean_list_length_is_refused_for_an_unordered_inclusion():
 def test_ordinary_integers_still_validate():
     _ranked(12, 50)
     _obs(EvidenceType.UNORDERED_INCLUSION, {"list_length": 15})
+
+
+def test_a_boolean_vote_share_is_refused():
+    """`0 <= True <= 1` is True, so `"vote_share": true` validated as a share
+    of 1.0 -- a claim that the subject took 100% of the ballot."""
+    with pytest.raises(SchemaError, match=r"\[0, 1\]"):
+        _obs(EvidenceType.BALLOT_PREFERENCE,
+             {"vote_share": True, "ballot_description": "reader vote among 20"})
+
+
+def test_an_ordinary_vote_share_still_validates():
+    _obs(EvidenceType.BALLOT_PREFERENCE,
+         {"vote_share": 0.3, "ballot_description": "reader vote among 20"})
+
+
+def test_a_publication_rating_must_be_a_number():
+    """The field is documented as "the PUBLICATION's number on the
+    PUBLICATION's scale" and only its presence was checked. A string rendered
+    into the dossier as 'gave its own rating of very high on its own 10 scale'
+    and went to a judge looking like a measurement."""
+    with pytest.raises(SchemaError, match="number"):
+        _obs(EvidenceType.PUBLICATION_RATING,
+             {"rating_value": "very high", "rating_scale": "0-10"})
+
+
+def test_a_boolean_publication_rating_is_refused():
+    with pytest.raises(SchemaError, match="number"):
+        _obs(EvidenceType.PUBLICATION_RATING,
+             {"rating_value": True, "rating_scale": "0-10"})
+
+
+def test_an_ordinary_publication_rating_still_validates():
+    _obs(EvidenceType.PUBLICATION_RATING,
+         {"rating_value": 7.5, "rating_scale": "0-10"})
