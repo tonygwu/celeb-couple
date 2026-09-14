@@ -133,12 +133,20 @@ Three facts combine into a trap.
 
 Therefore:
 
-> **A comparable pairing is 0.0 by construction, and any gap large enough to be
-> interesting is confounded by publication format.**
+> **A comparable pairing is almost always 0.0 by construction, and any gap
+> large enough to be interesting is confounded by publication format.**
 
-Adding more award-shaped sources raises coverage, creates more comparable
-pairings, and every one of them will be 0.0. That is not a partial fix. It
-makes the board larger and no more informative.
+Adding more award-shaped sources raises coverage and creates more comparable
+pairings, and most of them will be exactly 0.0 — 15 of the 18 award-shaped
+estimates in this corpus land on the same value, so two of them drawn at random
+agree about seven times in ten. That is not a partial fix. It makes the board
+larger and very little more informative.
+
+*Corrected 2026-09-14.* This said "every one of them will be 0.0", which was
+true when every award-shaped estimate was 92 and stopped being true when the
+corpus grew: the three exceptions are 78, 91 and 94. An award-versus-award
+pairing CAN produce a non-zero gap. It is rare, and it does not rescue the
+design, but the argument does not need the absolute and should not make it.
 
 ## What this changes about the source requirement
 
