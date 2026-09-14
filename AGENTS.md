@@ -38,6 +38,12 @@ Your checkout name is your **handle**. Use it when you claim work.
    forbidden here. Untracked files you did not create are another agent's work
    in progress. A tree dirty with foreign files is normal, not a mess to tidy.
 
+   `git add -u` is the obvious thing to reach for once `-A` is ruled out, and
+   it is only *safer*, not safe: it skips untracked files but still sweeps
+   every TRACKED file that has been modified, including ones another agent is
+   part-way through. Naming the files costs a few seconds and cannot take
+   somebody else's work with it.
+
 4. **Claim before you work.** Push the claim before you start. Add
    `[claimed by: repo-N]` to the item's line, commit that file by name, push.
    If the claim push is rejected, another agent won the item. Fetch and pick
