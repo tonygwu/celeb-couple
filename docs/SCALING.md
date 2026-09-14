@@ -15,7 +15,8 @@ Joint coverage is a conjunction of independently rare conditions: both people ju
 | Roster size | 14 | 100 |
 | Relationship episodes (scorable) | 28 | 239 |
 | Observations | 41 | 131 |
-| People with any observation | 14 | 61 |
+| People with any observation (incl. partners) | 14 | 61 |
+| ...of those, on the roster itself | 10 | 49 |
 | Person-periods | 39 | 127 |
 | Mean observations per person-period | 1.051 | 1.031 |
 | Person-periods with 2+ publishers | 2 | 4 |

@@ -403,3 +403,35 @@ def test_the_two_counts_are_reported_separately():
     assert cov["cohort_people_with_any_observation"] == 1
     assert cov["people_with_observations_including_partners"] == 2
     assert cov["cohort_people_with_any_observation"] <= cov["cohort_people_total"]
+
+
+def test_coverage_and_people_with_none_must_reconcile():
+    """`people_with_none` was written by fetch_observations and never
+    recomputed by the merge, so a prose mention that gave Liv Tyler her first
+    observation left her on the list. Deriving the coverage count as
+    `total - len(people_with_none)` then inherited the staleness and reported 9
+    where ten cohort members had evidence.
+
+    Two derived numbers over the same corpus must add up. This checks the live
+    artifact where it exists, which is the only place the bug could appear.
+    """
+    import json
+    from pathlib import Path
+    f = Path(__file__).resolve().parent.parent / "data/pilot/observations/observations.json"
+    if not f.exists():
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+
+    blob = json.loads(f.read_text())
+    cov = blob["coverage"]
+    assert (cov["cohort_people_with_any_observation"] + len(cov["people_with_none"])
+            == cov["cohort_people_total"]), cov
+
+    # And nobody on the "none" list may actually carry an observation.
+    observed = {o["person_id"] for o in blob["observations"]}
+    cohort = json.loads(
+        (Path(__file__).resolve().parent.parent / "docs/pilot-cohort.json").read_text())
+    by_name = {p["display_name"]: p["wikidata_qid"] for p in cohort["people"]}
+    wrongly_listed = [n for n in cov["people_with_none"]
+                      if by_name.get(n) in observed]
+    assert not wrongly_listed, (
+        f"listed as having no observations but they do: {wrongly_listed}")

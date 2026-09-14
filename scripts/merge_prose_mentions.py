@@ -35,6 +35,10 @@ def main() -> int:
     ap.add_argument("--observations", default="data/pilot/observations/observations.json")
     ap.add_argument("--mentions", default="data/pilot/observations/prose_mentions.json")
     ap.add_argument("--out", default="data/pilot/observations/observations.json")
+    ap.add_argument("--cohort", default="docs/pilot-cohort.json",
+                    help=("Needed to recompute cohort coverage after the merge. "
+                          "Without it the count is derived from a stale "
+                          "people_with_none list."))
     args = ap.parse_args()
 
     _abs = lambda rel: Path(rel) if Path(rel).is_absolute() else REPO / rel
@@ -135,13 +139,18 @@ def main() -> int:
     cov = obs.setdefault("coverage", {})
     cov["total_observations"] = len(obs["observations"])
     cov["per_person"] = dict(per_person.most_common())
-    # Cohort-only, same correction as fetch_observations. `per_person` counts
-    # partners too, and against a cohort denominator that read as full
-    # coverage while five cohort members had nothing.
-    _cohort_total = cov.get("cohort_people_total")
-    _cohort_none = set(cov.get("people_with_none") or [])
-    if _cohort_total is not None:
-        cov["cohort_people_with_any_observation"] = _cohort_total - len(_cohort_none)
+    # Recompute cohort coverage FROM THE OBSERVATIONS, not from the stale
+    # people_with_none list. Deriving the count as total - len(people_with_none)
+    # inherited that list's staleness: a prose merge that gave Liv Tyler her
+    # first observation left her in people_with_none, so the count said 9 while
+    # ten cohort members had evidence.
+    cohort_people = json.loads(_abs(args.cohort).read_text())["people"]
+    cohort_qids = {p["wikidata_qid"]: p["display_name"] for p in cohort_people}
+    cohort_with = {q for q in cohort_qids if per_person.get(q)}
+    cov["cohort_people_total"] = len(cohort_qids)
+    cov["cohort_people_with_any_observation"] = len(cohort_with)
+    cov["people_with_none"] = sorted(
+        name for q, name in cohort_qids.items() if q not in cohort_with)
     cov["people_with_observations_including_partners"] = len(per_person)
     cov["recomputed_after_merge"] = True
 

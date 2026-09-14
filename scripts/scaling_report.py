@@ -30,6 +30,8 @@ def main() -> int:
     r_joint = require(REPO, "data/roster100/run/joint_real_life.json")
     r_density = require(REPO, "data/roster100/run/evidence_density.json")
     p_density = require(REPO, "data/pilot/run/evidence_density.json")
+    pilot_cohort = require(REPO, "docs/pilot-cohort.json")
+    r_cohort = require(REPO, "docs/roster-100.json")
 
     pilot_comp = sum(1 for j in pilot_joint.get("jointly_covered", [])
                      if j.get("comparability") == "comparable")
@@ -41,9 +43,19 @@ def main() -> int:
         # Count the list itself. A stored summary goes stale the moment
         # anything merges in, which is exactly what happened here.
         ("Observations", len(pilot_obs["observations"]), len(r_obs["observations"])),
-        ("People with any observation",
+        # Labelled just "People with any observation", it counted roster
+        # members AND partners. docs/REACHABLE-PRODUCTS.md says "49 of 100
+        # roster people" from the same corpus this row called 61, and a reader
+        # comparing the two documents sees a contradiction that is really two
+        # different denominators wearing one label. Both are reported.
+        ("People with any observation (incl. partners)",
          len({o["person_id"] for o in pilot_obs["observations"]}),
          len({o["person_id"] for o in r_obs["observations"]})),
+        ("...of those, on the roster itself",
+         len({o["person_id"] for o in pilot_obs["observations"]}
+             & {p["wikidata_qid"] for p in pilot_cohort["people"]}),
+         len({o["person_id"] for o in r_obs["observations"]}
+             & {p["wikidata_qid"] for p in r_cohort["people"]})),
         ("Person-periods", p_density["person_periods"], r_density["person_periods"]),
         ("Mean observations per person-period",
          p_density["mean_observations_per_person_period"],
