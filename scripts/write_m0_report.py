@@ -260,8 +260,11 @@ def main() -> int:
     w("")
     w("The fingerprint, not the date, is this report's identity: it hashes the "
       "artifacts with their `generated_at_utc` stamps removed, so re-running the "
-      "chain over unchanged findings produces an identical file. A diff means "
-      "the numbers moved, not that the chain ran again.")
+      "chain over unchanged inputs produces an identical file. A changed "
+      "fingerprint means an input changed, not that the chain ran again. An "
+      "input can change without any rendered number moving — a new field in an "
+      "artifact will do it — so the fingerprint is a reason to read the diff, "
+      "not a claim about what is in it.")
     w("")
     w("**Private pilot. Nothing here is published, ranked, or deployed. Every "
       "relationship and every on-screen pairing is an UNVERIFIED candidate.**")
