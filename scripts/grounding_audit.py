@@ -72,6 +72,38 @@ def main() -> int:
     }
     (REPO / args.out_json).write_text(json.dumps(payload, indent=2))
 
+    # Which estimates actually carry a published conclusion. 34 of 39
+    # rationales are flagged for a human read, and the operator budgeted 60-90
+    # minutes for this plus the relationship checks. Only the handful feeding a
+    # jointly covered pairing produce every gap in the report; the rest are
+    # worth reading and cost nothing if they wait. Ordering by that is a
+    # workflow improvement, not a relaxed standard -- every rationale is still
+    # on the sheet.
+    load_bearing: set[tuple[str, str]] = set()
+    joint_path = REPO / "data/pilot/run/joint_with_nearby.json"
+    if joint_path.exists():
+        joint = json.loads(joint_path.read_text())
+        for j in joint.get("jointly_covered", []):
+            load_bearing.add((j["a"], j.get("a_src") or j["period"]))
+            load_bearing.add((j["b"], j.get("b_src") or j["period"]))
+
+    def _bare(name: str) -> str:
+        # `c.person` carries the judge in brackets -- "Brad Pitt [fable]" --
+        # and the joint artifact names people plainly. Matching the raw strings
+        # silently matched nothing, and the sheet came out unordered with no
+        # marker anywhere, which looks exactly like "no estimate is
+        # load-bearing".
+        return name.split(" [")[0].strip()
+
+    def _is_lb(c) -> bool:
+        return (_bare(c.person), c.period) in load_bearing
+
+    def _key(c):
+        return (0 if _is_lb(c) else 1, c.person, c.period)
+
+    checks_ordered = sorted(checks, key=_key)
+    n_lb = sum(1 for c in checks if _is_lb(c))
+
     L = ["# Grounding audit — human review sheet", "",
          "Each row puts a rationale beside the observations it cites. Read the "
          "evidence, then the claim, and mark whether the claim is a fair reading.",
@@ -81,8 +113,16 @@ def main() -> int:
          f"{payload['counts']['failed_automated']} failed; "
          f"{payload['counts']['warned']} warned.", "",
          f"**{payload['limitation']}**", ""]
-    for c in checks:
-        L += [f"## {c.person} — {c.period} — estimate {c.estimate}", ""]
+    if n_lb:
+        L += [f"**Read the first {n_lb} first.** Those estimates are the ones "
+              f"that feed a jointly covered pairing, so every signed gap the "
+              f"report publishes rests on them. The remaining "
+              f"{len(checks) - n_lb} are worth reading and change no published "
+              f"number if they wait. Each load-bearing entry is marked "
+              f"**LOAD-BEARING** in its heading.", ""]
+    for c in checks_ordered:
+        _lb = " — **LOAD-BEARING**" if _is_lb(c) else ""
+        L += [f"## {c.person} — {c.period} — estimate {c.estimate}{_lb}", ""]
         if c.failures:
             L += ["**AUTOMATED FAILURES**"] + [f"- {f}" for f in c.failures] + [""]
         if c.warnings:
