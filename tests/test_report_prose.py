@@ -836,3 +836,33 @@ def test_the_report_makes_no_absolute_claim_the_corpus_contradicts():
         "cannot discriminate between winners.",
     ):
         assert absolute not in text, f"absolute the corpus contradicts: {absolute!r}"
+
+
+def test_the_s2_table_cell_agrees_with_the_note_below_it():
+    """The prose under the stress table explains that S2 cannot be read as
+    evidence about format, because its arms reproduce the rubric's calibration
+    anchors. The table CELL still said it was "the evidence-shape confound
+    showing up under controlled conditions" — the claim the prose retracts, two
+    lines apart."""
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "S2 format" not in text:
+        pytest.skip("report not generated in this clone")
+    row = next(l for l in text.splitlines() if l.startswith("| S2 format"))
+    assert "confound showing up under controlled conditions" not in row
+    assert "NOT evidence about format" in row
+
+
+def test_no_document_states_a_romance_count_it_does_not_own():
+    """`fetch_onscreen_candidates.py` said "Seventeen of the pilot's first
+    twenty were not romances", which was true before the cast fix and is now
+    twelve. That script does not read romance.json and so cannot know the
+    number; it now points at the artifact that does."""
+    # Assert on the RENDERED report, not the source: the source carries the
+    # old sentence in a comment explaining why it went. Checking the file
+    # matched my own explanation, which is the second time a guard has caught
+    # its own docstring tonight.
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "co-starring films found" not in text:
+        pytest.skip("report not generated in this clone")
+    assert "Seventeen of the" not in text
+    assert "romance.json" in text

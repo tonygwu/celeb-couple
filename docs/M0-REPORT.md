@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `e11936721b11`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `81266054db53`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -82,7 +82,7 @@ This is an engineering access assessment from published directives and terms. It
 - 28 episodes eligible after the adult window.
 - Scoring every year of every eligible episode would need **633 person-period estimates** (span 1964–2026), against an M0 cap of 50. The pilot samples at most three periods per pairing.
 
-On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in a cast list proves only that both were in the film. A qualifying on-screen pairing needs an established reciprocal romance between their CHARACTERS, which scripts/classify_romance.py decides. Seventeen of the pilot's first twenty were not romances.
+On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in a cast list proves only that both were in the film. A qualifying on-screen pairing needs an established reciprocal romance between their CHARACTERS, which scripts/classify_romance.py decides. Most co-starring pairs are not romances; the current count is in data/pilot/records/romance.json.
 
 ## 4. Measurement stress tests
 
@@ -91,7 +91,7 @@ On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in 
 | Case | Question | Result |
 |---|---|---|
 | S1 single vs multi | Does publication count impose the ordering? | strong single-source **92** vs weak multi-source **63** — the stronger substantive judgment scored higher |
-| S2 format | Award vs rank vs prose | {"as_award": 92, "as_rank": 92, "as_prose": 88}, spread **4**, ABOVE the measured floor of 2.56 — format moved the estimate on identical substance, which is the evidence-shape confound showing up under controlled conditions |
+| S2 format | Award vs rank vs prose | {"as_award": 92, "as_rank": 92, "as_prose": 88}, spread **4**, ABOVE the measured floor of 2.56 — format moved the estimate; see the note below for why this is NOT evidence about format |
 | S3 corroboration | Does an extra publisher jump a band? | 69 → 70, spread **1**, within the measured floor of 2.56 — corroboration left the estimate where it was |
 | S4 contradiction | Does the rationale address the conflict? | estimate [80], names both placements: [True] |
 | S5 empty / off-topic | Unscored, or a low number? | empty unscored: True, off-topic unscored: True |

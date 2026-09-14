@@ -546,8 +546,11 @@ def main() -> int:
       + spread_verdict(
           s2.get("spread"), _floor,
           "the same judgment scored the same in all three renderings",
-          "format moved the estimate on identical substance, which is the "
-          "evidence-shape confound showing up under controlled conditions")
+          # NOT "the shape confound under controlled conditions" -- the prose
+          # below this table explains why S2 cannot be read that way, and the
+          # table cell was still making the claim the prose retracts.
+          "format moved the estimate; see the note below for why this is NOT "
+          "evidence about format")
       + " |")
     s3 = f.get("S3_corroboration_no_new_judgment", {})
     w(f"| S3 corroboration | Does an extra publisher jump a band? | "

@@ -92,8 +92,14 @@ def main() -> int:
         "caveat": ("Co-appearance in a cast list proves only that both were in "
                    "the film. A qualifying on-screen pairing needs an established "
                    "reciprocal romance between their CHARACTERS, which "
-                   "scripts/classify_romance.py decides. Seventeen of the "
-                   "pilot's first twenty were not romances."),
+                   # "Seventeen of the pilot's first twenty were not romances"
+                   # was true before the cast fix taught the classifier which
+                   # characters the actors play, when only three qualified.
+                   # Eight do now. The count lives in romance.json, which this
+                   # script does not read and must not restate.
+                   "scripts/classify_romance.py decides. Most co-starring "
+                   "pairs are not romances; the current count is in "
+                   "data/pilot/records/romance.json."),
         "candidates": out,
     }
     dest = REPO / args.out
