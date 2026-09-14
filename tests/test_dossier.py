@@ -222,3 +222,78 @@ def test_a_rank_with_no_stated_depth_says_so_rather_than_implying_one():
     text = build_dossier("p_1", "Ada", "2004", [o], EDITIONS).text
     assert "of 100" not in text
     assert "does not state how long the list was" in text
+
+
+# -- what redaction deliberately leaves behind -------------------------------
+
+def test_short_name_tokens_survive_redaction_and_are_reported():
+    """MIN_TOKEN_LEN = 4 is a deliberate tradeoff: redacting "de" or "Ben"
+    everywhere would mangle ordinary prose. The cost is that a first name
+    shorter than four characters survives, and seven of the 37 names in this
+    project's own cohort and partner universe have one -- Ben, Ana, Liv, Len.
+
+    The identity-leakage probe currently uses synthetic names whose tokens are
+    all long enough, so it is unaffected. Run it on Ben Affleck and it would
+    report "no leakage" while the judge had read "Ben". A probe that cannot see
+    its own blind spot reports a clean result either way, so the blind spot is
+    now returned rather than assumed away.
+    """
+    from modules.consensus.dossier import residual_identity_tokens
+    text = "Ben went to the ceremony. [SUBJECT] was named."
+    assert residual_identity_tokens(text, "Ben Affleck") == ("Ben",)
+
+
+def test_a_fully_redacted_text_reports_nothing_residual():
+    from modules.consensus.dossier import redact_name, residual_identity_tokens
+    text = redact_name("Ada Vance placed 12th.", "Ada Vance")
+    assert residual_identity_tokens(text, "Ada Vance") == ()
+
+
+def test_the_full_name_is_still_redacted_even_when_a_token_is_short():
+    """Longest-first matching means "Ben Affleck" goes before any token rule,
+    so the common case is covered. Only a BARE short token survives."""
+    from modules.consensus.dossier import redact_name
+    out = redact_name("Ben Affleck — Sexiest Man Alive 1997", "Ben Affleck")
+    assert "Affleck" not in out and "Ben Affleck" not in out
+    assert out.startswith("[SUBJECT]")
+
+
+def test_residual_detection_ignores_case_and_word_boundaries():
+    from modules.consensus.dossier import residual_identity_tokens
+    assert residual_identity_tokens("BEN arrived", "Ben Affleck") == ("Ben",)
+    assert residual_identity_tokens("Benjamin arrived", "Ben Affleck") == ()
+
+
+def _obs_with(excerpt):
+    return Observation(
+        observation_id="obs_r", person_id="p_1", list_edition_id="le_1",
+        evidence_type=EvidenceType.ORDERED_RANK,
+        observed={"rank": 12, "list_length": 50, "order_is_ranking": True,
+                  "order_basis": "page reads 'The Results'"},
+        concerns_period=_pd("1997"), published_at=_pd("1997-08-17", Precision.DAY),
+        lineage=Lineage(original_source="le_1", is_syndicated_copy=False),
+        excerpt=excerpt, excerpt_locator="slide 39 of 50",
+    )
+
+
+def test_an_anonymised_dossier_reports_what_redaction_could_not_remove():
+    """A leakage probe that cannot see its own blind spot reports clean either
+    way. The dossier now carries the blind spot."""
+    d = build_dossier("Q1", "Ben Affleck", "1997",
+                      [_obs_with("Ben placed 12th.")], EDITIONS, anonymise=True)
+    assert d.residual_name_tokens == ("Ben",), d.text
+    assert "Affleck" not in d.text, "the full name must still be gone"
+
+
+def test_a_name_with_no_short_tokens_reports_nothing_residual():
+    d = build_dossier("Q1", "Jordan Quill", "1997",
+                      [_obs_with("Jordan Quill placed 12th.")], EDITIONS,
+                      anonymise=True)
+    assert d.residual_name_tokens == ()
+
+
+def test_a_named_dossier_reports_nothing_residual():
+    """Residual tokens only mean something when anonymisation was requested."""
+    d = build_dossier("Q1", "Ben Affleck", "1997",
+                      [_obs_with("Ben placed 12th.")], EDITIONS, anonymise=False)
+    assert d.residual_name_tokens == ()

@@ -21,7 +21,8 @@ from dataclasses import dataclass
 from packages.ids.keys import json_sha256, stable_id
 from packages.schema.records import EvidenceType, ListEdition, Observation
 
-__all__ = ["Dossier", "build_dossier", "collapse_syndication", "redact_name"]
+__all__ = ["Dossier", "build_dossier", "collapse_syndication", "redact_name",
+           "residual_identity_tokens"]
 
 #: Name tokens shorter than this are not redacted on their own.  Redacting a
 #: two-letter token would hit ordinary words; verbatim-index learned this the
@@ -43,6 +44,36 @@ def redact_name(text: str, display_name: str, aliases: tuple[str, ...] = ()) -> 
     for token in sorted(set(candidates), key=len, reverse=True):
         text = re.sub(rf"\b{re.escape(token)}\b", "[SUBJECT]", text, flags=re.IGNORECASE)
     return text
+
+
+def residual_identity_tokens(
+    text: str, display_name: str, aliases: tuple[str, ...] = ()
+) -> tuple[str, ...]:
+    """Name tokens still visible in ``text`` after redaction.
+
+    ``redact_name`` skips tokens shorter than ``MIN_TOKEN_LEN`` on purpose:
+    blanking "de" or "Ben" across ordinary prose would destroy it. The cost is
+    that a short first name survives, and seven of the 37 names in this
+    project's own cohort and partner universe have one -- Ben, Ana, Liv, Len.
+
+    The identity-leakage probe cannot see that by itself. Run on a name whose
+    tokens are all long it reports honestly; run on "Ben Affleck" it would
+    report "no leakage" while the judge had read "Ben". A probe blind to its own
+    blind spot reports clean either way, so this returns the blind spot instead.
+
+    Returns the surviving tokens in the order they appear in the name, so a
+    caller can report exactly what redaction could not remove.
+    """
+    seen: list[str] = []
+    for alias in (display_name, *aliases):
+        for token in alias.split():
+            if len(token) >= MIN_TOKEN_LEN or not token.strip(".,'"):
+                continue
+            if token in seen:
+                continue
+            if re.search(rf"\b{re.escape(token)}\b", text, flags=re.IGNORECASE):
+                seen.append(token)
+    return tuple(seen)
 
 
 def collapse_syndication(observations: list[Observation]) -> tuple[list[Observation], int]:
@@ -78,6 +109,11 @@ class Dossier:
     distinct_publishers: int
     syndicated_copies_dropped: int
     anonymised: bool
+    #: Name tokens redaction could not remove, because they are shorter than
+    #: MIN_TOKEN_LEN. Empty unless ``anonymise`` was requested. A non-empty
+    #: tuple means the identity-leakage probe was NOT fully blind for this
+    #: dossier, and a clean result from it says less than it appears to.
+    residual_name_tokens: tuple[str, ...] = ()
 
     @property
     def is_empty(self) -> bool:
@@ -188,10 +224,14 @@ def build_dossier(
         ]
 
     text = "\n".join(lines).rstrip() + "\n"
+    residual: tuple[str, ...] = ()
     if anonymise:
         # Redact AFTER rendering, so the name is caught in excerpts and titles
         # too, not only on the Subject line.
         text = redact_name(text, display_name, aliases)
+        # And report what redaction could not remove, rather than letting a
+        # leakage probe report "clean" while the judge read a short first name.
+        residual = residual_identity_tokens(text, display_name, aliases)
     publishers = {editions[o.list_edition_id].publisher for o in kept}
     sources = {o.lineage.original_source for o in kept}
     return Dossier(
@@ -203,5 +243,6 @@ def build_dossier(
         distinct_original_sources=len(sources),
         distinct_publishers=len(publishers),
         syndicated_copies_dropped=dropped,
+        residual_name_tokens=residual,
         anonymised=anonymise,
     )
