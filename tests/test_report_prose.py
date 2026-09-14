@@ -601,3 +601,50 @@ def test_the_offset_section_reports_its_denominator():
         "the section said 'on N people' without saying across how many "
         "pairings, so a pairing dropped for having no gap was invisible"
     )
+
+
+# --------------------------------------------------------------------------
+# The stress runner's own verdicts
+# --------------------------------------------------------------------------
+
+def _stress():
+    import importlib.util
+    import sys as _sys
+    spec = importlib.util.spec_from_file_location(
+        "run_stress", REPO / "scripts/run_stress.py")
+    m = importlib.util.module_from_spec(spec)
+    _sys.modules[spec.name] = m
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_the_runner_no_longer_uses_typed_thresholds():
+    """Each verdict compared a spread against a constant typed before any noise
+    floor existed: 10 points for format equivalence, 5 for corroboration, and
+    any non-zero move for copy volume. The measured floor is 2.22, so the first
+    two were two to five times too permissive — S2's 4-point format spread was
+    recorded as "formats scored comparably" — and the third was too strict.
+    """
+    src = (REPO / "scripts/run_stress.py").read_text()
+    assert "> 10 else" not in src
+    assert "abs(three - one) > 5" not in src
+    assert "abs(vals[0] - vals[1]) > 0" not in src
+
+
+def test_a_spread_above_the_measured_floor_is_called_out():
+    mod = _stress()
+    assert "ABOVE" in mod.verdict(4, 2.22, "same", "format moved it")
+
+
+def test_a_spread_within_the_measured_floor_is_not():
+    mod = _stress()
+    v = mod.verdict(1, 2.22, "left it where it was", "moved it")
+    assert "within" in v and "left it where it was" in v
+
+
+def test_no_measured_floor_means_no_verdict():
+    """A spread in estimate points means nothing without the amount those
+    points are known to wobble by."""
+    mod = _stress()
+    v = mod.verdict(4, None, "a", "b")
+    assert "no verdict" in v and "measure_rater_noise" in v

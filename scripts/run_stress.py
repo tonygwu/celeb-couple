@@ -128,6 +128,44 @@ def _taxonomy(failures: list[dict]) -> dict[str, int]:
     return tax
 
 
+def measured_floor() -> float | None:
+    """The largest MEASURED least significant difference, or None.
+
+    Every verdict below used to compare a spread against a constant typed
+    before any noise floor existed: 10 points for format equivalence, 5 for
+    corroboration, and any non-zero move for copy volume. The measured
+    rank-shaped floor is 2.22, so the first two were roughly two to five times
+    too permissive -- S2's 4-point format spread was recorded as "formats
+    scored comparably" -- and the third was too strict, flagging moves well
+    inside the noise.
+
+    A spread in estimate points means nothing without the amount those points
+    are known to wobble by. Where no floor has been measured, no verdict is
+    given.
+    """
+    f = REPO / "data/pilot/run/rater_noise.json"
+    if not f.exists():
+        return None
+    try:
+        by_shape = (json.loads(f.read_text()).get("headline") or {}).get("by_shape") or {}
+    except (ValueError, OSError):
+        return None
+    floors = [s["least_significant_difference_95pct"] for s in by_shape.values()
+              if s.get("least_significant_difference_95pct") is not None]
+    return max(floors) if floors else None
+
+
+def verdict(spread, floor, within: str, beyond: str) -> str:
+    if spread is None:
+        return "no spread recorded"
+    if floor is None:
+        return (f"spread {spread}; no measured noise floor available, so no "
+                f"verdict — run measure_rater_noise.py")
+    return (f"spread {spread} within the measured floor of {floor}: {within}"
+            if spread <= floor else
+            f"spread {spread} ABOVE the measured floor of {floor}: {beyond}")
+
+
 def _by(results: list[dict], case: str) -> dict[str, list[dict]]:
     arms: dict[str, list[dict]] = {}
     for r in results:
@@ -162,8 +200,10 @@ def summarise(results: list[dict]) -> dict:
     if vals:
         out["S2_format_equivalence"] = {
             "per_format": means, "spread": max(vals) - min(vals),
-            "reading": "format may be acting as a ceiling; investigate"
-            if max(vals) - min(vals) > 10 else "formats scored comparably",
+            "reading": verdict(
+                round(max(vals) - min(vals), 3), measured_floor(),
+                "the same judgment scored the same in every rendering",
+                "format moved the estimate on identical substance"),
         }
 
     a = _by(results, "S3_corroboration_no_new_judgment")
@@ -172,9 +212,12 @@ def summarise(results: list[dict]) -> dict:
         out["S3_corroboration_no_new_judgment"] = {
             "one_publisher_mean": one, "three_publishers_mean": three,
             "delta": None if None in (one, three) else three - one,
-            "reading": "corroboration moved the estimate" if (
-                one is not None and three is not None and abs(three - one) > 5
-            ) else "corroboration left the estimate where it was",
+            "reading": verdict(
+                round(abs(three - one), 3)
+                if one is not None and three is not None else None,
+                measured_floor(),
+                "corroboration left the estimate where it was",
+                "corroboration alone moved the estimate, which the rubric forbids"),
         }
 
     a = _by(results, "S4_contradiction")
@@ -239,8 +282,10 @@ def summarise(results: list[dict]) -> dict:
     if len(vals) == 2:
         out["S8_volume_without_content"] = {
             "per_arm": means, "spread": abs(vals[0] - vals[1]),
-            "reading": "copy volume raised the score" if abs(vals[0] - vals[1]) > 0
-            else "copy volume changed nothing",
+            "reading": verdict(
+                round(abs(vals[0] - vals[1]), 3), measured_floor(),
+                "copy volume changed nothing",
+                "copy volume alone moved the estimate"),
         }
     return out
 
