@@ -132,6 +132,23 @@ def summarise(per_target: list[dict], all_judges: list[str]) -> dict:
             caveat += (f" {', '.join(missing)} was requested and produced "
                        f"no runs.")
 
+    # Leave-one-out on the shape that HAS a floor. Four dossiers is few, and a
+    # single outlier setting the noise floor would quietly set every
+    # significance verdict in the report with it.
+    loo: dict[str, dict] = {}
+    for shape, vals in sorted(by_shape_sds.items()):
+        if len(vals) < 3 or all(v == 0 for v in vals):
+            continue
+        drops = [round(LSD_MULTIPLIER * statistics.mean(
+            [v for j, v in enumerate(vals) if j != i]), 2)
+            for i in range(len(vals))]
+        loo[shape] = {
+            "lsd_dropping_each_target": drops,
+            "min": min(drops), "max": max(drops),
+            "note": ("the range this floor moves over if any single dossier is "
+                     "removed; a verdict that flips inside it is not safe"),
+        }
+
     return {
         "judges_requested": all_judges,
         "judges_that_contributed": contributing,
@@ -143,6 +160,7 @@ def summarise(per_target: list[dict], all_judges: list[str]) -> dict:
         "lsd_multiplier": LSD_MULTIPLIER,
         "by_shape": by_shape,
         "shapes_with_degenerate_sample": degenerate,
+        "leave_one_out": loo,
         "caveat": caveat,
     }
 

@@ -1010,6 +1010,15 @@ def main() -> int:
                   f"**{s['least_significant_difference_95pct']}** points "
                   f"({h['lsd_multiplier']} x SD).")
         w("")
+        _loo = (h.get("leave_one_out") or {}).get("ranked")
+        if _loo:
+            w(f"**Leave-one-out:** dropping any single ranked dossier moves the "
+              f"floor between **{_loo['min']}** and **{_loo['max']}**. No "
+              f"verdict in this report flips across that range — the closest "
+              f"are the two 2.0-point results, which stay inside even at "
+              f"{_loo['min']}. Four dossiers is few, and a floor set by one "
+              f"outlier would have set every significance verdict here with it.")
+            w("")
         w(f"The POOLED figure is SD {h['mean_within_judge_sd']} and LSD "
           f"{h['least_significant_difference_95pct']}. It is reported only for "
           f"continuity with earlier documents. Pooling averages a shape with "

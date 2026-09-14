@@ -180,3 +180,48 @@ def test_recompute_rebuilds_the_sds_from_the_runs():
     assert 'row["per_judge_sd"]' in recompute, (
         "the replay path must recompute the SDs from the stored runs"
     )
+
+
+def test_no_verdict_flips_across_the_leave_one_out_range():
+    """The noise floor gates every significance claim in the report and rests
+    on four dossiers. If dropping one moved it far enough to flip a verdict,
+    the verdict would be a property of that dossier.
+
+    Measured: the floor moves between 2.35 and 2.89. The two 2.0-point results
+    — order sensitivity, and the cross-run moves — are the closest to the edge
+    and stay inside even at 2.35. S2's 4-point spread stays outside even at
+    2.89.
+    """
+    import json
+    f = REPO / "data/pilot/run/rater_noise.json"
+    stress = REPO / "data/pilot/stress/stress_report.json"
+    if not (f.exists() and stress.exists()):
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+
+    loo = (json.loads(f.read_text())["headline"].get("leave_one_out") or {}).get("ranked")
+    assert loo, "the leave-one-out range must be recorded"
+    lo, hi = loo["min"], loo["max"]
+
+    findings = json.loads(stress.read_text())["findings"]
+    for case, spread in ((k, v.get("spread")) for k, v in findings.items()):
+        if spread is None:
+            continue
+        # A verdict is safe only if the spread is on the same side of the floor
+        # at BOTH ends of the leave-one-out range.
+        assert (spread <= lo) == (spread <= hi), (
+            f"{case} spread {spread} flips across the leave-one-out range "
+            f"[{lo}, {hi}] — that verdict depends on which dossiers were "
+            f"repeated, not on the case")
+
+
+def test_the_leave_one_out_range_is_reported_for_a_shape_that_has_a_floor():
+    import json
+    f = REPO / "data/pilot/run/rater_noise.json"
+    if not f.exists():
+        pytest.skip("data/ is gitignored")
+    h = json.loads(f.read_text())["headline"]
+    loo = h.get("leave_one_out") or {}
+    assert "award" not in loo, (
+        "the award shape has no measured floor; a leave-one-out on zeros says "
+        "nothing and would look like a result"
+    )

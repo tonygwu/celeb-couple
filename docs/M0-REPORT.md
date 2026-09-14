@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `3190e0f16b01`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `35365ac14961`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -337,6 +337,8 @@ Co-appearance in a cast list is not a pairing. All 20 candidates were classified
 
 - `award`: SD **0.0** over 2 dossier(s). No LSD quoted -- every repeat returned the same value; this sample cannot distinguish low variance from none, so no LSD is quoted.
 - `ranked`: SD **0.926**, least significant difference at 95% about **2.56** points (2.77 x SD).
+
+**Leave-one-out:** dropping any single ranked dossier moves the floor between **2.35** and **2.89**. No verdict in this report flips across that range — the closest are the two 2.0-point results, which stay inside even at 2.35. Four dossiers is few, and a floor set by one outlier would have set every significance verdict here with it.
 
 The POOLED figure is SD 0.617 and LSD 1.71. It is reported only for continuity with earlier documents. Pooling averages a shape with measured variance against one with none, which halves the number and understates the noise floor for exactly the rank-shaped estimates the LSD gets applied to.
 
