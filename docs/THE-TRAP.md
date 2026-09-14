@@ -65,6 +65,13 @@ in this table are not stable to two points" below.
 Every comparable gap is **exactly zero**. Every non-zero gap is
 **shape-mismatched**. There are no exceptions in the corpus.
 
+`scripts/verify_trap.py` re-derives those two statements and the gender claim
+below from the artifacts, and runs in `bash scripts/run_chain.sh reports`. It
+exits non-zero if any of them stops holding. **A break would be good news** —
+a comparable pairing with a real gap, or a man carrying ranked evidence, is the
+signal this project has not been able to produce — which is exactly why it must
+fail loudly rather than sit here being quoted.
+
 ### The numbers in this table are not stable to two points
 
 The Pitt–Aniston rows come from the pilot run and the Johansson–Reynolds row

@@ -47,6 +47,7 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   run scripts/gender_shape_confound.py
   run scripts/grounding_audit.py
   run scripts/offset_diagnostic.py
+  run scripts/verify_trap.py
   run scripts/cross_run_stability.py
   run scripts/write_m0_report.py
   # Last, because it checks the prose against the artifacts every stage above
