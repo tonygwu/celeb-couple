@@ -105,3 +105,37 @@ def test_no_test_hardcodes_the_local_venv_interpreter():
                 offenders.append(f"{f.name}:{i}: {line.strip()}")
     assert not offenders, (
         "use sys.executable; CI has no .venv:\n  " + "\n  ".join(offenders))
+
+
+def test_the_agents_tool_table_is_one_unbroken_table():
+    """A prose paragraph was inserted into the middle of the table, orphaning
+    every row after it — including all six quota-spending scripts, which are
+    the ones an agent most needs to find before running something expensive.
+    Markdown renders the tail as plain text or a second table."""
+    from pathlib import Path as _P
+    repo = _P(__file__).resolve().parent.parent
+    lines = (repo / "AGENTS.md").read_text().splitlines()
+    start = next(i for i, l in enumerate(lines) if l.startswith("| Command |"))
+    rows = 0
+    for line in lines[start:]:
+        if line.startswith("|"):
+            rows += 1
+        elif line.strip() == "":
+            continue
+        else:
+            break
+    assert rows >= 25, (
+        f"only {rows} contiguous rows after the table header; something has "
+        "been inserted into the middle of the table")
+
+
+def test_every_script_appears_in_the_agents_table():
+    """An unregistered tool exists for nobody — AGENTS.md says so itself."""
+    import subprocess
+    from pathlib import Path as _P
+    repo = _P(__file__).resolve().parent.parent
+    table = (repo / "AGENTS.md").read_text()
+    scripts = subprocess.run(["git", "ls-files", "scripts/*.py"], cwd=repo,
+                             capture_output=True, text=True, check=True).stdout.split()
+    missing = [s for s in scripts if _P(s).name not in table]
+    assert not missing, f"scripts not registered in AGENTS.md: {missing}"

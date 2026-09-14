@@ -97,8 +97,10 @@ write `pytest ...; echo $?` — the `;` reports the status of `echo`.
 
 ## The tools, and how to invoke them
 
-Run every one from a clone root with `.venv/bin/python`. The first four are
-read-only against Wikidata and Wikipedia. The last three spend model quota.
+Run every one from a clone root with `.venv/bin/python`. The ones marked **yes**
+in the last column spend model quota; every other one is read-only and offline
+apart from the Wikidata and Wikipedia fetchers. Check `quotapick status` before
+running anything in the first group.
 
 | Command | What it does | Spends quota |
 |---|---|---|
@@ -117,6 +119,7 @@ read-only against Wikidata and Wikipedia. The last three spend model quota.
 | `scripts/alignment_gap.py` | what the nearby-period bound costs, per pairing | no |
 | `scripts/partner_eligibility.py` | splits "no evidence found" from "never rate" | no |
 | `scripts/shape_confound.py` | how much of the estimate is evidence format | no |
+| `scripts/gender_shape_confound.py` | is that format effect aligned with gender — the project's most consequential finding | no |
 | `scripts/offset_diagnostic.py` | cross-gender offset sensitivity; exits non-zero if the identity breaks | no |
 | `scripts/grounding_audit.py` | automated grounding checks + the human review sheet | no |
 | `scripts/write_m0_report.py` | renders `docs/M0-REPORT.md` from the JSON artifacts | no |
@@ -124,13 +127,6 @@ read-only against Wikidata and Wikipedia. The last three spend model quota.
 | `scripts/conclusion_robustness.py` | do the capstone's claims survive other settings of the bound and the romance filter | no |
 | `scripts/verify_trap.py` | re-derive THE-TRAP.md's three structural claims; exits 1 if any stopped holding | no |
 | `scripts/cross_run_stability.py` | do two separate runs score an identical dossier the same | no |
-
-A re-score does not destroy the previous estimates any more: `score_evidenced.py`
-archives both score artifacts under `data/pilot/run/history/` before overwriting,
-content-addressed so an unchanged re-run does not pile up copies. To compare two
-runs of the same corpus, point `cross_run_stability.py --b-scores` at a history
-file. Run-to-run variance is real — 2 of 3 identical dossiers moved by
-2.0 points — so both runs have to survive for it to be measurable.
 | `scripts/audit_doc_numbers.py` | cross-checks measured numbers typed into any tracked Markdown against the artifacts; exits 1 on a stale one | no |
 | `scripts/run_stress.py --out data/pilot/stress` | the eight measurement stress cases | **yes** |
 | `scripts/score_evidenced.py` | scores person-periods that have evidence | **yes** |
@@ -138,6 +134,14 @@ file. Run-to-run variance is real — 2 of 3 identical dossiers moved by
 | `scripts/extract_prose_mentions.py` | list memberships from biographical prose | **yes** |
 | `scripts/measure_rater_noise.py` | repeat-scores unchanged dossiers | **yes** |
 | `scripts/run_pilot.py` | bounded pairing selection and coverage | **yes** |
+
+A re-score does not destroy the previous estimates any more: `score_evidenced.py`
+archives both score artifacts under `data/pilot/run/history/` before overwriting,
+content-addressed so an unchanged re-run does not pile up copies. To compare two
+runs of the same corpus, point `cross_run_stability.py --b-scores` at a history
+file. Run-to-run variance is real — 2 of 3 identical dossiers moved by
+2.0 points — so both runs have to survive for it to be measurable.
+
 | `scripts/score_roster_joint.py` | scores only what the roster-scale joint pairings need | **yes** |
 
 The quota-spending scripts take `CELEB_JUDGES` (default `fable,astra`) and
