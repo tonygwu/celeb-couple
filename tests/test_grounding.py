@@ -172,3 +172,49 @@ def test_an_unstated_depth_cannot_support_a_top_placement_claim():
     c = _check("obs_1 is a top decile placement.",
                [_obs(etype="ordered_rank", rank=9, length=None)])
     assert any("top_placement_claim" in f for f in c.failures)
+
+
+# -- the negation window must not cross a sentence boundary ------------------
+
+def test_a_negator_in_the_previous_sentence_does_not_excuse_a_claim():
+    """`_asserted` looked back a fixed 60 characters for a negator. That window
+    crosses sentence boundaries, so:
+
+        "The list is not ranked in any way. The subject is the winner..."
+
+    had its "winner" claim excused by the "not" belonging to a different
+    sentence. The module's own note worries about an unrelated "not" earlier in
+    THE SENTENCE; an earlier sentence is worse, and nothing stopped it.
+
+    This is a false NEGATIVE, which is the dangerous direction here: the
+    project publishes how many rationales passed these checks, and a check that
+    quietly stops firing still reports a pass.
+    """
+    from modules.consensus.grounding import _asserted, _TOP_CLAIM
+    text = "The list is not ranked in any way. The subject is the winner of this award."
+    assert _asserted(_TOP_CLAIM, text) is True
+
+
+def test_a_negator_in_the_same_sentence_still_excuses_the_claim():
+    """The behaviour that was wanted, unchanged. Three separate rounds of false
+    positives came from careful rationales declining a claim."""
+    from modules.consensus.grounding import _asserted, _TOP_CLAIM
+    for text in (
+        "No headline placement or superlative framing can be inferred here.",
+        "It is not a winner of a single-winner award.",
+        "The evidence falls short of a top placement.",
+    ):
+        assert _asserted(_TOP_CLAIM, text) is False, text
+
+
+def test_boundaries_other_than_a_full_stop_also_separate():
+    from modules.consensus.grounding import _asserted, _TOP_CLAIM
+    for sep in (". ", "! ", "? ", "\n"):
+        text = f"This is not a ranked list{sep}The subject is the winner here."
+        assert _asserted(_TOP_CLAIM, text) is True, repr(sep)
+
+
+def test_an_unnegated_claim_in_a_later_sentence_still_fires():
+    from modules.consensus.grounding import _asserted, _TOP_CLAIM
+    text = "The subject appeared in the publication. They were the winner."
+    assert _asserted(_TOP_CLAIM, text) is True

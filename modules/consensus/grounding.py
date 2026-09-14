@@ -64,8 +64,18 @@ def _asserted(pattern: re.Pattern[str], text: str) -> bool:
     claim pattern is matched only outside a negating context.
     """
     for m in pattern.finditer(text):
-        window = text[max(0, m.start() - _NEGATION_WINDOW):m.start()].lower()
-        if any(neg in window for neg in _NEGATORS):
+        window = text[max(0, m.start() - _NEGATION_WINDOW):m.start()]
+        # Clip at the last sentence boundary. The fixed-width window crossed
+        # them, so "The list is not ranked. The subject is the winner..." had
+        # its winner claim excused by a "not" belonging to a different
+        # sentence. That is a false NEGATIVE, and the false-negative direction
+        # is the dangerous one: the project publishes how many rationales
+        # passed these checks, and a check that quietly stops firing still
+        # reports a pass.
+        cut = max(window.rfind(c) for c in ".!?\n")
+        if cut != -1:
+            window = window[cut + 1:]
+        if any(neg in window.lower() for neg in _NEGATORS):
             continue
         return True
     return False
