@@ -311,3 +311,61 @@ def test_a_half_written_manifest_is_not_counted_as_spend(tmp_path):
     (d / "broken.json").write_text("")
     rows, _ = gen.spend_rows(tmp_path)
     assert len(rows) == 1 and rows[0]["attempted"] == 3
+
+
+# --------------------------------------------------------------------------
+# The identity-leakage row
+# --------------------------------------------------------------------------
+
+NOISE = {"headline": {"by_shape": {
+    "ranked": {"least_significant_difference_95pct": 2.22},
+    "award": {"least_significant_difference_95pct": None}}}}
+
+
+def test_a_spread_below_the_noise_floor_is_not_leakage():
+    """The report printed the artifact's stored reading verbatim -- "identity
+    moved the score" -- while the arms behind it read named 82, anonymised
+    82.5, swapped 82. A spread of 0.5 is below every noise floor this project
+    has measured.
+
+    It told the operator the rubric leaks identity, in a document whose
+    conclusion is that the measurement works, on a sentence nobody recomputed.
+    """
+    gen = _gen()
+    row = gen.identity_leakage_row(
+        {"per_arm": {"named": 82, "anonymised": 82.5, "swapped_name": 82},
+         "reading": "identity moved the score"}, NOISE)
+    assert "did NOT move the score" in row
+    assert "identity moved the score" not in row, (
+        "the stored string must not be repeated; it is what was wrong"
+    )
+
+
+def test_a_spread_above_the_noise_floor_is_flagged():
+    gen = _gen()
+    row = gen.identity_leakage_row(
+        {"per_arm": {"named": 70, "anonymised": 90}}, NOISE)
+    assert "possible leakage" in row
+
+
+def test_the_newer_per_judge_shape_is_handled():
+    """run_stress.py now reports per judge; the artifact on disk predates that,
+    which is how `per_judge` rendered as null."""
+    gen = _gen()
+    row = gen.identity_leakage_row(
+        {"per_judge": {"fable": {"named": 82, "anonymised": 82}}}, NOISE)
+    assert "did NOT move the score" in row
+
+
+def test_a_missing_artifact_says_so_rather_than_concluding():
+    gen = _gen()
+    assert "re-run" in gen.identity_leakage_row({}, NOISE)
+
+
+def test_no_noise_floor_means_no_verdict():
+    """Without a measured floor, a spread is not evidence either way. Saying so
+    beats picking a direction."""
+    gen = _gen()
+    row = gen.identity_leakage_row(
+        {"per_arm": {"named": 82, "anonymised": 82.5}}, None)
+    assert "not yet evidence either way" in row

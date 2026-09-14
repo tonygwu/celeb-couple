@@ -93,7 +93,7 @@ On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in 
 | S3 corroboration | Does an extra publisher jump a band? | 69 → 70 (delta 1) — corroboration left the estimate where it was |
 | S4 contradiction | Does the rationale address the conflict? | estimate [80], names both placements: [True] |
 | S5 empty / off-topic | Unscored, or a low number? | empty unscored: True, off-topic unscored: True |
-| S6 identity | Same evidence, different name | per judge null — identity moved the score |
+| S6 identity | Same evidence, different name | {"named": 82, "anonymised": 82.5, "swapped_name": 82} — spread **0.5**, at or below the measured noise floor of 2.22 — identity did NOT move the score |
 | S7 order | Reordered observations | {"order_a": 84, "order_b": 82}, spread 2 |
 | S8 copy volume | One copy vs five | {"one_copy": 72, "five_copies": 72} — copy volume changed nothing |
 

@@ -104,6 +104,61 @@ def decisive_measurement(shape_conf: dict, n_scored: int) -> str:
         f"carries a degree, so it can tell people apart.")
 
 
+def identity_leakage_row(s6: dict, noise: dict | None) -> str:
+    """Describe the identity-leakage case from its DATA, not its stored string.
+
+    Two failures met here. `run_stress.py` was improved to report per-judge
+    spreads, but the artifact on disk predates that and carries the old shape,
+    so the report rendered `per_judge` as `null`. Worse, it printed the stored
+    reading verbatim -- "identity moved the score" -- while the arms it was
+    computed from read named 82, anonymised 82.5, swapped 82. A spread of 0.5
+    is not movement; it is below every noise floor this project has measured.
+
+    So the report told the operator that the rubric leaks identity, in a
+    document whose conclusion is that the measurement works, on the strength of
+    a sentence nobody recomputed.
+
+    Both artifact shapes are handled, and the verdict is compared against the
+    measured rank-shaped LSD, which is what "compare against rater noise before
+    calling it leakage" requires.
+    """
+    arms = s6.get("per_judge") or s6.get("per_arm_pooled") or s6.get("per_arm")
+    if not arms:
+        return ("| S6 identity | Same evidence, different name | no usable "
+                "arms in the artifact — re-run `scripts/run_stress.py` |")
+
+    # per_judge nests one level deeper than per_arm.
+    values = []
+    for v in arms.values():
+        if isinstance(v, dict):
+            values.extend(x for x in v.values() if x is not None)
+        elif v is not None:
+            values.append(v)
+    if len(values) < 2:
+        return ("| S6 identity | Same evidence, different name | fewer than two "
+                "arms scored — inconclusive |")
+
+    spread = round(max(values) - min(values), 3)
+    floor = None
+    if noise:
+        by_shape = (noise.get("headline") or {}).get("by_shape") or {}
+        floors = [s["least_significant_difference_95pct"] for s in by_shape.values()
+                  if s.get("least_significant_difference_95pct") is not None]
+        floor = max(floors) if floors else None
+
+    if floor is None:
+        verdict = (f"spread {spread}; no measured noise floor to compare it "
+                   f"against, so this is not yet evidence either way")
+    elif spread <= floor:
+        verdict = (f"spread **{spread}**, at or below the measured noise floor "
+                   f"of {floor} — identity did NOT move the score")
+    else:
+        verdict = (f"spread **{spread}**, above the measured noise floor of "
+                   f"{floor} — investigate as possible leakage")
+    return (f"| S6 identity | Same evidence, different name | "
+            f"{json.dumps(arms)} — {verdict} |")
+
+
 def shape_for_pairing(pairing: dict, shape_conf: dict) -> str | None:
     """The single evidence shape a COMPARABLE pairing carries on both sides.
 
@@ -419,9 +474,7 @@ def main() -> int:
     w(f"| S5 empty / off-topic | Unscored, or a low number? | "
       f"empty unscored: {s5.get('empty', {}).get('all_unscored')}, "
       f"off-topic unscored: {s5.get('offtopic', {}).get('all_unscored')} |")
-    s6 = f.get("S6_identity_leakage", {})
-    w(f"| S6 identity | Same evidence, different name | per judge "
-      f"{json.dumps(s6.get('per_judge'))} — {s6.get('reading')} |")
+    w(identity_leakage_row(f.get("S6_identity_leakage") or {}, noise))
     s7 = f.get("S7_order_sensitivity", {})
     w(f"| S7 order | Reordered observations | {json.dumps(s7.get('per_order'))}, "
       f"spread {s7.get('spread')} |")
