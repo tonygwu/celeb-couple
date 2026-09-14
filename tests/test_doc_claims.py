@@ -17,6 +17,7 @@ import re
 from pathlib import Path
 
 import pytest
+import sys
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -305,9 +306,11 @@ def test_every_generated_document_regenerates_identically():
     from pathlib import Path
 
     repo = Path(__file__).resolve().parent.parent
-    py = repo / ".venv/bin/python"
-    if not py.exists() or not (repo / "data/pilot/run").exists():
-        pytest.skip("needs the venv and the artifacts")
+    # sys.executable: CI has no .venv, and a skip keyed on one would make this
+    # guard silently inert exactly where it matters most.
+    py = Path(sys.executable)
+    if not (repo / "data/pilot/run").exists():
+        pytest.skip("data/ is gitignored; nothing to regenerate in a fresh clone")
 
     def _hash(p):
         return hashlib.sha256((repo / p).read_bytes()).hexdigest()

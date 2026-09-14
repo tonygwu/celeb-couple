@@ -78,3 +78,27 @@ def test_every_required_artifact_names_the_command_that_makes_it():
         "artifacts required with no entry in PRODUCERS, so a fresh clone is "
         "told only that 'the pipeline stage that writes it' produces them:\n  "
         + "\n  ".join(missing))
+
+
+def test_no_test_hardcodes_the_local_venv_interpreter():
+    """CI installs with setup-python and has no `.venv` at all.
+
+    Three tests spawned `repo/.venv/bin/python`, so they would have failed on
+    the first CI run — and CI has never run, because it is blocked on the
+    account's billing. A local simulation of the workflow found it: clone into
+    a scratch directory, `python3 -m venv`, `pip install -r requirements.txt`,
+    `pytest tests -q`.
+
+    One of them also SKIPPED when `.venv` was missing, which is worse than
+    failing: the guard would have been silently inert in the one environment it
+    was meant to protect.
+    """
+    from pathlib import Path as _P
+    repo = _P(__file__).resolve().parent.parent
+    offenders = []
+    for f in sorted((repo / "tests").glob("*.py")):
+        for i, line in enumerate(f.read_text().splitlines(), 1):
+            if ".venv/bin/python" in line:
+                offenders.append(f"{f.name}:{i}: {line.strip()}")
+    assert not offenders, (
+        "use sys.executable; CI has no .venv:\n  " + "\n  ".join(offenders))

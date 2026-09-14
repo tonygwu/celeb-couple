@@ -21,6 +21,7 @@ from __future__ import annotations
 import pytest
 
 from packages.llmkit.accounts import AccountNotChosen, resolve_account
+import sys
 
 
 def test_an_explicit_account_wins(tmp_path, monkeypatch):
@@ -108,8 +109,11 @@ def test_a_dry_run_does_not_need_an_account():
     from pathlib import Path as _P
     repo = _P(__file__).resolve().parent.parent
     env = {"PATH": "/usr/bin:/bin", "HOME": str(_P.home())}
+    # sys.executable, not a hardcoded .venv. CI installs with setup-python and
+    # has no .venv at all, so this was the first thing that would have failed
+    # there -- and CI has never run, because it is blocked on billing.
     r = subprocess.run(
-        [str(repo / ".venv/bin/python"), str(repo / "scripts/measure_rater_noise.py"),
+        [sys.executable, str(repo / "scripts/measure_rater_noise.py"),
          "--dry-run", "--judges", "fable"],
         capture_output=True, text=True, cwd=repo, env=env, timeout=60)
     # Assert the PROPERTY, not a clean exit. A fresh clone has no data/ -- it is

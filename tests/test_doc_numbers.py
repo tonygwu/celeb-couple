@@ -126,7 +126,7 @@ def test_the_repository_currently_passes_the_audit():
     """Optional: needs the artifacts, which live under a gitignored data/."""
     if not (REPO / "data/pilot/run/shape_confound.json").exists():
         pytest.skip("data/ is gitignored; nothing to audit in a fresh clone")
-    r = subprocess.run([str(REPO / ".venv/bin/python"),
+    r = subprocess.run([sys.executable,
                         str(REPO / "scripts/audit_doc_numbers.py")],
                        capture_output=True, text=True, cwd=REPO)
     assert r.returncode == 0, f"stale numbers in the docs:\n{r.stdout}"
