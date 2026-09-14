@@ -73,3 +73,62 @@ def test_the_guard_would_catch_a_new_overlap():
     fixtures = {"a face that stopped the room"}
     overlap = {q for q in fixtures if _norm(q) in rubric}
     assert overlap, "the matching logic must find a contained phrase"
+
+
+# -- the case set itself -----------------------------------------------------
+
+def _cases():
+    import importlib.util
+    import sys as _sys
+    spec = importlib.util.spec_from_file_location(
+        "stress_mod", REPO / "modules/consensus/stress.py")
+    m = importlib.util.module_from_spec(spec)
+    _sys.modules[spec.name] = m
+    spec.loader.exec_module(m)
+    # CASES is a tuple, not a list -- the first version looked only at lists
+    # and found nothing, so every test below passed vacuously on an empty set.
+    return list(m.CASES)
+
+
+#: The plan's section 6.3 lists eight live measurement evaluations. Each maps
+#: to one case. A case quietly dropped would remove a check the plan requires
+#: and leave the report reporting on seven.
+EXPECTED = {
+    "S1_single_vs_multi": "strong single-source vs weaker multi-source",
+    "S2_format_equivalence": "award vs rank vs prose",
+    "S3_corroboration_no_new_judgment": "corroboration with no new judgment",
+    "S4_contradiction": "contradictory evidence",
+    "S5_empty_and_offtopic": "empty and generic dossiers",
+    "S6_identity_leakage": "identity leakage",
+    "S7_order_sensitivity": "order sensitivity",
+    "S8_volume_without_content": "volume without independent content",
+}
+
+
+def test_all_eight_plan_cases_are_defined():
+    have = {c.case_id for c in _cases()}
+    missing = sorted(set(EXPECTED) - have)
+    assert not missing, f"the plan requires these and they are not defined: {missing}"
+
+
+def test_no_case_is_defined_twice():
+    ids = [c.case_id for c in _cases()]
+    assert len(ids) == len(set(ids)), ids
+
+
+def test_every_case_states_what_it_expects():
+    """A case with no stated expectation cannot be read as passed or failed by
+    anyone who did not write it."""
+    thin = [c.case_id for c in _cases()
+            if not (c.expectation or "").strip()
+            or len((c.expectation or "").split()) < 8]
+    assert not thin, f"cases with no usable expectation: {thin}"
+
+
+def test_every_case_has_at_least_two_arms_to_compare():
+    """Except the ones that test a single required OUTCOME rather than a
+    difference between arms."""
+    single_outcome = {"S4_contradiction", "S5_empty_and_offtopic"}
+    thin = [c.case_id for c in _cases()
+            if len(c.arms) < 2 and c.case_id not in single_outcome]
+    assert not thin, f"cases with nothing to compare: {thin}"
