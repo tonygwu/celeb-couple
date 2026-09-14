@@ -15,6 +15,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted           # noqa: E402
 from packages.llmkit.contract import load_contract                   # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge           # noqa: E402
@@ -156,7 +157,10 @@ def main() -> int:
                           "decides how well the noise floor is known."))
     ap.add_argument("--award", type=int, default=1, metavar="N",
                     help="How many award-shaped dossiers to repeat.")
-    ap.add_argument("--account", default="/Users/tonygwu/.claude-e")
+    ap.add_argument("--account", default=None,
+                    help=("Claude Code config dir to run under. No default: "
+                          "quota headroom moves between accounts. Run "
+                          "`quotapick status` first, or set CELEB_ACCOUNT."))
     ap.add_argument("--max-calls-per-judge", type=int, default=12)
     ap.add_argument("--judges", default="fable,astra")
     ap.add_argument("--dry-run", action="store_true")
@@ -236,7 +240,7 @@ def main() -> int:
     judges = []
     if "fable" in wanted:
         judges.append(("fable", ClaudeJudge("fable", "claude-fable-5-1",
-                                            config_dir=args.account)))
+                                            config_dir=resolve_account(args.account))))
     if "astra" in wanted:
         judges.append(("astra", CodexJudge("astra", "gpt-6-astra", effort="high")))
     budgets = {n: Budget(max_calls=args.max_calls_per_judge) for n, _ in judges}

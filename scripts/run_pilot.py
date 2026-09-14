@@ -20,6 +20,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
+from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted             # noqa: E402
 from packages.llmkit.contract import load_contract                     # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge             # noqa: E402
@@ -88,7 +89,10 @@ def _pick_periods(years: list[int]) -> list[str]:
 def main() -> int:
     ap = argparse.ArgumentParser(description='Bounded pairing selection and coverage for the pilot. SPENDS MODEL QUOTA.')
     ap.add_argument("--judges", default="fable,astra")
-    ap.add_argument("--fable-account", default="/Users/tonygwu/.claude-e")
+    ap.add_argument("--fable-account", default=None,
+                    help=("Claude Code config dir to run under. No default: "
+                          "quota headroom moves between accounts. Run "
+                          "`quotapick status` first, or set CELEB_ACCOUNT."))
     ap.add_argument("--max-fable", type=int, default=40)
     ap.add_argument("--max-astra", type=int, default=28)
     ap.add_argument("--max-dossiers", type=int, default=50)
@@ -142,7 +146,7 @@ def main() -> int:
     judges = []
     if "fable" in args.judges:
         judges.append(("fable", ClaudeJudge("fable", "claude-fable-5-1",
-                                            config_dir=args.fable_account)))
+                                            config_dir=resolve_account(args.fable_account))))
     if "astra" in args.judges:
         judges.append(("astra", CodexJudge("astra", "gpt-6-astra", effort="high")))
     budgets = {"fable": Budget(max_calls=args.max_fable),

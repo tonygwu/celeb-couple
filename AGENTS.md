@@ -166,8 +166,14 @@ Quota rules for the ones that spend:
   headless mode auto-denies it, and the turn returns empty. Do not fix that by
   granting the permission — a judge with filesystem access is not isolated from
   the corpus it is being kept away from.
-- Check `quotapick status` first. Fable headroom moves between accounts; on
-  2026-09-14 only `~/.claude-e` had both 5-hour and weekly room.
+- Check `quotapick status` first, and pass what it tells you. **There is no
+  default account**: every paid script takes `--account <config dir>` or reads
+  `CELEB_ACCOUNT`, and refuses to start without one, naming the config dirs it
+  can see. The six scripts used to default to `~/.claude-e`, which on
+  2026-09-14 was at 0% on its 5-hour window while `~/.claude-c` had 66% fable
+  headroom — a default that is wrong is worse than no default, because the run
+  fails as `auth_or_quota` and reads like a broken judge. A `--dry-run` needs
+  no account; resolution happens where the judge is built.
 - Every runner takes `--max-calls` style caps and **halts at the cap**, reporting
   the halt and the work it did not reach.
 

@@ -20,6 +20,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
+from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted          # noqa: E402
 from packages.llmkit.contract import load_contract                   # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge           # noqa: E402
@@ -34,7 +35,10 @@ SCHEMA = REPO / "rubrics/standing/estimate.schema.json"
 def main() -> int:
     ap = argparse.ArgumentParser(description='Run the measurement stress cases against the judges. SPENDS MODEL QUOTA.')
     ap.add_argument("--out", required=True)
-    ap.add_argument("--fable-account", default="/Users/tonygwu/.claude-e")
+    ap.add_argument("--fable-account", default=None,
+                    help=("Claude Code config dir to run under. No default: "
+                          "quota headroom moves between accounts. Run "
+                          "`quotapick status` first, or set CELEB_ACCOUNT."))
     ap.add_argument("--fable-model", default="claude-fable-5-1")
     ap.add_argument("--astra-model", default="gpt-6-astra")
     ap.add_argument("--max-fable", type=int, default=25)
@@ -47,7 +51,7 @@ def main() -> int:
     contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
     rubric_text, schema_text = RUBRIC.read_text(), SCHEMA.read_text()
 
-    fable = ClaudeJudge("fable", args.fable_model, config_dir=args.fable_account)
+    fable = ClaudeJudge("fable", args.fable_model, config_dir=resolve_account(args.fable_account))
     astra = CodexJudge("astra", args.astra_model, effort="high")
     budgets = {"fable": Budget(max_calls=args.max_fable),
                "astra": Budget(max_calls=args.max_astra)}

@@ -17,6 +17,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.llmkit.artifacts import require                          # noqa: E402
+from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted             # noqa: E402
 from packages.llmkit.contract import load_contract                     # noqa: E402
 from packages.llmkit.judges import ClaudeJudge                         # noqa: E402
@@ -37,7 +38,10 @@ SCHEMA = REPO / "rubrics/standing/estimate.schema.json"
 
 def main() -> int:
     ap = argparse.ArgumentParser(description='Score only what the roster-scale joint pairings need. SPENDS MODEL QUOTA.')
-    ap.add_argument("--account", default="/Users/tonygwu/.claude-c")
+    ap.add_argument("--account", default=None,
+                    help=("Claude Code config dir to run under. No default: "
+                          "quota headroom moves between accounts. Run "
+                          "`quotapick status` first, or set CELEB_ACCOUNT."))
     ap.add_argument("--max-calls", type=int, default=20)
     ap.add_argument("--out", default="data/roster100/run/joint_scores.json")
     args = ap.parse_args()
@@ -102,7 +106,7 @@ def main() -> int:
 
     contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
     rubric, schema = RUBRIC.read_text(), SCHEMA.read_text()
-    judge = ClaudeJudge("fable", "claude-fable-5-1", config_dir=args.account)
+    judge = ClaudeJudge("fable", "claude-fable-5-1", config_dir=resolve_account(args.account))
     budget = Budget(max_calls=args.max_calls)
     manifest = RunManifest(stage_name="roster-joint", repo=REPO, args=vars(args),
                            contracts={"standing": contract.as_dict()},

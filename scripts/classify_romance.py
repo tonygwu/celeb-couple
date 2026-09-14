@@ -6,6 +6,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted            # noqa: E402
 from packages.llmkit.contract import load_contract                    # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, JudgeError            # noqa: E402
@@ -21,7 +22,10 @@ SCHEMA = REPO / "rubrics/romance/romance.schema.json"
 
 def main() -> int:
     ap = argparse.ArgumentParser(description='Classify whether each co-starring pair is a romance in the film. SPENDS MODEL QUOTA.')
-    ap.add_argument("--account", default="/Users/tonygwu/.claude-e")
+    ap.add_argument("--account", default=None,
+                    help=("Claude Code config dir to run under. No default: "
+                          "quota headroom moves between accounts. Run "
+                          "`quotapick status` first, or set CELEB_ACCOUNT."))
     ap.add_argument("--model", default="claude-fable-5-1")
     ap.add_argument("--max-calls", type=int, default=25)
     ap.add_argument("--out", default="data/pilot/records/romance.json")
@@ -31,7 +35,7 @@ def main() -> int:
         (REPO / "data/pilot/records/onscreen_candidates.json").read_text())["candidates"]
     contract = load_contract(RUBRIC, SCHEMA, "romance-1.0")
     rubric, schema = RUBRIC.read_text(), SCHEMA.read_text()
-    judge = ClaudeJudge("fable", args.model, config_dir=args.account)
+    judge = ClaudeJudge("fable", args.model, config_dir=resolve_account(args.account))
     budget = Budget(max_calls=args.max_calls)
     manifest = RunManifest(stage_name="romance", repo=REPO, args=vars(args),
                            contracts={"romance": contract.as_dict()},

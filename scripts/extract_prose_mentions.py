@@ -17,6 +17,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.ids.keys import stable_id                               # noqa: E402
+from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted            # noqa: E402
 from packages.llmkit.contract import load_contract                    # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, JudgeError            # noqa: E402
@@ -48,7 +49,10 @@ def _norm(s: str) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description='Extract dated list memberships from biographical prose. SPENDS MODEL QUOTA.')
-    ap.add_argument("--account", default="/Users/tonygwu/.claude-e")
+    ap.add_argument("--account", default=None,
+                    help=("Claude Code config dir to run under. No default: "
+                          "quota headroom moves between accounts. Run "
+                          "`quotapick status` first, or set CELEB_ACCOUNT."))
     ap.add_argument("--max-calls", type=int, default=16)
     ap.add_argument("--pace", type=float, default=1.5)
     ap.add_argument("--dry-run", action="store_true")
@@ -64,7 +68,7 @@ def main() -> int:
 
     contract = load_contract(RUBRIC, SCHEMA, "mentions-1.0")
     rubric, schema = RUBRIC.read_text(), SCHEMA.read_text()
-    judge = ClaudeJudge("fable", "claude-fable-5-1", config_dir=args.account)
+    judge = ClaudeJudge("fable", "claude-fable-5-1", config_dir=resolve_account(args.account))
     budget = Budget(max_calls=args.max_calls)
     manifest = RunManifest(stage_name="prose-mentions", repo=REPO, args=vars(args),
                            contracts={"mentions": contract.as_dict()},
