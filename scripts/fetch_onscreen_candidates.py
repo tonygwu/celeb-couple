@@ -24,15 +24,75 @@ from modules.records.wikidata import _query, _val   # noqa: E402
 #: Films where both a male and a female roster member are credited cast (P161).
 #: Q11424 is "film"; the subclass walk catches documentary, animated film, etc.
 QUERY = """
-SELECT ?film ?filmLabel ?pub ?m ?f WHERE {
+SELECT ?film ?filmLabel ?pub ?prec ?m ?f WHERE {
   VALUES ?m { %s }
   VALUES ?f { %s }
   ?film wdt:P31/wdt:P279* wd:Q11424 .
   ?film wdt:P161 ?m . ?film wdt:P161 ?f .
-  OPTIONAL { ?film wdt:P577 ?pub }
+  OPTIONAL {
+    ?film p:P577/psv:P577 ?node .
+    ?node wikibase:timeValue ?pub ; wikibase:timePrecision ?prec .
+  }
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 } LIMIT %d
 """
+
+#: Wikidata time precision codes, as used everywhere else in this project.
+_YEAR, _MONTH, _DAY = 9, 10, 11
+
+
+def format_release(value: str, precision: int) -> str:
+    """Render a Wikidata time at the precision the SOURCE asserts.
+
+    The old code took `wdt:P577` and sliced the literal to ten characters, so a
+    year-precision statement -- which Wikidata serialises as
+    `+2002-01-01T00:00:00Z` with precision 9 -- was stored as `2002-01-01`.
+    Eleven of twenty films carried that invented January 1st, in a project
+    whose `packages/temporal/dates.py` exists specifically to stop a year
+    becoming a day and whose test list names "Year-precision date: never
+    becomes January 1".
+    """
+    if precision <= _YEAR:
+        return value[:4]
+    if precision == _MONTH:
+        return value[:7]
+    return value[:10]
+
+
+def choose_release(values: list[tuple[str, int]]) -> tuple[str, int] | None:
+    """Pick one publication date from the several Wikidata usually holds.
+
+    P577 is repeated per country, so a film routinely carries four or more
+    dates. The old code kept whichever SPARQL row arrived first, which is
+    arbitrary and not stable between runs.
+
+    A YEAR-precision statement wins when one exists. That looks backwards --
+    preferring the vaguer value -- and it is the honest choice: the
+    day-precision values are individual countries' releases, and picking one
+    of them silently declares a country. Deconstructing Harry shows the cost of
+    the alternative. Its values are 1997 (year) and 1998-05-21 (day); the film
+    opened in December 1997, so taking the finest available date would have
+    moved it into the wrong YEAR, and the year is what every consumer reads.
+
+    With no year statement, the year MOST of the statements agree on wins, and
+    the earliest date within that year is taken. Plain "earliest" was tried
+    first and is not safe: Thor: Love and Thunder carries eight dates, two of
+    them in 2021 against six in 2022, and earliest-wins moved a 2022 film to
+    2021. A majority over the source's own repeated statements is stable
+    against a stray value in a way that a single extreme is not.
+
+    A tie between two years goes to the earlier one, so the result does not
+    depend on iteration order.
+    """
+    if not values:
+        return None
+    years = [v for v in values if v[1] <= _YEAR]
+    if years:
+        return min(years)
+    from collections import Counter
+    counts = Counter(v[0][:4] for v in values)
+    best = max(counts, key=lambda y: (counts[y], -int(y)))
+    return min(v for v in values if v[0][:4] == best)
 
 
 def main() -> int:
@@ -54,6 +114,7 @@ def main() -> int:
     rows = _query(QUERY % (" ".join(f"wd:{q}" for q in men),
                            " ".join(f"wd:{q}" for q in women), args.limit))
     seen: dict[tuple, dict] = {}
+    pubs: dict[tuple, set] = {}
     rows_missing_ids = 0
     for r in rows:
         film = (_val(r, "film") or "").rsplit("/", 1)[-1]
@@ -65,11 +126,28 @@ def main() -> int:
             # total can shrink with nothing to notice.
             rows_missing_ids += 1
             continue
-        seen.setdefault((film, m, f), {
+        key = (film, m, f)
+        pub, prec = _val(r, "pub"), _val(r, "prec")
+        if pub and prec is not None:
+            pubs.setdefault(key, set()).add((pub, int(prec)))
+        seen.setdefault(key, {
             "work_qid": film, "title": _val(r, "filmLabel") or film,
-            "release": (_val(r, "pub") or "")[:10],
             "male_qid": m, "male": names.get(m, m),
             "female_qid": f, "female": names.get(f, f)})
+
+    multi = 0
+    for key, c in seen.items():
+        vals = sorted(pubs.get(key, ()))
+        if len(vals) > 1:
+            multi += 1
+        picked = choose_release(vals)
+        c["release"] = format_release(*picked) if picked else ""
+        c["release_precision"] = (
+            {9: "year", 10: "month", 11: "day"}.get(picked[1], "year")
+            if picked else None)
+        # Kept so a reader can see what was NOT chosen. P577 is repeated per
+        # country and the choice is a rule, not a fact.
+        c["release_candidates"] = [format_release(v, p) for v, p in vals]
 
     out = sorted(seen.values(), key=lambda c: (c["release"] or "9999", c["title"]))
     # A label that fell back to its own Q-id is an unresolved name, not a name.
