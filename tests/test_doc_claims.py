@@ -39,6 +39,8 @@ def _doc(rel: str) -> str:
 def test_scaling_table_matches_the_scaling_artifact():
     blob = _artifact("data/roster100/run/scaling.json")
     md = _doc("docs/SCALING.md")
+    assert len(blob["rows"]) >= 5, (
+        "an empty rows list makes every comparison below vacuous")
     for row in blob["rows"]:
         metric, pilot, roster = row["metric"], row["pilot_14"], row["roster_100"]
         line = next((l for l in md.splitlines()
@@ -53,6 +55,7 @@ def test_scaling_table_matches_the_scaling_artifact():
 def test_source_requirement_ladder_matches_the_artifact():
     blob = _artifact("data/roster100/run/source_requirement.json")
     md = _doc("docs/SCALING.md")
+    assert len(blob["ladder"]) >= 5, "an empty ladder checks nothing"
     for rung in blob["ladder"]:
         n, median = rung["names_per_year"], rung["median_covered"]
         line = next((l for l in md.splitlines()
@@ -84,6 +87,7 @@ def test_source_hunt_depth_claims_match_the_observation_sources():
 def test_reachable_products_counts_match_the_artifact():
     blob = _artifact("data/roster100/run/reachable.json")
     md = _doc("docs/REACHABLE-PRODUCTS.md")
+    assert len(blob["options"]) >= 3, "an empty options list checks nothing"
     for option in blob["options"]:
         line = next((l for l in md.splitlines()
                      if l.startswith("|") and option["name"] in l), None)

@@ -195,8 +195,12 @@ def test_a_tighter_bound_can_only_reduce_joint_coverage():
     if not f.exists():
         pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
     settings = json.loads(f.read_text())["settings"]
+    # A sorted() check over an empty list is vacuously true, so the sweep has
+    # to be shown to exist before its monotonicity means anything.
+    assert len(settings) >= 4, f"the bound sweep is too small to test: {settings}"
     for rf in (True, False):
         series = [s for s in settings if s["romance_filter"] is rf]
+        assert len(series) >= 2, f"no sweep at romance_filter={rf}"
         series.sort(key=lambda s: s["bound"])
         covered = [s["jointly_covered"] for s in series]
         assert covered == sorted(covered), (
@@ -211,6 +215,8 @@ def test_the_romance_filter_only_ever_removes_pairings():
         pytest.skip("data/ is gitignored")
     settings = {(s["bound"], s["romance_filter"]): s
                 for s in json.loads(f.read_text())["settings"]}
+    assert any(rf for _, rf in settings), (
+        "no romance-filtered setting, so this asserts nothing about the filter")
     for (bound, rf), s in settings.items():
         if rf:
             other = settings.get((bound, False))

@@ -161,7 +161,9 @@ def test_every_row_links_to_both_wikidata_pages():
         pytest.skip("needs the generated sheet and the episodes artifact")
 
     text = md.read_text()
-    for ep in json.loads(eps.read_text())["episodes"]:
+    episodes = json.loads(eps.read_text())["episodes"]
+    assert episodes, "no episodes, so every link assertion below is vacuous"
+    for ep in episodes:
         for qid in (ep["subject_qid"], ep["partner_qid"]):
             assert f"https://www.wikidata.org/wiki/{qid}" in text, (
                 f"{qid} has no link on the sheet")

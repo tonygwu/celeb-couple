@@ -32,7 +32,11 @@ def test_every_free_analysis_script_is_in_the_chain():
             "write_m0_report", "fetch_records", "build_episodes",
             "build_partner_universe", "fetch_observations",
             "fetch_onscreen_candidates"}
-    for script in sorted((repo / "scripts").glob("*.py")):
+    scripts = sorted((repo / "scripts").glob("*.py"))
+    assert len(scripts) > 20, (
+        f"the glob found {len(scripts)} scripts; a broken glob makes this "
+        "guard pass while checking nothing")
+    for script in scripts:
         if script.stem in paid:
             continue
         assert script.name in CHAIN, (
