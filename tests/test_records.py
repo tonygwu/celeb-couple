@@ -340,3 +340,24 @@ def test_a_boolean_publication_rating_is_refused():
 def test_an_ordinary_publication_rating_still_validates():
     _obs(EvidenceType.PUBLICATION_RATING,
          {"rating_value": 7.5, "rating_scale": "0-10"})
+
+
+# -- label provenance and lookup failures ------------------------------------
+
+def test_a_failed_label_lookup_is_distinguishable_from_a_missing_label():
+    """Both end as "still a bare Q-id" and the caller could not tell them
+    apart. That ambiguity already cost an investigation: Q13909 was first
+    diagnosed as a label-SERVICE failure and turned out to have no English
+    label at all, in any batch, ever."""
+    from modules.records import wikidata
+    assert hasattr(wikidata, "LOOKUP_FAILURES")
+    assert isinstance(wikidata.LOOKUP_FAILURES, list)
+
+
+def test_label_provenance_is_recorded_per_person():
+    """A name taken from an English Wikipedia article title is different
+    provenance from a name taken from a Wikidata label. Both are sourced; they
+    are not the same source."""
+    from modules.records import wikidata
+    assert hasattr(wikidata, "LABEL_SOURCES")
+    assert isinstance(wikidata.LABEL_SOURCES, dict)

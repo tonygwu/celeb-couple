@@ -22,7 +22,8 @@ from packages.ids.keys import pair_key, stable_id
 from packages.temporal.dates import Censoring, Interval, PreciseDate, from_wikidata
 
 __all__ = ["RelationshipCandidate", "fetch_relationships", "fetch_birth_dates",
-           "fetch_gender", "fetch_labels", "SPARQL"]
+           "fetch_gender", "fetch_labels", "SPARQL",
+           "LOOKUP_FAILURES", "LABEL_SOURCES"]
 
 SPARQL = "https://query.wikidata.org/sparql"
 USER_AGENT = (
@@ -31,6 +32,15 @@ USER_AGENT = (
 #: Wikidata asks for polite pacing and will 429. Commons returned 429 after
 #: about twenty sequential calls during the feasibility probe.
 PACE_SECONDS = 1.2
+
+
+#: Batches whose lookup failed outright, so "still a bare Q-id" can be told
+#: apart from "this entity has no English label". Module-level rather than a
+#: return value because the single caller wants the labels, and an ambiguity
+#: nobody can see is worse than a global nobody reads.
+LOOKUP_FAILURES: list[dict] = []
+#: qid -> "label" | "enwiki_sitelink", how each name was actually obtained.
+LABEL_SOURCES: dict[str, str] = {}
 
 
 def fetch_labels(qids: list[str], timeout: int = 45) -> dict[str, str]:
@@ -61,16 +71,29 @@ def fetch_labels(qids: list[str], timeout: int = 45) -> dict[str, str]:
         try:
             with urllib.request.urlopen(req, timeout=timeout) as fh:
                 blob = json.load(fh)
-        except (urllib.error.URLError, TimeoutError):
-            continue                            # a failed lookup leaves it unknown
+        except (urllib.error.URLError, TimeoutError) as exc:
+            # A failed batch and a batch whose entities genuinely have no
+            # English label both end as "still a bare Q-id", and the caller
+            # could not tell them apart. That ambiguity already cost an
+            # investigation: Q13909 was first diagnosed as a SERVICE failure
+            # and turned out to have no English label at all.
+            LOOKUP_FAILURES.append({"qids": list(chunk), "error": f"{type(exc).__name__}: {exc}"})
+            continue
         for qid, entity in (blob.get("entities") or {}).items():
             label = ((entity.get("labels") or {}).get("en") or {}).get("value")
+            source = "label"
             if not label:
                 # no English label; the English Wikipedia article title is a
                 # sourced name for the same entity
                 label = ((entity.get("sitelinks") or {}).get("enwiki") or {}).get("title")
+                source = "enwiki_sitelink"
             if label:
                 out[qid] = label
+                # A name from an article title is different provenance from a
+                # name from a label. In a project whose product is
+                # traceability, which route supplied a person's name is worth
+                # being able to answer.
+                LABEL_SOURCES[qid] = source
         time.sleep(PACE_SECONDS)
     return out
 
