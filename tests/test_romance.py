@@ -91,3 +91,22 @@ def test_a_wrong_schema_version_is_refused():
 def test_empty_evidence_is_never_grounded():
     v = parse_verdict(_reply(evidence=""), "F", PLOT, "sha")
     assert v.grounded is False and v.classification == "cannot_tell"
+
+
+def test_the_candidate_records_carry_a_qid_so_the_article_need_not_be_guessed():
+    """Measured 2026-09-14: fetching by film title sent 13 of 20 candidates to
+    the wrong Wikipedia article and reported 'no Plot section' for each. Pearl
+    Harbor is a harbour, Elektra is a Greek tragedy, Daredevil is a comic. Each
+    returned a real article with no plot, which is indistinguishable from a
+    genuinely missing plot. The fix is to resolve the sitelink from the film's
+    Wikidata id, which cannot land on a different subject."""
+    import json
+    from pathlib import Path
+    repo = Path(__file__).resolve().parent.parent
+    blob = json.loads(
+        (repo / "data/pilot/records/onscreen_candidates.json").read_text())
+    for c in blob["candidates"]:
+        assert c["work_qid"].startswith("Q"), (
+            "every on-screen candidate must carry a Wikidata id, or the article "
+            "has to be guessed from an ambiguous title"
+        )

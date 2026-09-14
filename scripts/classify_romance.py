@@ -11,7 +11,7 @@ from packages.llmkit.contract import load_contract                    # noqa: E4
 from packages.llmkit.judges import ClaudeJudge, JudgeError            # noqa: E402
 from packages.llmkit.manifest import RunManifest                      # noqa: E402
 from modules.records.romance import (                                 # noqa: E402
-    PlotUnavailable, build_prompt, fetch_plot, parse_verdict,
+    PlotUnavailable, build_prompt, fetch_plot, parse_verdict, title_for_qid,
 )
 
 RUBRIC = REPO / "rubrics/romance/ROMANCE.md"
@@ -43,11 +43,13 @@ def main() -> int:
     for c in cands:
         stage.attempted += 1
         label = f"{c['title']} ({c['male']} + {c['female']})"
+        page = title_for_qid(c["work_qid"]) or c["title"]
         try:
-            plot, plot_sha = fetch_plot(c["title"])
+            plot, plot_sha = fetch_plot(page)
         except PlotUnavailable as exc:
             stage.excluded += 1
-            results.append({**c, "classification": "cannot_tell",
+            results.append({**c, "wikipedia_page": page,
+                            "classification": "cannot_tell",
                             "qualifies": False, "exclusion": str(exc)})
             print(f"  SKIP  {label[:60]:60} {exc}")
             continue
@@ -83,7 +85,7 @@ def main() -> int:
             print(f"  FAIL  {label[:60]:60} parse: {exc}")
             continue
         stage.succeeded += 1
-        results.append({**c, **v.as_dict()})
+        results.append({**c, "wikipedia_page": page, **v.as_dict()})
         mark = "ROMANCE" if v.qualifies else v.classification
         print(f"  {mark:22} {label[:56]:56} grounded={v.grounded}")
         time.sleep(0.3)

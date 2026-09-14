@@ -28,8 +28,24 @@ def main() -> int:
     obs = json.loads((REPO / "data/pilot/observations/observations.json").read_text())
     eps = json.loads((REPO / "data/pilot/records/episodes.json").read_text())
     films = json.loads((REPO / "data/pilot/records/onscreen_candidates.json").read_text())
+    romance_path = REPO / "data/pilot/records/romance.json"
+    romance = (json.loads(romance_path.read_text()) if romance_path.exists() else None)
     cohort = json.loads((REPO / "docs/pilot-cohort.json").read_text())
     names = {p["wikidata_qid"]: p["display_name"] for p in cohort["people"]}
+
+    # A film pairing counts only when the romance classifier confirmed a
+    # reciprocal, grounded romance. Co-appearance in a cast list is not a
+    # pairing, and until this filter existed the coverage number counted Being
+    # John Malkovich as a Brad Pitt / Michelle Pfeiffer couple.
+    qualifying: set[tuple[str, str, str]] | None = None
+    romance_by_key: dict[tuple[str, str, str], str] = {}
+    if romance:
+        qualifying = set()
+        for c in romance["candidates"]:
+            key = (c["work_qid"], c["male_qid"], c["female_qid"])
+            romance_by_key[key] = c.get("classification") or "unclassified"
+            if c.get("qualifies"):
+                qualifying.add(key)
 
     have: dict[str, dict[str, float]] = {}
     for o in obs["observations"]:
@@ -37,9 +53,14 @@ def main() -> int:
 
     joint, near_misses = [], []
 
+    excluded_by_romance = 0
     for c in films["candidates"]:
         a, b, y = c["male_qid"], c["female_qid"], c["release"][:4]
         if not y.isdigit():
+            continue
+        key = (c["work_qid"], a, b)
+        if qualifying is not None and key not in qualifying:
+            excluded_by_romance += 1
             continue
         ra = resolve_period(y, have.get(a, {}), args.bound)
         rb = resolve_period(y, have.get(b, {}), args.bound)
@@ -47,7 +68,10 @@ def main() -> int:
                "a": c["male"], "a_qid": a, "b": c["female"], "b_qid": b,
                "a_src": ra.source_period, "a_dist": ra.distance, "a_support": ra.support,
                "b_src": rb.source_period, "b_dist": rb.distance, "b_support": rb.support,
-               "verification": "co-appearance only; ROMANCE UNVERIFIED"}
+               "romance_classification": romance_by_key.get(key, "unclassified"),
+               "verification": ("reciprocal romance confirmed from the plot text"
+                                if qualifying is not None
+                                else "co-appearance only; ROMANCE UNVERIFIED")}
         if ra.scored and rb.scored:
             joint.append(row)
         elif ra.scored or rb.scored:
@@ -74,9 +98,13 @@ def main() -> int:
         "note": ("Both sides resolved within the bound. Any entry with distance 1 "
                  "is a REUSED estimate flagged nearby_period, and must share one "
                  "draw with every other period that same estimate serves."),
+        "romance_filter_applied": qualifying is not None,
         "denominators": {
             "episodes_examined": len(eps["episodes"]),
             "films_examined": len(films["candidates"]),
+            "films_excluded_as_not_a_romance": excluded_by_romance,
+            "films_qualifying_as_romance": (
+                len(qualifying) if qualifying is not None else None),
             "candidate_pairings": len(eps["episodes"]) + len(films["candidates"]),
         },
         "jointly_covered_pairing_periods": len(joint),
@@ -91,6 +119,9 @@ def main() -> int:
 
     print(f"bound = +/-{args.bound} year(s)")
     print(f"candidate pairings examined: {payload['denominators']['candidate_pairings']}")
+    if qualifying is not None:
+        print(f"films excluded as not a romance: {excluded_by_romance} "
+              f"(of {len(films['candidates'])}); qualifying: {len(qualifying)}")
     print(f"jointly covered pairing-periods: {len(joint)}  "
           f"(distinct pairings: {len(distinct)})")
     for j in joint:

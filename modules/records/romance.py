@@ -17,7 +17,7 @@ import urllib.request
 from dataclasses import dataclass
 
 __all__ = ["RomanceVerdict", "fetch_plot", "build_prompt", "parse_verdict",
-           "QUALIFYING", "PlotUnavailable"]
+           "QUALIFYING", "PlotUnavailable", "title_for_qid"]
 
 API = "https://en.wikipedia.org/w/api.php"
 USER_AGENT = (
@@ -34,6 +34,36 @@ _JSON = re.compile(r"\{.*\}", re.S)
 
 class PlotUnavailable(RuntimeError):
     pass
+
+
+def title_for_qid(qid: str, timeout: int = 45) -> str | None:
+    """Resolve the English Wikipedia article from a Wikidata id.
+
+    WHY NOT JUST USE THE TITLE
+    --------------------------
+    Measured 2026-09-14: fetching by film title sent 13 of 20 candidates to the
+    wrong article and reported "no Plot section" for every one. "Pearl Harbor"
+    is a harbour in Hawaii, "Elektra" is a figure from Greek tragedy, and
+    "Daredevil" is a comics character. Every one of those returned a real
+    article with no plot, which looks exactly like a missing plot rather than
+    like a wrong subject.
+
+    The candidate records already carry the film's Wikidata id. Resolving the
+    sitelink from it cannot land on a different subject.
+    """
+    url = (
+        "https://www.wikidata.org/w/api.php?"
+        + urllib.parse.urlencode({
+            "action": "wbgetentities", "ids": qid, "props": "sitelinks",
+            "sitefilter": "enwiki", "format": "json",
+        })
+    )
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=timeout) as fh:
+        blob = json.load(fh)
+    entity = (blob.get("entities") or {}).get(qid) or {}
+    link = (entity.get("sitelinks") or {}).get("enwiki") or {}
+    return link.get("title")
 
 
 @dataclass(frozen=True)
