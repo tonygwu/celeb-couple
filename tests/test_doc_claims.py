@@ -216,3 +216,45 @@ def test_no_source_docstring_states_a_current_measurement():
     assert not offenders, (
         "a measurement typed into source goes stale and then lies. Point at "
         "the artifact instead:\n  " + "\n  ".join(offenders))
+
+
+def test_no_document_claims_cross_family_agreement_on_the_real_dossiers():
+    """The claim appeared in three documents and was wrong in all of them:
+    README.md said "Two model families agree closely on real dossiers",
+    docs/THE-TRAP.md said "two model families agree closely", and the M0
+    report's opening said "Two model families independently agreed".
+
+    Only one family scored the real dossiers -- codex reached 0% of its quota
+    window mid-run. Two families DID agree on the synthetic stress corpus, and
+    the distinction is the whole point: agreement on constructed cases says the
+    rubric is legible, agreement on real evidence would say the estimates are
+    not one family's idiosyncrasy. Only the first was measured.
+
+    This asserts the claim against the SCORES, so it relaxes on its own the
+    moment a second family actually runs.
+    """
+    import json
+    import re
+    import subprocess
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parent.parent
+    scores = repo / "data/pilot/run/evidenced_scores.json"
+    if not scores.exists():
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+
+    blob = json.loads(scores.read_text())
+    families = {j for r in blob["person_periods"] for j in r["judges"]}
+    if len(families) > 1:
+        return          # a second family ran; the claim would be true
+
+    tracked = subprocess.run(["git", "ls-files", "*.md"], cwd=repo,
+                             capture_output=True, text=True, check=True).stdout.split()
+    # "families agree ... real dossiers" within a sentence.
+    pattern = re.compile(
+        r"families?\s+(?:agree|agreed)[^.]{0,80}real dossiers", re.I)
+    offenders = [p for p in tracked if pattern.search((repo / p).read_text())]
+    assert not offenders, (
+        f"only {sorted(families)} scored the real dossiers, but these claim "
+        f"cross-family agreement on them: {offenders}"
+    )
