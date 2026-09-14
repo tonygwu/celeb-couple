@@ -170,3 +170,49 @@ def test_regenerating_the_report_over_unchanged_artifacts_is_a_no_op():
         "two consecutive generations over the same artifacts differ; the "
         "report's identity must be its input fingerprint, not the wall clock"
     )
+
+
+# -- measurements do not belong in source docstrings -------------------------
+
+#: Files whose docstrings NARRATE a superseded measurement to explain why it
+#: was wrong. That is history, not a claim about the present, and removing it
+#: would delete the reasoning. Everything else must point at the artifact.
+_NARRATES_HISTORY = {
+    "scripts/audit_doc_numbers.py",      # explains the 42% that went stale
+    "scripts/measure_rater_noise.py",    # explains the pooled LSD of 1.2
+}
+
+_STANDING_MEASUREMENT = __import__("re").compile(
+    r"explains \d+%|\d+% of the (?:estimate|variance)|LSD of \d",
+    __import__("re").I)
+
+
+def test_no_source_docstring_states_a_current_measurement():
+    """`modules/analytics/comparability.py` opened with "evidence type alone
+    explains 42% of the variance" for hours after the re-score made it 39%.
+    `scripts/audit_doc_numbers.py` checks Markdown, and a docstring is read by
+    the next person exactly as confidently as a document.
+
+    Widening that audit to `*.py` was tried and reverted: most hits were test
+    fixtures and deliberate historical references, and a guard that raises
+    false alarms is one nobody believes. So the rule is simpler -- source says
+    "a large share, see the artifact" and never a figure -- and this enforces
+    it, with an explicit allowlist for the two files that narrate history.
+    """
+    import subprocess
+    from pathlib import Path
+    repo = Path(__file__).resolve().parent.parent
+    tracked = subprocess.run(
+        ["git", "ls-files", "modules/*.py", "packages/*.py", "scripts/*.py"],
+        cwd=repo, capture_output=True, text=True, check=True).stdout.split()
+
+    offenders = []
+    for rel in tracked:
+        if rel in _NARRATES_HISTORY:
+            continue
+        for i, line in enumerate((repo / rel).read_text().splitlines(), 1):
+            if _STANDING_MEASUREMENT.search(line):
+                offenders.append(f"{rel}:{i}: {line.strip()}")
+    assert not offenders, (
+        "a measurement typed into source goes stale and then lies. Point at "
+        "the artifact instead:\n  " + "\n  ".join(offenders))

@@ -1,8 +1,10 @@
 """Is a pairing's gap comparing two people, or two publication formats?
 
-Measured 2026-09-14: evidence type alone explains 42% of the variance in the
-standing estimates. An editorial award is superlative by construction and pins
-near 92; ranked placements spread lower. So when one side of a pairing is
+Evidence type alone explains a large share of the variance in the standing
+estimates -- the current figure is in `data/pilot/run/shape_confound.json` and
+is deliberately not written down here, because a hand-typed measurement goes
+stale and then lies. An editorial award is superlative by construction and
+concentrates near the top of the scale; ranked placements spread lower. So when one side of a pairing is
 judged by an award and the other by a list placement, a large part of the
 signed gap is a statement about which magazine covered whom in what format.
 

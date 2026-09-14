@@ -103,7 +103,7 @@ def main() -> int:
                               "verification": "wikidata candidate; UNVERIFIED"})
 
     # Label each jointly covered row: is this gap comparing two people, or two
-    # publication formats? 42% of the estimate is evidence shape.
+    # publication formats? a large share of the estimate is evidence shape.
     for j in joint:
         c = classify_pairing(
             f"{j['domain']}_{j['period']}_{j['a_qid']}_{j['b_qid']}",
