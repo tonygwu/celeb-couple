@@ -35,7 +35,7 @@ def main() -> int:
     density = load("data/pilot/run/evidence_density.json")
     align = load("data/pilot/run/alignment_gap.json")
     elig = load("data/pilot/records/partner_eligibility.json")
-    shape = load("data/pilot/run/shape_confound.json")
+    shape_conf = load("data/pilot/run/shape_confound.json")
 
     L: list[str] = []
     w = L.append
@@ -356,24 +356,24 @@ def main() -> int:
         w("")
 
     # ---------- shape confounding ----------
-    if shape:
+    if shape_conf:
         w("## 5a. The most serious bias: evidence shape drives the estimate")
         w("")
         w(f"**Evidence type alone explains "
-          f"{round((shape['eta_squared_shape_explains'] or 0) * 100)}% of the "
+          f"{round((shape_conf['eta_squared_shape_explains'] or 0) * 100)}% of the "
           f"variance in the estimates** (eta-squared "
-          f"{shape['eta_squared_shape_explains']}).")
+          f"{shape_conf['eta_squared_shape_explains']}).")
         w("")
         w("| Evidence shape | n | mean | range | SD |")
         w("|---|---|---|---|---|")
-        for k, v in shape["by_shape"].items():
+        for k, v in shape_conf["by_shape"].items():
             w(f"| `{k}` | {v['n']} | {v['mean']} | {v['min']}–{v['max']} | {v['sd']} |")
         w("")
-        w(f"**{shape['pairings_with_mismatched_shapes']} of "
-          f"{shape['jointly_covered_pairings']} jointly covered pairings have "
+        w(f"**{shape_conf['pairings_with_mismatched_shapes']} of "
+          f"{shape_conf['jointly_covered_pairings']} jointly covered pairings have "
           f"MISMATCHED evidence shapes on the two sides.**")
         w("")
-        for m in shape["mismatched"]:
+        for m in shape_conf["mismatched"]:
             w(f"- {m['pairing']} {m['period']}: {m['a']} `{m['a_shape']}` vs "
               f"{m['b']} `{m['b_shape']}`")
         w("")

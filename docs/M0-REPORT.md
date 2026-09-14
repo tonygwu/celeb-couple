@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 08:56 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 09:19 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
 
 **Private pilot. Nothing here is published, ranked, or deployed. Every relationship and every on-screen pairing is an UNVERIFIED candidate.**
 
@@ -10,11 +10,11 @@ Generated 2026-09-14 08:56 UTC from the run artifacts under `data/pilot/`. Every
 
 The rubric behaves as intended under adversarial testing: 25 of 27 stress scorings succeeded and every construct check passed. Two model families independently agreed on the calibration anchor.
 
-But across the 14-person cohort, the permitted sources yielded **13 attractiveness observations total**, covering 9 of 14 people. 5 people have none at all.
+But across the 14-person cohort, the permitted sources yielded **27 attractiveness observations total**, covering 12 of 14 people. 5 people have none at all.
 
-Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **1** pairing is jointly covered.
+Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **4** pairings are jointly covered.
 
-**The decisive measurement**: 13 of 18 scored person-periods rest on a one-winner editorial award, and every single one scored exactly 92.0 — both model families, to the digit. The one person-period resting on an ORDERED rank (5th of 100) scored 72.0. Award-shaped evidence cannot tell winners apart. Ranked evidence can.
+**The decisive measurement**: 22 of 34 scored person-periods rest on a one-winner editorial award, and every single one scored exactly 92.0 — both model families, to the digit. The one person-period resting on an ORDERED rank (5th of 100) scored 64.0. Award-shaped evidence cannot tell winners apart. Ranked evidence can.
 
 ## 1. Cohort
 
@@ -57,9 +57,9 @@ This is an engineering access assessment from published directives and terms. It
 |---|---|---|---|---|---|---|
 | Sexiest Man Alive | PEOPLE | male | `editorial_award` | 40 winner rows | 1985–2025 | 6 |
 | Maxim Hot 100 number one | Maxim | female | `editorial_award` | 24 winner rows | 2000–2025 | 1 |
-| Most Beautiful cover choice | PEOPLE | mixed | `editorial_award` | 37 winner rows | 1990–2026 | 4 |
+| Most Beautiful cover choice | PEOPLE | mixed | `editorial_award` | 37 winner rows | 1990–2026 | 8 |
 | Sexiest Woman Alive | Esquire | female | `editorial_award` | 11 winner rows | 2005–2015 | 1 |
-| FHM 100 Sexiest Women (UK) | FHM | female | `ordered_rank` | 229 entries, 206 ranked | 1995–2017 | 1 |
+| FHM 100 Sexiest Women (UK) | FHM | female | `ordered_rank` | 229 entries, 206 ranked | 1995–2017 | 11 |
 
 ## 3. Records
 
@@ -98,32 +98,51 @@ Joint pairing coverage: **0 of 8** (0/4 real-life, 0/4 on-screen).
 
 **Exhaustive check.** Across all 31 episodes and 20 films, zero pairings had both sides evidenced in a shared year. The near-misses are the finding: Ben Affleck and Jennifer Garner each have 2002 evidence and four pairings together, every one landing one to three years off.
 
-**With the plan's ±1-year bounded reuse**, 1 pairing-periods become jointly covered:
+**With the plan's ±1-year bounded reuse**, 4 pairing-periods become jointly covered:
 
 - Daredevil (2003, on_screen): Ben Affleck from 2002 (d=1), Jennifer Garner from 2002 (d=1)
+- relationship (1999, real_life): Brad Pitt from 2000 (d=1), Jennifer Aniston from 1999 (d=0)
+- relationship (2000, real_life): Brad Pitt from 2000 (d=0), Jennifer Aniston from 2000 (d=0)
+- relationship (2001, real_life): Brad Pitt from 2000 (d=1), Jennifer Aniston from 2000 (d=1)
 
 Both are reused estimates flagged `nearby_period`. Any simulation must give each source estimate ONE shared draw across every period it serves.
 
 ## 6. Scored person-periods and pairing contributions
 
-18 of 18 evidenced person-periods scored, using 18 model calls, 0 failed.
+34 of 34 evidenced person-periods scored, using 34 model calls, 0 failed.
 
 | Person | Period | Obs | Estimate | fable | astra | judge gap | support |
 |---|---|---|---|---|---|---|---|
 | Michelle Pfeiffer | 1990 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Michelle Pfeiffer | 1995 | 1 | 84.0 | 84.0 | – | – | single_source |
-| Brad Pitt | 1995 | 2 | 94.0 | 94.0 | – | – | multi |
+| Michelle Pfeiffer | 1995 | 1 | 86.0 | 86.0 | – | – | single_source |
+| Brad Pitt | 1995 | 2 | 93.0 | 93.0 | – | – | multi |
+| Jennifer Aniston | 1996 | 1 | 82.0 | 82.0 | – | – | single_source |
 | Denzel Washington | 1996 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Liv Tyler | 1997 | 1 | 72.0 | 72.0 | – | – | single_source |
+| Jennifer Aniston | 1997 | 1 | 91.0 | 91.0 | – | – | single_source |
+| Jennifer Aniston | 1998 | 1 | 86.0 | 86.0 | – | – | single_source |
 | Harrison Ford | 1998 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Michelle Pfeiffer | 1999 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Aniston | 1999 | 1 | 84.0 | 84.0 | – | – | single_source |
+| Jennifer Aniston | 2000 | 1 | 80.0 | 80.0 | – | – | single_source |
 | Brad Pitt | 2000 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Lopez | 2000 | 1 | 93.0 | 93.0 | – | – | single_source |
+| Jennifer Lopez | 2001 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Garner | 2002 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Lopez | 2002 | 1 | 90.0 | 90.0 | – | – | single_source |
 | Ben Affleck | 2002 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Lopez | 2003 | 1 | 86.0 | 86.0 | – | – | single_source |
 | Michelle Pfeiffer | 2004 | 1 | 86.0 | 86.0 | – | – | single_source |
+| Jennifer Aniston | 2004 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Lopez | 2004 | 1 | 84.0 | 84.0 | – | – | single_source |
 | Kate Beckinsale | 2009 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Idris Elba | 2013 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Idris Elba | 2017 | 1 | 80.0 | 80.0 | – | – | single_source |
+| Jennifer Aniston | 2011 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Lopez | 2011 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Aniston | 2012 | 1 | 64.0 | 64.0 | – | – | single_source |
+| Idris Elba | 2013 | 1 | 91.0 | 91.0 | – | – | single_source |
+| Gwyneth Paltrow | 2013 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Aniston | 2016 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Idris Elba | 2017 | 1 | 84.0 | 84.0 | – | – | single_source |
 | Idris Elba | 2018 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Garner | 2019 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Michelle Pfeiffer | 2020 | 1 | 80.0 | 80.0 | – | – | single_source |
@@ -131,7 +150,7 @@ Both are reused estimates flagged `nearby_period`. Any simulation must give each
 
 ### Score compression — the most consequential measurement result
 
-Every scored person-period carries exactly one observation, and every one of those observations is a one-winner editorial award. All 18 estimates land between **72.0** and **94.0**, a spread of **22.0** points on a 0-100 scale.
+Every scored person-period carries exactly one observation, and every one of those observations is a one-winner editorial award. All 34 estimates land between **64.0** and **93.0**, a spread of **29.0** points on a 0-100 scale.
 
 The judges agree almost perfectly: 0 of 0 person-periods came back identical from both families, and the largest disagreement was 0 point. So the compression is not rater noise. It is the evidence.
 
@@ -148,9 +167,30 @@ This was predicted in the plan's worked example A and is now measured. It is the
 - covered share 1, period support `nearby_period`
 - gap in the men's view **+0.0**, in the women's view **+0.0**, mirrors exactly: True
 
+**relationship** (1999, real_life) — co-appearance only; ROMANCE UNVERIFIED
+
+- Brad Pitt: 92.0 (estimate from 2000)
+- Jennifer Aniston: 84.0 (estimate from 1999)
+- covered share 1, period support `nearby_period`
+- gap in the men's view **-8.0**, in the women's view **+8.0**, mirrors exactly: True
+
+**relationship** (2000, real_life) — co-appearance only; ROMANCE UNVERIFIED
+
+- Brad Pitt: 92.0 (estimate from 2000)
+- Jennifer Aniston: 80.0 (estimate from 2000)
+- covered share 1, period support `contemporaneous`
+- gap in the men's view **-12.0**, in the women's view **+12.0**, mirrors exactly: True
+
+**relationship** (2001, real_life) — co-appearance only; ROMANCE UNVERIFIED
+
+- Brad Pitt: 92.0 (estimate from 2000)
+- Jennifer Aniston: 80.0 (estimate from 2000)
+- covered share 1, period support `nearby_period`
+- gap in the men's view **-12.0**, in the women's view **+12.0**, mirrors exactly: True
+
 ## 6. Evidence density — the actual bottleneck
 
-Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.042**. Distribution: `{'1': 23, '2': 1}`. Person-periods carrying two or more publishers: **1**. Person-periods that are a lone one-winner award: **15 of 24**.
+Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.029**. Distribution: `{'1': 33, '2': 1}`. Person-periods carrying two or more publishers: **1**. Person-periods that are a lone one-winner award: **18 of 34**.
 
 | Corpus | n | range | distinct values | SD |
 |---|---|---|---|---|
@@ -163,18 +203,18 @@ This reframes what "more sources" has to mean. A source that adds a hundred new 
 
 ## 6e. Why joint coverage does not move
 
-The corpus grew from 13 observations to 25 and joint coverage did not move. This is why.
+The corpus grew from 13 observations to 35 and joint coverage did not move. This is why.
 
 - Pairings considered (romance-verified films plus scorable episodes): **30**
-- With evidence on BOTH sides at any distance: **8**
-- Missing evidence on one side entirely: **22**
+- With evidence on BOTH sides at any distance: **9**
+- Missing evidence on one side entirely: **21**
 
 Joint coverage if the nearby-period bound were widened:
 
 | Bound | Pairings jointly covered |
 |---|---|
-| ±0 | 0 |
-| ±1 | 1 ← current |
+| ±0 | 1 |
+| ±1 | 2 ← current |
 | ±2 | 3 |
 | ±3 | 4 |
 | ±4 | 5 |
@@ -186,6 +226,42 @@ Joint coverage if the nearby-period bound were widened:
 Two things follow. Widening the bound from ±1 to ±2 would triple joint coverage, from 1 to 3. And it would not matter much beyond that: the count saturates at 6, because **22 of 30 pairings have no evidence on one side at all**. The bound is a real cost but absence is the bigger one.
 
 *This measures what the bound costs. It is NOT an argument for widening it: a wider bound reuses an estimate further from the period it is supposed to describe, which is the manufactured precision the bound exists to prevent.*
+
+## 5a. The most serious bias: evidence shape drives the estimate
+
+**Evidence type alone explains 42% of the variance in the estimates** (eta-squared 0.421).
+
+| Evidence shape | n | mean | range | SD |
+|---|---|---|---|---|
+| `editorial_award` | 18 | 91.5 | 84.0–92.0 | 1.833 |
+| `editorial_award+unordered_inclusion` | 1 | 93.0 | 93.0–93.0 | 0.0 |
+| `ordered_rank` | 12 | 84.83 | 64.0–93.0 | 7.381 |
+| `unordered_inclusion` | 3 | 79.33 | 72.0–86.0 | 5.735 |
+
+**3 of 4 jointly covered pairings have MISMATCHED evidence shapes on the two sides.**
+
+- relationship 1999: Brad Pitt `editorial_award` vs Jennifer Aniston `ordered_rank`
+- relationship 2000: Brad Pitt `editorial_award` vs Jennifer Aniston `ordered_rank`
+- relationship 2001: Brad Pitt `editorial_award` vs Jennifer Aniston `ordered_rank`
+
+This is the project's most serious systematic bias and it is not hypothetical. The Brad Pitt and Jennifer Aniston gap of −12 pairs a Sexiest Man Alive win, which is superlative by construction and lands at 92, against ranked list placements, which spread lower. A large part of that gap is a statement about which publication covered whom in what format, not about the two people.
+
+Any published pairing whose sides carry different evidence shapes must carry this caveat on the row. A board that shows the number without it would be reporting a property of the sources as a property of the couple.
+
+## 6f. How much of the board is even reachable
+
+A pairing needs both sides. The partners missing evidence are two different populations, and counting them together overstates what the project can reach.
+
+| Status | Partners |
+|---|---|
+| Public figure, no evidence found — **a real gap** | 12 |
+| Notable but not public-facing (producers, directors) | 4 |
+| Not a public figure — **never rate** | 3 |
+| Evidenced | 3 |
+
+**Reachable ceiling: 15 of 22 partners.**
+
+7 of 22 partners are people this project must not rate: the plan forbids rating a private individual merely because they dated a celebrity. Those pairings are a PERMANENT exclusion, not a coverage gap, and counting them in the denominator overstates how much of the board is reachable.
 
 ## 6a. On-screen romance verification
 
@@ -215,7 +291,7 @@ Measured on one judge (fable). Codex reached 0% of its 7-day quota window mid-ru
 
 ## 6c. Cross-gender offset sensitivity
 
-Deltas [-6.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0] applied to the partner side, on 1 people.
+Deltas [-6.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0] applied to the partner side, on 2 people.
 
 - Identity holds: **True**
 - PAW-rate ranks stable under a constant offset: **True**
@@ -227,16 +303,16 @@ A constant cross-gender offset shifts every PAW rate by exactly delta, so rate r
 
 ## 6d. Grounding audit
 
-18 rationales checked: **18** passed the automated checks, 0 failed, 18 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
+34 rationales checked: **34** passed the automated checks, 0 failed, 30 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
 
 *These checks prove a rationale does not assert MORE than its evidence carries. They do not prove it is a fair reading. Only the human sheet can establish that.*
 
 ## 7. Cost and budget
 
 - Stress tests: 27 model calls ({"fable": 17, "astra": 10}).
-- Scoring: 18 model calls ({"fable": 18, "astra": 0}).
+- Scoring: 34 model calls ({"fable": 34, "astra": 0}).
 - First pilot pass: 0 model calls — all 32 dossiers were empty and short-circuited.
-- **Total: 45 model calls**, against a cap of 300.
+- **Total: 61 model calls**, against a cap of 300.
 - Subscription quota only. API billing was asserted off at start-up.
 - Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and inventing a figure for the other arm would be a fabricated number.
 
