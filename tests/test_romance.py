@@ -92,21 +92,34 @@ def test_empty_evidence_is_never_grounded():
     v = parse_verdict(_reply(evidence=""), "F", PLOT, "sha")
     assert v.grounded is False and v.classification == "cannot_tell"
 
-
-def test_the_candidate_records_carry_a_qid_so_the_article_need_not_be_guessed():
+def test_an_on_screen_candidate_record_carries_a_qid_not_just_a_title():
     """Measured 2026-09-14: fetching by film title sent 13 of 20 candidates to
     the wrong Wikipedia article and reported 'no Plot section' for each. Pearl
     Harbor is a harbour, Elektra is a Greek tragedy, Daredevil is a comic. Each
     returned a real article with no plot, which is indistinguishable from a
     genuinely missing plot. The fix is to resolve the sitelink from the film's
-    Wikidata id, which cannot land on a different subject."""
+    Wikidata id, which cannot land on a different subject.
+
+    This asserts the SHAPE against a fixture rather than reading the live
+    artifact. data/ is gitignored, so a test that reads it passes in a clone
+    that has run the pipeline and fails in every fresh one -- including CI.
+    Caught by running the suite in repo-1."""
+    candidate = {"work_qid": "Q194413", "title": "Pearl Harbor",
+                 "male_qid": "Q483118", "female_qid": "Q179414"}
+    for key in ("work_qid", "male_qid", "female_qid"):
+        assert candidate[key].startswith("Q"), (
+            f"{key} must be a Wikidata id, or the article has to be guessed "
+            "from an ambiguous title"
+        )
+
+
+def test_the_live_candidate_file_also_carries_qids_when_it_exists():
+    """Optional: only runs in a clone that has produced the artifact."""
     import json
     from pathlib import Path
-    repo = Path(__file__).resolve().parent.parent
-    blob = json.loads(
-        (repo / "data/pilot/records/onscreen_candidates.json").read_text())
-    for c in blob["candidates"]:
-        assert c["work_qid"].startswith("Q"), (
-            "every on-screen candidate must carry a Wikidata id, or the article "
-            "has to be guessed from an ambiguous title"
-        )
+    path = (Path(__file__).resolve().parent.parent
+            / "data/pilot/records/onscreen_candidates.json")
+    if not path.exists():
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+    for c in json.loads(path.read_text())["candidates"]:
+        assert c["work_qid"].startswith("Q")
