@@ -186,7 +186,7 @@ All 39 estimates land between **64.0** and **94.0**, a spread of **30.0** points
 
 The judges agree almost perfectly: 0 of 0 person-periods came back identical from both families, and the largest disagreement was 0 point. So the compression is not rater noise. It is the evidence.
 
-An annual one-winner award is a superlative judgment by construction, so the rubric places almost every winner in band 90-100: 17 of 18 award-shaped estimates, the exception being 78.0. The consequence is that **award-shaped evidence cannot discriminate between winners.** A leaderboard built on it would rank people by the difference between one judge saying 92 and another saying 93.
+An annual one-winner award is a superlative judgment by construction, so the rubric places almost every winner in band 90-100: 17 of 18 award-shaped estimates, the exception being 78.0. The consequence is that **award-shaped evidence cannot discriminate between MOST winners: 15 of 18 land on the same value.** A leaderboard built on it would rank people by the difference between one judge saying 92 and another saying 93.
 
 This was predicted in the plan's worked example A and is now measured. It is the strongest argument for either finding ordered, depth-carrying lists on permitted routes, or leading the men's and women's views with intervals instead of point estimates.
 
@@ -231,7 +231,7 @@ Coverage asks whether a person-year has any evidence. Density asks how much. Mea
 
 The rubric discriminates; the corpus does not let it. A lone one-winner award is superlative by construction, so it concentrates almost all of its estimates on a single value, and a person-period carrying exactly that has almost no room to differ from the next one. What the board needs is not more sources covering more people, but sources landing on the SAME person-year as an existing observation.
 
-This reframes what "more sources" has to mean. A source that adds a hundred new people at one observation each raises coverage and changes nothing about the board, because every one of those dossiers still lands in a single band. Only a source that puts a SECOND observation on a person-year that already has one can widen the distribution.
+This reframes what "more sources" has to mean. A source that adds a hundred new people at one observation each raises coverage and changes almost nothing about the board, because a lone observation leaves a dossier with nothing to weigh against and its estimate lands where that evidence shape lands. Only a source that puts a SECOND observation on a person-year that already has one can widen the distribution.
 
 ## 8. Why joint coverage does not move
 

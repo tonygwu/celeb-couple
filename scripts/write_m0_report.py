@@ -727,13 +727,18 @@ def main() -> int:
                      if r.get("shape") == "editorial_award"]
             _in_band = [r for r in _rows if r["estimate"] >= 90]
             _out = sorted(r["estimate"] for r in _rows if r["estimate"] < 90)
+            _rows_awb = [r for r in (shape_conf or {}).get("rows", [])
+                         if r.get("shape") == "editorial_award"]
+            _at_92b = sum(1 for r in _rows_awb if r["estimate"] == 92.0)
             w("An annual one-winner award is a superlative judgment by "
               "construction, so the rubric places almost every winner in band "
               f"90-100: {len(_in_band)} of {len(_rows)} award-shaped estimates"
               + (f", the exception{'s' if len(_out) > 1 else ''} being "
                  f"{', '.join(str(v) for v in _out)}" if _out else "")
               + ". The consequence is that **award-shaped evidence cannot "
-                "discriminate between winners.** A leaderboard built on it "
+                f"discriminate between MOST winners: {_at_92b} of "
+                f"{len(_rows_awb)} land on the same value.** A leaderboard "
+                "built on it "
                 "would rank people by the difference between one judge saying "
                 "92 and another saying 93.")
             w("")
@@ -783,11 +788,16 @@ def main() -> int:
             w("")
         w(d["reading"])
         w("")
-        w("This reframes what \"more sources\" has to mean. A source that adds a "
-          "hundred new people at one observation each raises coverage and changes "
-          "nothing about the board, because every one of those dossiers still "
-          "lands in a single band. Only a source that puts a SECOND observation "
-          "on a person-year that already has one can widen the distribution.")
+        # "every one of those dossiers still lands in a single band" is the
+        # same false absolute: a lone award landed at 78 once. The argument
+        # only needs "almost all", which is what was measured.
+        w("This reframes what \"more sources\" has to mean. A source that adds "
+          "a hundred new people at one observation each raises coverage and "
+          "changes almost nothing about the board, because a lone observation "
+          "leaves a dossier with nothing to weigh against and its estimate "
+          "lands where that evidence shape lands. Only a source that puts a "
+          "SECOND observation on a person-year that already has one can widen "
+          "the distribution.")
         w("")
 
     # ---------- alignment ----------

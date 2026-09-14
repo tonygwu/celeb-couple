@@ -815,3 +815,24 @@ def test_the_cohort_line_is_a_sentence():
     line = text.split("## 1. Cohort")[1].strip().splitlines()[0]
     assert not re.search(r"\.\s+[a-z]", line), (
         f"a lowercase fragment follows a full stop: {line!r}")
+
+
+def test_the_report_makes_no_absolute_claim_the_corpus_contradicts():
+    """Four separate sentences claimed award evidence lands in one band or
+    produces one value. The award-shaped estimates run 78 to 94 and 15 of 18
+    are 92, so every one of those absolutes was false — and each was written
+    before the corpus grew past the point where it was true.
+
+    The argument never needed them. Concentration is the mechanism and it is
+    what was measured.
+    """
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "The decisive measurement" not in text:
+        pytest.skip("report not generated in this clone")
+    for absolute in (
+        "can only land in one band",
+        "produces the same number every time",
+        "every one of those dossiers still lands in a single band",
+        "cannot discriminate between winners.",
+    ):
+        assert absolute not in text, f"absolute the corpus contradicts: {absolute!r}"
