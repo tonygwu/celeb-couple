@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 08:43 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 08:52 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
 
 **Private pilot. Nothing here is published, ranked, or deployed. Every relationship and every on-screen pairing is an UNVERIFIED candidate.**
 
@@ -14,7 +14,7 @@ But across the 14-person cohort, the permitted sources yielded **13 attractivene
 
 Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **1** pairing is jointly covered.
 
-**The decisive measurement**: 12 of 13 scored person-periods rest on a one-winner editorial award, and every single one scored exactly 92.0 — both model families, to the digit. The one person-period resting on an ORDERED rank (5th of 100) scored 86.5. Award-shaped evidence cannot tell winners apart. Ranked evidence can.
+**The decisive measurement**: 13 of 18 scored person-periods rest on a one-winner editorial award, and every single one scored exactly 92.0 — both model families, to the digit. The one person-period resting on an ORDERED rank (5th of 100) scored 72.0. Award-shaped evidence cannot tell winners apart. Ranked evidence can.
 
 ## 1. Cohort
 
@@ -106,49 +106,40 @@ Both are reused estimates flagged `nearby_period`. Any simulation must give each
 
 ## 6. Scored person-periods and pairing contributions
 
-13 of 13 evidenced person-periods scored, using 26 model calls, 0 failed.
+18 of 18 evidenced person-periods scored, using 18 model calls, 0 failed.
 
 | Person | Period | Obs | Estimate | fable | astra | judge gap | support |
 |---|---|---|---|---|---|---|---|
-| Michelle Pfeiffer | 1990 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Michelle Pfeiffer | 1995 | 1 | 86.5 | 86.0 | 87.0 | 1.0 | single_source |
-| Brad Pitt | 1995 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Denzel Washington | 1996 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Harrison Ford | 1998 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Michelle Pfeiffer | 1999 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Brad Pitt | 2000 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Jennifer Garner | 2002 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Ben Affleck | 2002 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Kate Beckinsale | 2009 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Idris Elba | 2018 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Jennifer Garner | 2019 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Melissa McCarthy | 2023 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Michelle Pfeiffer | 1990 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Michelle Pfeiffer | 1995 | 1 | 84.0 | 84.0 | – | – | single_source |
+| Brad Pitt | 1995 | 2 | 94.0 | 94.0 | – | – | multi |
+| Denzel Washington | 1996 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Liv Tyler | 1997 | 1 | 72.0 | 72.0 | – | – | single_source |
+| Harrison Ford | 1998 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Michelle Pfeiffer | 1999 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Brad Pitt | 2000 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Garner | 2002 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Ben Affleck | 2002 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Michelle Pfeiffer | 2004 | 1 | 86.0 | 86.0 | – | – | single_source |
+| Kate Beckinsale | 2009 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Idris Elba | 2013 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Idris Elba | 2017 | 1 | 80.0 | 80.0 | – | – | single_source |
+| Idris Elba | 2018 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Garner | 2019 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Michelle Pfeiffer | 2020 | 1 | 80.0 | 80.0 | – | – | single_source |
+| Melissa McCarthy | 2023 | 1 | 92.0 | 92.0 | – | – | single_source |
 
 ### Score compression — the most consequential measurement result
 
-Every scored person-period carries exactly one observation, and every one of those observations is a one-winner editorial award. All 13 estimates land between **86.5** and **92.0**, a spread of **5.5** points on a 0-100 scale.
+Every scored person-period carries exactly one observation, and every one of those observations is a one-winner editorial award. All 18 estimates land between **72.0** and **94.0**, a spread of **22.0** points on a 0-100 scale.
 
-The judges agree almost perfectly: 12 of 13 person-periods came back identical from both families, and the largest disagreement was 1.0 point. So the compression is not rater noise. It is the evidence.
+The judges agree almost perfectly: 0 of 0 person-periods came back identical from both families, and the largest disagreement was 0 point. So the compression is not rater noise. It is the evidence.
 
 An annual one-winner award is a superlative judgment by construction, so the rubric correctly places every winner in band 90-100. The consequence is that **award-shaped evidence cannot discriminate between winners.** A leaderboard built on it would rank people by a half-point that is the difference between one judge saying 92 and another saying 93.
 
 This was predicted in the plan's worked example A and is now measured. It is the strongest argument for either finding ordered, depth-carrying lists on permitted routes, or leading the men's and women's views with intervals instead of point estimates.
 
 ### Mirrored contributions
-
-**Being John Malkovich** (1999, on_screen) — co-appearance only; ROMANCE UNVERIFIED
-
-- Brad Pitt: 92.0 (estimate from 2000)
-- Michelle Pfeiffer: 92.0 (estimate from 1999)
-- covered share 1, period support `nearby_period`
-- gap in the men's view **+0.0**, in the women's view **+0.0**, mirrors exactly: True
-
-**Pearl Harbor** (2001, on_screen) — co-appearance only; ROMANCE UNVERIFIED
-
-- Ben Affleck: 92.0 (estimate from 2002)
-- Jennifer Garner: 92.0 (estimate from 2002)
-- covered share 1, period support `nearby_period`
-- gap in the men's view **+0.0**, in the women's view **+0.0**, mirrors exactly: True
 
 **Daredevil** (2003, on_screen) — co-appearance only; ROMANCE UNVERIFIED
 
@@ -159,11 +150,11 @@ This was predicted in the plan's worked example A and is now measured. It is the
 
 ## 6. Evidence density — the actual bottleneck
 
-Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.0**. Distribution: `{'1': 13}`. Person-periods carrying two or more publishers: **0**. Person-periods that are a lone one-winner award: **12 of 13**.
+Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.056**. Distribution: `{'1': 17, '2': 1}`. Person-periods carrying two or more publishers: **1**. Person-periods that are a lone one-winner award: **13 of 18**.
 
 | Corpus | n | range | distinct values | SD |
 |---|---|---|---|---|
-| Real | 13 | 5.5 | **2** | 1.466 |
+| Real | 18 | 22.0 | **6** | 5.858 |
 | Synthetic stress | 23 | 29 | 10 | 9.183 |
 
 The rubric discriminates; the corpus does not let it. A lone one-winner award is superlative by construction and can only land in one band, so a person-period carrying exactly that produces the same number every time. What the board needs is not more sources covering more people, but sources landing on the SAME person-year as an existing observation.
@@ -198,28 +189,28 @@ Measured on one judge (fable). Codex reached 0% of its 7-day quota window mid-ru
 
 ## 6c. Cross-gender offset sensitivity
 
-Deltas [-6.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0] applied to the partner side, on 2 people.
+Deltas [-6.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0] applied to the partner side, on 1 people.
 
 - Identity holds: **True**
 - PAW-rate ranks stable under a constant offset: **True**
-- Cumulative PAW ranks changed: **True**
+- Cumulative PAW ranks changed: **False**
 
-A constant cross-gender offset shifts every PAW rate by exactly delta, so rate ranks inside a view cannot move. Cumulative PAW is exposure-weighted, so it can. Cumulative ranks did move over the tested range.
+A constant cross-gender offset shifts every PAW rate by exactly delta, so rate ranks inside a view cannot move. Cumulative PAW is exposure-weighted, so it can. Cumulative ranks did NOT move over the tested range, which with this few people and this little exposure spread says the board is too small to be sensitive rather than that it is robust.
 
 *This is a sensitivity scenario, not an estimate of real-world bias. Genders are never silently recentred.*
 
 ## 6d. Grounding audit
 
-26 rationales checked: **26** passed the automated checks, 0 failed, 25 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
+18 rationales checked: **18** passed the automated checks, 0 failed, 18 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
 
 *These checks prove a rationale does not assert MORE than its evidence carries. They do not prove it is a fair reading. Only the human sheet can establish that.*
 
 ## 7. Cost and budget
 
 - Stress tests: 27 model calls ({"fable": 17, "astra": 10}).
-- Scoring: 26 model calls ({"fable": 13, "astra": 13}).
+- Scoring: 18 model calls ({"fable": 18, "astra": 0}).
 - First pilot pass: 0 model calls — all 32 dossiers were empty and short-circuited.
-- **Total: 53 model calls**, against a cap of 300.
+- **Total: 45 model calls**, against a cap of 300.
 - Subscription quota only. API billing was asserted off at start-up.
 - Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and inventing a figure for the other arm would be a fabricated number.
 

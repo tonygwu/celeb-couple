@@ -38,6 +38,39 @@ _TOP_CLAIM = re.compile(r"\b(top[- ](of[- ]the[- ]list|placement|ten|decile)|"
                         r"number one|first place|winner|headline)\b", re.I)
 _SUPERLATIVE = re.compile(r"\b(most|greatest|unmatched|without equal|the single)\b", re.I)
 
+#: Words that flip the meaning of a phrase appearing shortly after them.
+_NEGATORS = (
+    "no ", "not ", "n't", "never", "cannot", "can not", "without", "absent",
+    "rather than", "instead of", "neither", "nor ", "lacks", "lacking",
+    "does not", "is not", "are not", "was not", "were not", "would require",
+    "could reach", "would reach", "short of", "falls short", "unlike",
+)
+#: How far back to look for one. A negation binds tightly in practice, and a
+#: wide window would let an unrelated "not" earlier in the sentence excuse a
+#: real overclaim.
+_NEGATION_WINDOW = 60
+
+
+def _asserted(pattern: re.Pattern[str], text: str) -> bool:
+    """True only where the pattern is ASSERTED, not denied or hypothesised.
+
+    Measured 2026-09-14, three times over. A keyword check fires on rationales
+    that are being CAREFUL: "no headline placement or superlative framing can be
+    inferred", "It is not a single-winner award", "could reach the top band.
+    However...". Each of those is the judge correctly declining the claim, and
+    failing them punishes exactly the reasoning the rubric asks for.
+
+    A check that fires on correct work is a check that gets ignored, so every
+    claim pattern is matched only outside a negating context.
+    """
+    for m in pattern.finditer(text):
+        window = text[max(0, m.start() - _NEGATION_WINDOW):m.start()].lower()
+        if any(neg in window for neg in _NEGATORS):
+            continue
+        return True
+    return False
+
+
 AUTOMATED_CHECKS = (
     "cites_at_least_one_observation",
     "every_cited_id_exists_in_the_dossier",
@@ -108,12 +141,12 @@ def check_rationale(
     publishers = {o.get("publisher") for o in observations if o.get("publisher")}
     periods = {o.get("concerns_period") for o in observations}
 
-    if _MULTI_SOURCE.search(rationale) and len(sources) < 2:
+    if _asserted(_MULTI_SOURCE, rationale) and len(sources) < 2:
         failures.append(
             f"multi_source_claim_matches_source_count: the rationale claims "
             f"several sources but the dossier has {len(sources)}"
         )
-    if _REPEATED.search(rationale) and len(periods) < 2:
+    if _asserted(_REPEATED, rationale) and len(periods) < 2:
         failures.append(
             f"repetition_claim_matches_period_count: the rationale claims "
             f"recognition across years but the dossier covers {len(periods)} period(s)"
@@ -124,7 +157,7 @@ def check_rationale(
             "often the rubric's own band language rather than a claim about "
             "several years, so a person should judge which it is"
         )
-    if _TOP_CLAIM.search(rationale):
+    if _asserted(_TOP_CLAIM, rationale):
         supports_top = any(
             o.get("evidence_type") == "editorial_award"
             or (o.get("evidence_type") == "ordered_rank"
