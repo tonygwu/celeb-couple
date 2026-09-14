@@ -1466,6 +1466,20 @@ def main() -> int:
     w("- **Human verification has not happened.** Every relationship remains a "
       "Wikidata candidate that no person has checked, and the plan budgeted "
       "60-90 minutes for exactly that.")
+    if relcorr:
+        # Precise on purpose. Corroboration is not verification, and the
+        # difference is the whole reason the plan keeps a human in this loop.
+        # But saying "no person has checked" and stopping would understate what
+        # is now in front of them.
+        _vc = relcorr["verdict_counts"]
+        w(f"  They are no longer unchecked against anything, which is not the "
+          f"same thing: "
+          f"{_vc.get('prose_confirms_a_stored_year', 0)} of "
+          f"{relcorr['episodes_checked']} are corroborated by English "
+          f"Wikipedia prose naming a year this project stored, and the review "
+          f"sheet puts the excerpts beside each claim so the hour is spent "
+          f"judging rather than looking things up. A second source agreeing "
+          f"is evidence; it is not a person having decided.")
     if romance:
         _q = romance["counts"]["qualifying_romances"]
         _c = romance["counts"]["candidates"]

@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `22016c7444c1`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `1d539901f1b8`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -493,6 +493,7 @@ The plan's section 8.2 lists six things M0 should produce. Where each one is, an
 ## 24. What M0 did not establish
 
 - **Human verification has not happened.** Every relationship remains a Wikidata candidate that no person has checked, and the plan budgeted 60-90 minutes for exactly that.
+  They are no longer unchecked against anything, which is not the same thing: 21 of 29 are corroborated by English Wikipedia prose naming a year this project stored, and the review sheet puts the excerpts beside each claim so the hour is spent judging rather than looking things up. A second source agreeing is evidence; it is not a person having decided.
   On-screen pairings ARE romance-filtered — 8 of 20 candidates are confirmed reciprocal romances from the plot text — so that is no longer an open item, but the filter is a model's reading of a Wikipedia summary, not a human's.
 - **The grounding audit is not done.** 34 rationales are flagged for a human to read and judge whether the cited observations support what they claim. The automated checks cannot establish that.
 - **Rater noise is measured but thin.** 4 repeats across 6 dossiers on 1 judge family. The award shape returned the same value every time, which cannot distinguish low variance from none, so no floor is quoted for it.
