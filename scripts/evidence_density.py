@@ -53,9 +53,13 @@ def main() -> int:
         1 for v in per_pp.values()
         if len(v) == 1 and v[0]["evidence_type"] == "editorial_award"
     )
+    # Publisher names arrive with inconsistent case from different routes
+    # ("PEOPLE" from a table title, "People" from prose), and comparing them raw
+    # reported one magazine as two independent publishers.
     multi_publisher = sum(
         1 for v in per_pp.values()
-        if len({editions[o["list_edition_id"]]["publisher"] for o in v}) > 1
+        if len({(editions[o["list_edition_id"]]["publisher"] or "").strip().lower()
+                for o in v}) > 1
     )
 
     real_spread = None

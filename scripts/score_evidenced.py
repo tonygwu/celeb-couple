@@ -48,8 +48,14 @@ for o in obs_blob["observations"]:
 
 contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
 rt, st = RUBRIC.read_text(), SCHEMA.read_text()
-judges = [("fable", ClaudeJudge("fable", "claude-fable-5-1", config_dir="/Users/tonygwu/.claude-e")),
-          ("astra", CodexJudge("astra", "gpt-6-astra", effort="high"))]
+import os
+_JUDGES = os.environ.get("CELEB_JUDGES", "fable,astra").split(",")
+judges = []
+if "fable" in _JUDGES:
+    judges.append(("fable", ClaudeJudge("fable", "claude-fable-5-1",
+                                        config_dir="/Users/tonygwu/.claude-e")))
+if "astra" in _JUDGES:
+    judges.append(("astra", CodexJudge("astra", "gpt-6-astra", effort="high")))
 budgets = {"fable": Budget(max_calls=20), "astra": Budget(max_calls=20)}
 out = REPO / "data/pilot/run"; (out / "raw").mkdir(parents=True, exist_ok=True)
 

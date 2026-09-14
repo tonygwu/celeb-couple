@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "list memberships extracted from biographical prose",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "person", "mentions"],
+  "properties": {
+    "schema_version": {"const": "mentions-1.0"},
+    "person": {"type": "string"},
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["publisher", "list_name", "year", "shape", "evidence"],
+        "properties": {
+          "publisher": {"type": "string", "minLength": 1},
+          "list_name": {"type": "string", "minLength": 1},
+          "year": {"type": "integer", "minimum": 1900, "maximum": 2100},
+          "rank": {"type": ["integer", "null"], "minimum": 1},
+          "list_length": {"type": ["integer", "null"], "minimum": 1},
+          "shape": {"enum": ["ordered_rank", "editorial_award", "unordered_inclusion"]},
+          "evidence": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}
