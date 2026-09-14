@@ -6,6 +6,8 @@ Every relationship in this project is a Wikidata CANDIDATE. The plan keeps full 
 
 Each claim also carries what the English Wikipedia articles say about it, pulled from both people's articles. **21 of 29** are corroborated by prose naming a year this project stored. **2** are mentioned in neither article. Wikidata statements and article prose are edited by different people, so agreement is worth something — but the excerpt is evidence for you, not a verdict.
 
+**The 6 unreferenced claims are not unsupported.** 5 of them are corroborated by prose naming a year this project stored, and **none** is missing from both Wikidata's references and both articles. There is no claim here with nothing behind it, which is the thing worth knowing before you start.
+
 **Read the first 1 first.** Everything the report says about real-life pairings rests on it.
 
 ## Brad Pitt + Jennifer Aniston — **LOAD-BEARING**

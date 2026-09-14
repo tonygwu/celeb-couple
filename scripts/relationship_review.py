@@ -65,6 +65,29 @@ def build(episodes: dict, joint: dict | None) -> tuple[list[dict], set[str]]:
     return rows, load_bearing
 
 
+def unreferenced_support(rows: list[dict], corr: dict) -> tuple[list, int, list]:
+    """Cross-tabulate the two independent supports for a relationship claim.
+
+    This sheet tells a reader the unreferenced claims are the ones most likely
+    to be wrong, and then leaves them to check all of them by hand. Prose
+    corroboration is independent of whether Wikidata cites a source -- a
+    different set of editors wrote each -- so the two together identify the
+    claims with NOTHING behind them, which is a much shorter list to read
+    first.
+
+    Returns (unreferenced rows, how many of those the prose corroborates,
+    the ones named in neither article).
+    """
+    unref = [r for r in rows if not r["has_reference"]]
+    keys = {(r["episode_id"], r["subject"], r["partner"]) for r in unref}
+    found = [corr[k] for k in keys if k in corr]
+    rescued = sum(1 for c in found
+                  if c["verdict"] == "prose_confirms_a_stored_year")
+    naked = sorted((c for c in found if c["verdict"] == "not_mentioned"),
+                   key=lambda c: (c["subject"], c["partner"]))
+    return unref, rescued, naked
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=("Render the human review sheet for relationship claims. "
@@ -114,6 +137,7 @@ def main() -> int:
         n_conf = sum(1 for c in corr.values()
                      if c["verdict"] == "prose_confirms_a_stored_year")
         n_none = sum(1 for c in corr.values() if c["verdict"] == "not_mentioned")
+        unref, rescued, naked = unreferenced_support(rows, corr)
         L += [f"Each claim also carries what the English Wikipedia articles "
               f"say about it, pulled from both people's articles. "
               f"**{n_conf} of {len(corr)}** are corroborated by prose naming a "
@@ -121,6 +145,21 @@ def main() -> int:
               f"neither article. Wikidata statements and article prose are "
               f"edited by different people, so agreement is worth something — "
               f"but the excerpt is evidence for you, not a verdict.", ""]
+        if unref:
+            if not naked:
+                L += [f"**The {len(unref)} unreferenced claims are not "
+                      f"unsupported.** {rescued} of them are corroborated by "
+                      f"prose naming a year this project stored, and **none** "
+                      f"is missing from both Wikidata's references and both "
+                      f"articles. There is no claim here with nothing behind "
+                      f"it, which is the thing worth knowing before you start.",
+                      ""]
+            else:
+                L += [f"**{len(naked)} claims have neither a Wikidata "
+                      f"reference nor any mention in either article.** Those "
+                      f"are the ones to read first: "
+                      + "; ".join(f"{c['subject']} + {c['partner']}"
+                                  for c in naked) + ".", ""]
     if n_lb:
         L += [f"**Read the first {n_lb} first.** Everything the report says "
               f"about real-life pairings rests on "
