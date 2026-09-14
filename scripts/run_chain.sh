@@ -69,6 +69,10 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   # pilot against the 100-roster, so it goes stale whenever the PILOT grows --
   # which it did, leaving a table reading 35 observations against a corpus of
   # 41 while the roster column stayed right.
+  # Before scaling_report, which reads its ladder. It was in no chain at all,
+  # so its artifact still described a 239-episode corpus after the corpus
+  # became 228 -- and its ceiling is the project's most optimistic number.
+  [ -f data/roster100/records/episodes.json ] && run scripts/source_requirement.py
   [ -f data/roster100/run/joint_real_life.json ] && run scripts/scaling_report.py
   # Same gate, same reason. docs/REACHABLE-PRODUCTS.md went stale the moment
   # mirrored episode duplicates were collapsed -- it read 239 scorable roster

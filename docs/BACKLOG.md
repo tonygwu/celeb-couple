@@ -142,6 +142,28 @@ fired on a downstream number. Neither would have surfaced on its own.
   containment rule, and a reversed date wants the defect flag it already gets.
   **Difficulty: a decision, not a task.**
 
+- **`data/roster100/run/joint_real_life.json` has no producer.** Found
+  2026-09-14. Four scripts read it -- `scaling_report.py`,
+  `reachable_products.py`, `score_roster_joint.py` and the chain's gate -- and
+  nothing in the repository writes it. `packages/llmkit/artifacts.PRODUCERS`
+  names `scaling_report.py`, which only reads it. `joint_coverage.py` takes
+  `--bound` and `--out` and hardcodes the pilot paths, so it cannot produce the
+  roster equivalent as it stands.
+
+  The consequence is already visible. Its stored `scorable_episodes: 239` went
+  stale when mirrored duplicates were collapsed, and `scaling_report.py` was
+  reading its frozen roster figure beside a freshly computed pilot figure in
+  the SAME table row. That row now computes both sides from the episodes
+  artifacts, which is what fixed the disagreement, but the file's other
+  fields -- `both_sides_have_evidence`, `jointly_covered_within_1y` and
+  `comparability` -- are still frozen and still feed `docs/THE-TRAP.md`.
+
+  The fix is to give `joint_coverage.py` the cohort and path flags the other
+  roster-scale scripts already take, run it for the roster, and correct
+  PRODUCERS. Not done tonight because regenerating it would move the numbers
+  `THE-TRAP.md` publishes, and those should move under review rather than
+  overnight. **Difficulty: medium, and it changes published figures.**
+
 - **One Wikidata episode has an end date before its start date.** Flagged,
   excluded, left exactly as sourced. Worth reporting upstream.
   **Difficulty: easy.**

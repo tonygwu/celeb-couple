@@ -60,7 +60,13 @@ def main() -> int:
             "unit": "pairings with both sides scored, same evidence shape",
             "count": joint["comparability"].get("comparable", 0),
             "of": len(scorable_eps),
-            "verdict": "Not reachable. One comparable pairing across 239 episodes.",
+            # Derived. It was the literal "239 episodes" sitting one line
+            # below `"of": len(scorable_eps)`, so the same sentence carried a
+            # computed number and a typed one, and they disagreed the moment
+            # mirrored episode duplicates were collapsed.
+            "verdict": (f"Not reachable. "
+                        f"{joint['comparability'].get('comparable', 0)} "
+                        f"comparable pairing across {len(scorable_eps)} episodes."),
             "gives_up": "nothing",
         },
         {

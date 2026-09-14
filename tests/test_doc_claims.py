@@ -95,13 +95,30 @@ def test_reachable_products_counts_match_the_artifact():
 
 
 def test_the_readme_headline_numbers_match_the_measurements():
+    """The README must lead with the UNBIASED estimator.
+
+    This test used to assert the README contained the ETA-squared percentage,
+    which is the superseded, biased number. It passed only because the README
+    mentions 39% in the sentence explaining that eta is biased upward. So the
+    guard had it exactly backwards: tidying the historical note away would have
+    failed it, and replacing the headline 31% with anything at all would not.
+    A test pinned to the wrong statistic is worse than no test, because it
+    reads as coverage.
+    """
     density = _artifact("data/pilot/run/evidence_density.json")
     shape = _artifact("data/pilot/run/shape_confound.json")
     readme = _doc("README.md")
-    pct = round((shape["eta_squared_shape_explains"] or 0) * 100)
-    assert f"{pct}%" in readme, (
-        f"README should say evidence shape explains {pct}% of the estimate"
+    omega = round((shape["omega_squared_shape_explains"] or 0) * 100)
+    assert f"{omega}% of the estimate" in readme, (
+        f"README should lead with omega-squared: shape explains {omega}% of "
+        f"the estimate"
     )
+    eta = round((shape["eta_squared_shape_explains"] or 0) * 100)
+    if f"{eta}%" in readme:
+        assert "eta-squared" in readme and "biased" in readme, (
+            f"the README names {eta}%, the biased eta-squared value, without "
+            "saying which estimator it is or that it is superseded"
+        )
     distinct = density["real_estimate_spread"]["distinct_values"]
     assert re.search(rf"\b{distinct}\b", readme), (
         f"README should reflect the real corpus's {distinct} distinct values"

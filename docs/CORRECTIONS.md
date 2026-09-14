@@ -57,6 +57,36 @@ Partner coverage is now reported separately, because partner evidence is what
 makes a pairing jointly covered. **10 of 14** cohort members have evidence and
 four have none.
 
+### Source-requirement ceiling, again: 25 of 239 → 14 of 228 episodes
+
+The largest correction in this file, and it moved the project's most optimistic
+number: how much joint coverage a perfect, permitted source could ever buy.
+
+The roster's episode list counted the same relationship twice whenever both
+people were on the roster. Wikidata records a marriage on BOTH items, the
+fetcher read both, and `merge_progressions` saw two spans over the same dates
+rather than two abutting ones. 12 roster pairs were duplicated that way.
+
+Those duplicates were not a random sample of the corpus. A mirrored duplicate
+exists ONLY when both partners are on the roster, and both-partners-on-the-
+roster is the precondition for a pairing to be jointly covered at all. So the
+duplicates fell entirely inside the population the simulation counts, and each
+one was counted twice.
+
+The arithmetic shows it: removing them took scorable episodes 239 → 228, a loss
+of 11, and took the ceiling 25 → 14, a loss of 11. One for one. Had the
+duplicates been spread evenly across the corpus, the ceiling would have fallen
+by about one.
+
+Verified by running `source_requirement.py` against both episode files with the
+same seed (20260914) and the same 120 trials per rung, so the corpus is the
+only thing that differs.
+
+**The conclusion is unchanged and is stronger.** `docs/SOURCE-HUNT.md` says the
+pairing board's source requirement cannot be met on a permitted route. The
+ceiling being 6 percent of episodes rather than 10 does not rescue anything;
+it makes the gap wider.
+
 ### Source-requirement ceiling: 22 → 25 of 239 episodes
 
 The simulation drew each hypothetical annual list WITH replacement, so a rung

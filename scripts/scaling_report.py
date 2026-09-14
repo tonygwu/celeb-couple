@@ -37,9 +37,16 @@ def main() -> int:
                      if j.get("comparability") == "comparable")
     rows = [
         ("Roster size", 14, 100),
+        # BOTH sides from the episodes artifact. The roster side used to read
+        # r_joint["scorable_episodes"], a stored summary in an artifact nothing
+        # in this repository produces any more, so one half of the row was
+        # recomputed and the other half frozen. Collapsing mirrored duplicates
+        # took the roster count 239 to 228 and the row kept saying 239, while
+        # docs/REACHABLE-PRODUCTS.md -- which computes it -- said 228. Two
+        # tracked documents disagreeing about one number, from one corpus.
         ("Relationship episodes (scorable)",
          pilot_eps["counts"]["eligible_after_adult_window"],
-         r_joint["scorable_episodes"]),
+         r_eps["counts"]["eligible_after_adult_window"]),
         # Count the list itself. A stored summary goes stale the moment
         # anything merges in, which is exactly what happened here.
         ("Observations", len(pilot_obs["observations"]), len(r_obs["observations"])),

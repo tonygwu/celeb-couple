@@ -16,7 +16,7 @@ Corpus: 131 observations over 49 of 100 roster people, and 228 scorable relation
 
 ### A. The pairing board, as specified
 
-Not reachable. One comparable pairing across 239 episodes.
+Not reachable. 1 comparable pairing across 228 episodes.
 
 ### B. Pairing board, comparability caveat shown instead of enforced
 

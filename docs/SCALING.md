@@ -4,7 +4,7 @@ Generated from the artifacts by `scripts/scaling_report.py`. The pilot ran 14 pe
 
 ## The answer
 
-**Coverage does not scale with roster size. A 7-fold larger roster produced 3.2x the observations and 9.2x the episodes, and the number of COMPARABLE jointly covered pairings went from 1 to 1.**
+**Coverage does not scale with roster size. A 7-fold larger roster produced 3.2x the observations and 8.8x the episodes, and the number of COMPARABLE jointly covered pairings went from 1 to 1.**
 
 Joint coverage is a conjunction of independently rare conditions: both people judged, near the same year, by the same kind of evidence. Each is uncommon, so the conjunction is rarer than any of them, and growing the roster multiplies the numerator and the denominator together.
 
@@ -13,7 +13,7 @@ Joint coverage is a conjunction of independently rare conditions: both people ju
 | Metric | Pilot (14) | Roster (100) |
 |---|---|---|
 | Roster size | 14 | 100 |
-| Relationship episodes (scorable) | 26 | 239 |
+| Relationship episodes (scorable) | 26 | 228 |
 | Observations | 41 | 131 |
 | People with any observation (incl. partners) | 14 | 61 |
 | ...of those, on the roster itself | 10 | 49 |
@@ -26,18 +26,18 @@ Joint coverage is a conjunction of independently rare conditions: both people ju
 
 ## What a source would have to look like
 
-"Find better sources" is not a specification, so `scripts/source_requirement.py` turns it into one: simulate a hypothetical annual ranked list over the REAL episode structure and the REAL roster, and count how many of the 239 scorable episodes come out jointly covered.
+"Find better sources" is not a specification, so `scripts/source_requirement.py` turns it into one: simulate a hypothetical annual ranked list over the REAL episode structure and the REAL roster, and count how many of the 228 scorable episodes come out jointly covered.
 
 | Names per year | p10 | median | p90 |
 |---|---|---|---|
 | 1 | 0 | 0 | 0 |
-| 5 | 0 | 1 | 4 |
-| 10 | 2 | 4 | 7 |
-| 25 | 8 | 13 | 18 |
-| 50 | 20 | 23 | 25 |
-| 100 | 25 | 25 | 25 |
-| 200 | 25 | 25 | 25 |
-| 400 | 25 | 25 | 25 |
+| 5 | 0 | 1 | 2 |
+| 10 | 1 | 2 | 4 |
+| 25 | 5 | 8 | 11 |
+| 50 | 11 | 13 | 14 |
+| 100 | 14 | 14 | 14 |
+| 200 | 14 | 14 | 14 |
+| 400 | 14 | 14 | 14 |
 
 Read against what actually exists:
 
@@ -51,9 +51,9 @@ Read against what actually exists:
 
 **One name a year covers nothing.** Every award source this project can currently reach sits on that rung. That is not a shortfall to be closed by adding more such sources.
 
-**The requirement is about 100 names a year.** At that depth the median reaches 25 episodes. That is the shape of FHM's real published list, which exists and is not reachable: Wikipedia carries only its top ten, and the publisher blocks the AI crawlers.
+**The requirement is about 100 names a year.** At that depth the median reaches 14 episodes. That is the shape of FHM's real published list, which exists and is not reachable: Wikipedia carries only its top ten, and the publisher blocks the AI crawlers.
 
-**It saturates there.** Beyond 100 names a year the median stays at 25, because the binding constraint becomes the roster and the era span rather than the list depth. So the ceiling for this design, with a perfect source, is 25 of 239 episodes — 10 percent — before the shape-comparability filter cuts it further.
+**It saturates there.** Beyond 100 names a year the median stays at 14, because the binding constraint becomes the roster and the era span rather than the list depth. So the ceiling for this design, with a perfect source, is 14 of 228 episodes — 6 percent — before the shape-comparability filter cuts it further.
 
 *A simulation of COVERAGE only. It invents no score, and a real list's pool would not be the roster. Read the shape of the curve, not the absolute numbers.*
 

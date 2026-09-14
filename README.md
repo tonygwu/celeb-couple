@@ -70,7 +70,7 @@ The measurement works. The evidence does not support the product as specified.
   biased upward by the five shape groups. An award pins near 92 by
   construction; ranked placements spread lower.
 - **Coverage does not scale.** Going from 14 people to 100 gave 3.2x the
-  observations and 8.5x the episodes, and left the count of comparable pairings
+  observations and 8.8x the episodes, and left the count of comparable pairings
   at one.
 - The source that would fix it — about a hundred ranked names a year — exists
   and is not reachable on any permitted route.

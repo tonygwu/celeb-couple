@@ -28,7 +28,7 @@ def test_every_free_analysis_script_is_in_the_chain():
     paid = {"score_evidenced", "classify_romance", "extract_prose_mentions",
             "measure_rater_noise", "run_stress", "score_roster_joint",
             "run_pilot", "resolve_roster", "merge_prose_mentions",
-            "scaling_report", "source_requirement",
+            "scaling_report",
             "write_m0_report", "fetch_records", "build_episodes",
             "build_partner_universe", "fetch_observations",
             "fetch_onscreen_candidates"}
