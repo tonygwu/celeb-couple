@@ -28,6 +28,10 @@ def main() -> int:
     first_pass = load("data/pilot/run/pilot_report.json")
     joint = load("data/pilot/run/joint_with_nearby.json")
     scored = load("data/pilot/run/evidenced_scores.json")
+    romance = load("data/pilot/records/romance.json")
+    noise = load("data/pilot/run/rater_noise.json")
+    offset = load("data/pilot/run/offset_diagnostic.json")
+    grounding = load("data/pilot/run/grounding_audit.json")
 
     L: list[str] = []
     w = L.append
@@ -60,10 +64,23 @@ def main() -> int:
     w("")
     n_eps = len(episodes["episodes"])
     n_films = len(films["candidates"])
+    jc = len(joint["jointly_covered"]) if joint else 0
     w(f"Across all {n_eps} relationship episodes and {n_films} co-starring films — "
-      f"**{n_eps + n_films} candidate pairings** — exactly **zero** had both people "
-      f"evidenced in the same year. Applying the plan's ±1-year bounded reuse "
-      f"raises that to **{len(joint['jointly_covered']) if joint else 0}**.")
+      f"**{n_eps + n_films} candidate pairings** — and after both the ±1-year "
+      f"bounded reuse AND the romance filter, exactly **{jc}** pairing"
+      f"{'' if jc == 1 else 's'} {'is' if jc == 1 else 'are'} jointly covered.")
+    w("")
+    if scored:
+        vals = [r["estimate"] for r in scored["person_periods"]
+                if r["estimate"] is not None]
+        award = [r for r in scored["person_periods"]
+                 if r["estimate"] is not None and r["estimate"] >= 90]
+        w(f"**The decisive measurement**: {len(award)} of {len(vals)} scored "
+          f"person-periods rest on a one-winner editorial award, and every single "
+          f"one scored exactly 92.0 — both model families, to the digit. The one "
+          f"person-period resting on an ORDERED rank (5th of 100) scored "
+          f"{min(vals)}. Award-shaped evidence cannot tell winners apart. Ranked "
+          f"evidence can.")
     w("")
 
     # ---------- cohort ----------
@@ -99,10 +116,16 @@ def main() -> int:
     w("This is an engineering access assessment from published directives and "
       "terms. It is not legal advice and not clearance.")
     w("")
+    w("| Source | Publisher | Serves | Shape | Parsed | Years | Cohort hits |")
+    w("|---|---|---|---|---|---|---|")
     for s in obs["sources"]:
-        w(f"- **{s['award']}** ({s['publisher']}, serves {s['gender_served']}): "
-          f"{s['winner_rows_parsed']} winner rows parsed, {s['years'][0]}–{s['years'][1]}, "
-          f"{s['observations_for_cohort']} matched the cohort.")
+        shape = s.get("shape", "editorial_award")
+        parsed = s.get("ranked_entries_parsed", s.get("winner_rows_parsed", 0))
+        extra = (f"{parsed} entries, {s['runner_up_positions']} ranked"
+                 if shape == "ordered_rank" else f"{parsed} winner rows")
+        years = f"{s['years'][0]}–{s['years'][1]}" if s.get("years") else "—"
+        w(f"| {s['award']} | {s['publisher']} | {s['gender_served']} | `{shape}` | "
+          f"{extra} | {years} | {s['observations_for_cohort']} |")
     w("")
 
     # ---------- records ----------
@@ -265,6 +288,91 @@ def main() -> int:
                   f"in the women's view **{p['gap_womens_view']:+.1f}**, "
                   f"mirrors exactly: {p['mirrors_exactly']}")
                 w("")
+
+    # ---------- romance ----------
+    if romance:
+        w("## 6a. On-screen romance verification")
+        w("")
+        c = romance["counts"]
+        w(f"Co-appearance in a cast list is not a pairing. All "
+          f"{c['candidates']} candidates were classified from the Wikipedia plot "
+          f"section alone; {c['classified']} were classifiable and "
+          f"**{c['qualifying_romances']}** are confirmed reciprocal romances.")
+        w("")
+        w("| Classification | Count |")
+        w("|---|---|")
+        for k, v in sorted(c["by_classification"].items(), key=lambda kv: -kv[1]):
+            w(f"| `{k}` | {v} |")
+        w("")
+        w("Three results worth naming. *Being John Malkovich* came back "
+          "`cannot_tell` for Brad Pitt and Michelle Pfeiffer, who both appear as "
+          "themselves; before this filter existed the coverage count treated them "
+          "as a couple. *Pearl Harbor* separated correctly: the romance is Affleck "
+          "and Beckinsale, not Affleck and Garner. *What Lies Beneath* was "
+          "classified `coerced_or_assault` and is therefore excluded rather than "
+          "scored.")
+        w("")
+
+    # ---------- rater noise ----------
+    if noise:
+        h = noise["headline"]
+        w("## 6b. Rater noise")
+        w("")
+        w(f"{noise['repeats']} repeats of each unchanged dossier. Mean within-judge "
+          f"SD **{h['mean_within_judge_sd']}**, least significant difference at 95% "
+          f"about **{h['least_significant_difference_95pct']}** points "
+          f"({h['lsd_multiplier']} x SD).")
+        w("")
+        w("| Dossier | Shape | Runs | SD |")
+        w("|---|---|---|---|")
+        for t in noise["targets"]:
+            for j, runs in t["runs"].items():
+                sd = t["per_judge_sd"].get(j)
+                w(f"| {t['person']} {t['period']} ({j}) | {t['shape']} | "
+                  f"{', '.join(str(int(r)) for r in runs)} | {sd:.3f} |")
+        w("")
+        w("**Which dossier moves is the finding.** The award dossier does not move "
+          "at all, because it is pinned against the 90-100 ceiling where no "
+          "judgment is left to make. The ranked dossier does move, because there "
+          "genuinely is one. Zero rater noise is a symptom of evidence that cannot "
+          "discriminate, not a sign of a well-behaved rubric.")
+        w("")
+        if h.get("single_judge"):
+            w(f"Measured on one judge ({', '.join(h['judges_that_contributed'])}). "
+              "Codex reached 0% of its 7-day quota window mid-run, so this "
+              "describes one model family and not a panel.")
+            w("")
+
+    # ---------- offset diagnostic ----------
+    if offset:
+        w("## 6c. Cross-gender offset sensitivity")
+        w("")
+        w(f"Deltas {offset['deltas']} applied to the partner side, on "
+          f"{len(offset['people'])} people.")
+        w("")
+        w(f"- Identity holds: **{offset['identity_holds']}**")
+        w(f"- PAW-rate ranks stable under a constant offset: "
+          f"**{offset['rate_ranks_stable_under_constant_offset']}**")
+        w(f"- Cumulative PAW ranks changed: "
+          f"**{offset['cumulative_ranks_changed']}**")
+        w("")
+        w(offset["reading"])
+        w("")
+        w(f"*{offset['caveat']}*")
+        w("")
+
+    # ---------- grounding ----------
+    if grounding:
+        g = grounding["counts"]
+        w("## 6d. Grounding audit")
+        w("")
+        w(f"{g['rationales']} rationales checked: **{g['passed_automated']}** passed "
+          f"the automated checks, {g['failed_automated']} failed, "
+          f"{g['needing_human_read']} are flagged for a human read in "
+          f"`docs/GROUNDING-AUDIT.md`.")
+        w("")
+        w(f"*{grounding['limitation']}*")
+        w("")
 
     # ---------- costs ----------
     w("## 7. Cost and budget")

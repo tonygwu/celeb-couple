@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 08:11 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 08:40 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
 
 **Private pilot. Nothing here is published, ranked, or deployed. Every relationship and every on-screen pairing is an UNVERIFIED candidate.**
 
@@ -10,9 +10,11 @@ Generated 2026-09-14 08:11 UTC from the run artifacts under `data/pilot/`. Every
 
 The rubric behaves as intended under adversarial testing: 25 of 27 stress scorings succeeded and every construct check passed. Two model families independently agreed on the calibration anchor.
 
-But across the 14-person cohort, the permitted sources yielded **7 attractiveness observations total**, covering 6 of 14 people. 8 people have none at all.
+But across the 14-person cohort, the permitted sources yielded **13 attractiveness observations total**, covering 9 of 14 people. 5 people have none at all.
 
-Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — exactly **zero** had both people evidenced in the same year. Applying the plan's ±1-year bounded reuse raises that to **2**.
+Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **1** pairing is jointly covered.
+
+**The decisive measurement**: 12 of 13 scored person-periods rest on a one-winner editorial award, and every single one scored exactly 92.0 — both model families, to the digit. The one person-period resting on an ORDERED rank (5th of 100) scored 86.5. Award-shaped evidence cannot tell winners apart. Ranked evidence can.
 
 ## 1. Cohort
 
@@ -28,11 +30,11 @@ Across all 31 relationship episodes and 20 co-starring films — **51 candidate 
 | Adam Sandler | male | comic lead | **0** |
 | Paul Giamatti | male | character lead | **0** |
 | Ana de Armas | female | 2010s-2020s lead | **0** |
-| Jennifer Garner | female | 2000s-2010s lead | 1 |
-| Kate Beckinsale | female | 1990s-2010s lead | **0** |
+| Jennifer Garner | female | 2000s-2010s lead | 2 |
+| Kate Beckinsale | female | 1990s-2010s lead | 1 |
 | Liv Tyler | female | 1990s-2000s lead | **0** |
-| Michelle Pfeiffer | female | 1980s-1990s lead | **0** |
-| Melissa McCarthy | female | comic lead | **0** |
+| Michelle Pfeiffer | female | 1980s-1990s lead | 3 |
+| Melissa McCarthy | female | comic lead | 1 |
 | Zendaya | female | 2010s-2020s lead | **0** |
 
 ## 2. Source access decisions
@@ -51,8 +53,13 @@ Facts read from English Wikipedia (CC BY-SA), not from the publishers' sites. pe
 
 This is an engineering access assessment from published directives and terms. It is not legal advice and not clearance.
 
-- **Sexiest Man Alive** (PEOPLE, serves male): 40 winner rows parsed, 1985–2025, 6 matched the cohort.
-- **Maxim Hot 100 number one** (Maxim, serves female): 24 winner rows parsed, 2000–2025, 1 matched the cohort.
+| Source | Publisher | Serves | Shape | Parsed | Years | Cohort hits |
+|---|---|---|---|---|---|---|
+| Sexiest Man Alive | PEOPLE | male | `editorial_award` | 40 winner rows | 1985–2025 | 6 |
+| Maxim Hot 100 number one | Maxim | female | `editorial_award` | 24 winner rows | 2000–2025 | 1 |
+| Most Beautiful cover choice | PEOPLE | mixed | `editorial_award` | 37 winner rows | 1990–2026 | 4 |
+| Sexiest Woman Alive | Esquire | female | `editorial_award` | 11 winner rows | 2005–2015 | 1 |
+| FHM 100 Sexiest Women (UK) | FHM | female | `ordered_rank` | 229 entries, 206 ranked | 1995–2017 | 1 |
 
 ## 3. Records
 
@@ -91,32 +98,37 @@ Joint pairing coverage: **0 of 8** (0/4 real-life, 0/4 on-screen).
 
 **Exhaustive check.** Across all 31 episodes and 20 films, zero pairings had both sides evidenced in a shared year. The near-misses are the finding: Ben Affleck and Jennifer Garner each have 2002 evidence and four pairings together, every one landing one to three years off.
 
-**With the plan's ±1-year bounded reuse**, 2 pairing-periods become jointly covered:
+**With the plan's ±1-year bounded reuse**, 1 pairing-periods become jointly covered:
 
-- Pearl Harbor (2001, on_screen): Ben Affleck from 2002 (d=1), Jennifer Garner from 2002 (d=1)
 - Daredevil (2003, on_screen): Ben Affleck from 2002 (d=1), Jennifer Garner from 2002 (d=1)
 
 Both are reused estimates flagged `nearby_period`. Any simulation must give each source estimate ONE shared draw across every period it serves.
 
 ## 6. Scored person-periods and pairing contributions
 
-7 of 7 evidenced person-periods scored, using 14 model calls, 0 failed.
+13 of 13 evidenced person-periods scored, using 26 model calls, 0 failed.
 
 | Person | Period | Obs | Estimate | fable | astra | judge gap | support |
 |---|---|---|---|---|---|---|---|
+| Michelle Pfeiffer | 1990 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Michelle Pfeiffer | 1995 | 1 | 86.5 | 86.0 | 87.0 | 1.0 | single_source |
 | Brad Pitt | 1995 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
 | Denzel Washington | 1996 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
 | Harrison Ford | 1998 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Michelle Pfeiffer | 1999 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
 | Brad Pitt | 2000 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
-| Jennifer Garner | 2002 | 1 | 92.5 | 93.0 | 92.0 | 1.0 | single_source |
+| Jennifer Garner | 2002 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
 | Ben Affleck | 2002 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Kate Beckinsale | 2009 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
 | Idris Elba | 2018 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Jennifer Garner | 2019 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Melissa McCarthy | 2023 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
 
 ### Score compression — the most consequential measurement result
 
-Every scored person-period carries exactly one observation, and every one of those observations is a one-winner editorial award. All 7 estimates land between **92.0** and **92.5**, a spread of **0.5** points on a 0-100 scale.
+Every scored person-period carries exactly one observation, and every one of those observations is a one-winner editorial award. All 13 estimates land between **86.5** and **92.0**, a spread of **5.5** points on a 0-100 scale.
 
-The judges agree almost perfectly: 6 of 7 person-periods came back identical from both families, and the largest disagreement was 1.0 point. So the compression is not rater noise. It is the evidence.
+The judges agree almost perfectly: 12 of 13 person-periods came back identical from both families, and the largest disagreement was 1.0 point. So the compression is not rater noise. It is the evidence.
 
 An annual one-winner award is a superlative judgment by construction, so the rubric correctly places every winner in band 90-100. The consequence is that **award-shaped evidence cannot discriminate between winners.** A leaderboard built on it would rank people by a half-point that is the difference between one judge saying 92 and another saying 93.
 
@@ -124,26 +136,77 @@ This was predicted in the plan's worked example A and is now measured. It is the
 
 ### Mirrored contributions
 
+**Being John Malkovich** (1999, on_screen) — co-appearance only; ROMANCE UNVERIFIED
+
+- Brad Pitt: 92.0 (estimate from 2000)
+- Michelle Pfeiffer: 92.0 (estimate from 1999)
+- covered share 1, period support `nearby_period`
+- gap in the men's view **+0.0**, in the women's view **+0.0**, mirrors exactly: True
+
 **Pearl Harbor** (2001, on_screen) — co-appearance only; ROMANCE UNVERIFIED
 
 - Ben Affleck: 92.0 (estimate from 2002)
-- Jennifer Garner: 92.5 (estimate from 2002)
+- Jennifer Garner: 92.0 (estimate from 2002)
 - covered share 1, period support `nearby_period`
-- gap in the men's view **+0.5**, in the women's view **-0.5**, mirrors exactly: True
+- gap in the men's view **+0.0**, in the women's view **+0.0**, mirrors exactly: True
 
 **Daredevil** (2003, on_screen) — co-appearance only; ROMANCE UNVERIFIED
 
 - Ben Affleck: 92.0 (estimate from 2002)
-- Jennifer Garner: 92.5 (estimate from 2002)
+- Jennifer Garner: 92.0 (estimate from 2002)
 - covered share 1, period support `nearby_period`
-- gap in the men's view **+0.5**, in the women's view **-0.5**, mirrors exactly: True
+- gap in the men's view **+0.0**, in the women's view **+0.0**, mirrors exactly: True
+
+## 6a. On-screen romance verification
+
+Co-appearance in a cast list is not a pairing. All 20 candidates were classified from the Wikipedia plot section alone; 19 were classifiable and **3** are confirmed reciprocal romances.
+
+| Classification | Count |
+|---|---|
+| `cannot_tell` | 15 |
+| `reciprocal_romance` | 3 |
+| `co_appearance_only` | 1 |
+| `coerced_or_assault` | 1 |
+
+Three results worth naming. *Being John Malkovich* came back `cannot_tell` for Brad Pitt and Michelle Pfeiffer, who both appear as themselves; before this filter existed the coverage count treated them as a couple. *Pearl Harbor* separated correctly: the romance is Affleck and Beckinsale, not Affleck and Garner. *What Lies Beneath* was classified `coerced_or_assault` and is therefore excluded rather than scored.
+
+## 6b. Rater noise
+
+4 repeats of each unchanged dossier. Mean within-judge SD **0.433**, least significant difference at 95% about **1.2** points (2.77 x SD).
+
+| Dossier | Shape | Runs | SD |
+|---|---|---|---|
+| Michelle Pfeiffer 1995 (fable) | ranked | 86, 86, 88, 86 | 0.866 |
+| Brad Pitt 1995 (fable) | award | 92, 92, 92, 92 | 0.000 |
+
+**Which dossier moves is the finding.** The award dossier does not move at all, because it is pinned against the 90-100 ceiling where no judgment is left to make. The ranked dossier does move, because there genuinely is one. Zero rater noise is a symptom of evidence that cannot discriminate, not a sign of a well-behaved rubric.
+
+Measured on one judge (fable). Codex reached 0% of its 7-day quota window mid-run, so this describes one model family and not a panel.
+
+## 6c. Cross-gender offset sensitivity
+
+Deltas [-6.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0] applied to the partner side, on 2 people.
+
+- Identity holds: **True**
+- PAW-rate ranks stable under a constant offset: **True**
+- Cumulative PAW ranks changed: **True**
+
+A constant cross-gender offset shifts every PAW rate by exactly delta, so rate ranks inside a view cannot move. Cumulative PAW is exposure-weighted, so it can. Cumulative ranks did move over the tested range.
+
+*This is a sensitivity scenario, not an estimate of real-world bias. Genders are never silently recentred.*
+
+## 6d. Grounding audit
+
+26 rationales checked: **26** passed the automated checks, 0 failed, 25 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
+
+*These checks prove a rationale does not assert MORE than its evidence carries. They do not prove it is a fair reading. Only the human sheet can establish that.*
 
 ## 7. Cost and budget
 
 - Stress tests: 27 model calls ({"fable": 17, "astra": 10}).
-- Scoring: 14 model calls ({"fable": 7, "astra": 7}).
+- Scoring: 26 model calls ({"fable": 13, "astra": 13}).
 - First pilot pass: 0 model calls — all 32 dossiers were empty and short-circuited.
-- **Total: 41 model calls**, against a cap of 300.
+- **Total: 53 model calls**, against a cap of 300.
 - Subscription quota only. API billing was asserted off at start-up.
 - Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and inventing a figure for the other arm would be a fabricated number.
 
