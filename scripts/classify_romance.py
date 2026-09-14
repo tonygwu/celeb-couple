@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+"""Classify the on-screen candidates: is it a romance, or just the same film?"""
+from __future__ import annotations
+import argparse, json, sys, time
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+from packages.llmkit.budget import Budget, BudgetExhausted            # noqa: E402
+from packages.llmkit.contract import load_contract                    # noqa: E402
+from packages.llmkit.judges import ClaudeJudge, JudgeError            # noqa: E402
+from packages.llmkit.manifest import RunManifest                      # noqa: E402
+from modules.records.romance import (                                 # noqa: E402
+    PlotUnavailable, build_prompt, fetch_plot, parse_verdict,
+)
+
+RUBRIC = REPO / "rubrics/romance/ROMANCE.md"
+SCHEMA = REPO / "rubrics/romance/romance.schema.json"
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--account", default="/Users/tonygwu/.claude-e")
+    ap.add_argument("--model", default="claude-fable-5-1")
+    ap.add_argument("--max-calls", type=int, default=25)
+    ap.add_argument("--out", default="data/pilot/records/romance.json")
+    args = ap.parse_args()
+
+    cands = json.loads(
+        (REPO / "data/pilot/records/onscreen_candidates.json").read_text())["candidates"]
+    contract = load_contract(RUBRIC, SCHEMA, "romance-1.0")
+    rubric, schema = RUBRIC.read_text(), SCHEMA.read_text()
+    judge = ClaudeJudge("fable", args.model, config_dir=args.account)
+    budget = Budget(max_calls=args.max_calls)
+    manifest = RunManifest(stage_name="romance", repo=REPO, args=vars(args),
+                           contracts={"romance": contract.as_dict()},
+                           caps={"max_calls": args.max_calls})
+    stage = manifest.stage("classify")
+    raw_dir = REPO / "data/pilot/records/raw_romance"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+
+    results = []
+    for c in cands:
+        stage.attempted += 1
+        label = f"{c['title']} ({c['male']} + {c['female']})"
+        try:
+            plot, plot_sha = fetch_plot(c["title"])
+        except PlotUnavailable as exc:
+            stage.excluded += 1
+            results.append({**c, "classification": "cannot_tell",
+                            "qualifies": False, "exclusion": str(exc)})
+            print(f"  SKIP  {label[:60]:60} {exc}")
+            continue
+        except Exception as exc:
+            stage.record_failure("transient_retryable")
+            results.append({**c, "classification": "cannot_tell",
+                            "qualifies": False, "exclusion": f"fetch failed: {exc}"})
+            print(f"  FAIL  {label[:60]:60} {exc}")
+            continue
+
+        prompt = build_prompt(rubric, schema, c["title"], c["male"], c["female"], plot)
+        try:
+            budget.spend_call(label)
+        except BudgetExhausted as exc:
+            manifest.halt(str(exc))
+            print(f"  HALT  {exc}")
+            break
+        try:
+            res = judge(prompt, timeout=600)
+        except JudgeError as exc:
+            stage.record_failure(exc.error_type)
+            results.append({**c, "classification": "cannot_tell", "qualifies": False,
+                            "exclusion": exc.detail})
+            print(f"  FAIL  {label[:60]:60} {exc.error_type}")
+            continue
+        (raw_dir / f"{c['work_qid']}_{c['male_qid']}_{c['female_qid']}.txt").write_text(res.text)
+        try:
+            v = parse_verdict(res.text, c["title"], plot, plot_sha)
+        except ValueError as exc:
+            stage.record_failure("schema_validation_failed")
+            results.append({**c, "classification": "cannot_tell", "qualifies": False,
+                            "exclusion": f"parse: {exc}"})
+            print(f"  FAIL  {label[:60]:60} parse: {exc}")
+            continue
+        stage.succeeded += 1
+        results.append({**c, **v.as_dict()})
+        mark = "ROMANCE" if v.qualifies else v.classification
+        print(f"  {mark:22} {label[:56]:56} grounded={v.grounded}")
+        time.sleep(0.3)
+
+    qualifying = [r for r in results if r.get("qualifies")]
+    stage.notes = {
+        "candidates": len(cands), "classified": stage.succeeded,
+        "qualifying_romances": len(qualifying),
+        "by_classification": {
+            k: sum(1 for r in results if r.get("classification") == k)
+            for k in sorted({r.get("classification") for r in results if r.get("classification")})
+        },
+    }
+    out = REPO / args.out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({
+        "generated_at_utc": manifest.started_at_utc,
+        "contract": contract.as_dict(),
+        "note": ("Classified from the Wikipedia plot section only. A verdict whose "
+                 "quote is not found in that text is downgraded to cannot_tell, "
+                 "because only reciprocal_romance puts a couple on a board."),
+        "counts": stage.notes, "candidates": results,
+    }, indent=2))
+    mpath = manifest.write(REPO / "data/pilot/manifests")
+    print(f"\n{json.dumps(stage.notes, indent=2)}")
+    print(f"wrote {out}\nmanifest {mpath}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

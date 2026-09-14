@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "on-screen romance classification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "work", "classification", "evidence", "reasoning"],
+  "properties": {
+    "schema_version": {"const": "romance-1.0"},
+    "work": {"type": "string"},
+    "classification": {
+      "enum": ["reciprocal_romance", "co_appearance_only", "unrequited",
+               "brief_or_incidental", "family_or_platonic", "coerced_or_assault",
+               "cannot_tell"]
+    },
+    "evidence": {
+      "type": "string",
+      "description": "Verbatim quote from the supplied plot text, or empty when cannot_tell."
+    },
+    "reasoning": {"type": "string", "minLength": 1},
+    "characters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {"a": {"type": ["string", "null"]}, "b": {"type": ["string", "null"]}}
+    }
+  }
+}
