@@ -323,7 +323,7 @@ Co-appearance in a cast list is not a pairing. All 20 candidates were classified
 | `co_appearance_only` | 3 |
 | `family_or_platonic` | 2 |
 
-Three results worth naming. *Being John Malkovich* came back `cannot_tell` for Brad Pitt and Michelle Pfeiffer, who both appear as themselves; before this filter existed the coverage count treated them as a couple. *Pearl Harbor* separated correctly: the romance is Affleck and Beckinsale, not Affleck and Garner. *What Lies Beneath* was classified `coerced_or_assault` and is therefore excluded rather than scored.
+3 results worth naming. *Being John Malkovich* came back `cannot_tell` for Brad Pitt and Michelle Pfeiffer — both appear as themselves; before this filter existed the coverage count treated them as a couple. *Pearl Harbor* came back `cannot_tell` for Ben Affleck and Jennifer Garner; `reciprocal_romance` for Ben Affleck and Kate Beckinsale — the two candidate pairs separated, which is the point of classifying per pair rather than per film. *What Lies Beneath* came back `reciprocal_romance` for Harrison Ford and Michelle Pfeiffer — the cast fix changed this one: knowing which characters the two actors play turned an unclassifiable plot into an established marital relationship.
 
 ## 13. Rater noise
 

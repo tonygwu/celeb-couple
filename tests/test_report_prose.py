@@ -510,3 +510,28 @@ def test_the_bound_table_is_not_truncated_before_the_plateau():
         "the table must extend past the first bound reaching the maximum, or "
         "the reader cannot see that it is a plateau rather than a trend"
     )
+
+
+def test_the_named_romance_results_match_the_artifact():
+    """Three typed sentences, one of which had reversed. What Lies Beneath was
+    recorded as `coerced_or_assault` and excluded; after the cast fix taught
+    the classifier which characters the actors play, it came back
+    `reciprocal_romance` and qualifies. The report still said the old thing,
+    and the classification table two lines above it listed no
+    `coerced_or_assault` at all."""
+    import json
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    f = REPO / "data/pilot/records/romance.json"
+    if "results worth naming" not in text or not f.exists():
+        pytest.skip("needs the generated report and the artifact")
+
+    rom = json.loads(f.read_text())
+    for c in rom["candidates"]:
+        if c["title"] in ("What Lies Beneath", "Being John Malkovich"):
+            assert f"`{c['classification']}`" in text, (
+                f"{c['title']} is {c['classification']} in the artifact and the "
+                "report does not say so"
+            )
+    assert "coerced_or_assault" not in text or any(
+        c.get("classification") == "coerced_or_assault" for c in rom["candidates"]
+    ), "the report names a classification no candidate carries"

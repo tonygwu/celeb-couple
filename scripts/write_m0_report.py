@@ -888,14 +888,36 @@ def main() -> int:
         for k, v in sorted(c["by_classification"].items(), key=lambda kv: -kv[1]):
             w(f"| `{k}` | {v} |")
         w("")
-        w("Three results worth naming. *Being John Malkovich* came back "
-          "`cannot_tell` for Brad Pitt and Michelle Pfeiffer, who both appear as "
-          "themselves; before this filter existed the coverage count treated them "
-          "as a couple. *Pearl Harbor* separated correctly: the romance is Affleck "
-          "and Beckinsale, not Affleck and Garner. *What Lies Beneath* was "
-          "classified `coerced_or_assault` and is therefore excluded rather than "
-          "scored.")
-        w("")
+        # These were three typed sentences. One had gone stale and reversed:
+        # What Lies Beneath was recorded as `coerced_or_assault` and excluded,
+        # and after the cast fix taught the classifier who plays whom it came
+        # back `reciprocal_romance` and qualifies. Look each verdict up.
+        _verdicts = {}
+        for c in romance["candidates"]:
+            _verdicts.setdefault(c["title"], []).append(
+                (c.get("classification"), c.get("male"), c.get("female")))
+        _notes = []
+        for title, gloss in (
+            ("Being John Malkovich",
+             "both appear as themselves; before this filter existed the "
+             "coverage count treated them as a couple"),
+            ("Pearl Harbor",
+             "the two candidate pairs separated, which is the point of "
+             "classifying per pair rather than per film"),
+            ("What Lies Beneath",
+             "the cast fix changed this one: knowing which characters the two "
+             "actors play turned an unclassifiable plot into an established "
+             "marital relationship"),
+        ):
+            rows = _verdicts.get(title)
+            if not rows:
+                continue
+            got = "; ".join(
+                f"`{cls}` for {m} and {fem}" for cls, m, fem in rows)
+            _notes.append(f"*{title}* came back {got} — {gloss}.")
+        if _notes:
+            w(f"{len(_notes)} results worth naming. " + " ".join(_notes))
+            w("")
 
     # ---------- rater noise ----------
     if noise:
