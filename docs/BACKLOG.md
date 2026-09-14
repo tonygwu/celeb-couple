@@ -124,6 +124,19 @@ fired on a downstream number. Neither would have surfaced on its own.
   next rubric version bump, when the id changes anyway.**
   **Difficulty: easy, but must be bundled.**
 
+- **`ADJUDICATION_GAP = 10.0` is still the plan's provisional value.** The plan
+  set it "provisionally 10 points, set from M0's own spread", and M0 has now
+  measured a spread: the rank-shaped least significant difference is 2.22
+  points. Ten is more than four times that, so a real cross-family disagreement
+  could sit well inside it and never be flagged.
+
+  Not changed, because the data that should set it does not exist. Every
+  across-judge gap in the corpus is `None`: codex ran out of quota and one
+  family scored all 39 person-periods, so nothing has ever exercised this
+  threshold. Set it from the observed distribution of cross-family gaps AFTER a
+  two-family re-score, not from the single-family repeat noise, which measures
+  a different thing. **Difficulty: a decision, blocked on the re-score.**
+
 ## Tooling
 
 - ~~Smoke tests can clobber production artifacts.~~ **Fixed 2026-09-14.**
