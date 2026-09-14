@@ -21,7 +21,8 @@ from dataclasses import dataclass
 from packages.ids.keys import pair_key, stable_id
 from packages.temporal.dates import Censoring, Interval, PreciseDate, from_wikidata
 
-__all__ = ["RelationshipCandidate", "fetch_relationships", "fetch_birth_dates", "SPARQL"]
+__all__ = ["RelationshipCandidate", "fetch_relationships", "fetch_birth_dates",
+           "fetch_gender", "SPARQL"]
 
 SPARQL = "https://query.wikidata.org/sparql"
 USER_AGENT = (
@@ -136,6 +137,34 @@ def fetch_relationships(qids: list[str]) -> list[RelationshipCandidate]:
         elif cand.has_reference and not prior.has_reference:
             seen[key] = cand
     return sorted(seen.values(), key=lambda c: (c.subject_qid, c.partner_label))
+
+
+_GENDER_QUERY = """
+SELECT ?p ?genderLabel WHERE {
+  VALUES ?p { %s }
+  ?p wdt:P21 ?gender .
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+"""
+
+
+def fetch_gender(qids: list[str]) -> dict[str, str]:
+    """Sourced public-identity gender from Wikidata P21.
+
+    The plan is explicit that this is a SOURCED field. It is never inferred from
+    appearance and never from who somebody dated, and a person Wikidata does not
+    record is left out of the map rather than guessed at, because an absent
+    value is unknown and not a default.
+    """
+    rows = _query(_GENDER_QUERY % " ".join(f"wd:{q}" for q in qids))
+    time.sleep(PACE_SECONDS)
+    out: dict[str, str] = {}
+    for row in rows:
+        qid = (_val(row, "p") or "").rsplit("/", 1)[-1]
+        label = (_val(row, "genderLabel") or "").strip().lower()
+        if qid and label and not label.startswith("q"):
+            out[qid] = label
+    return out
 
 
 _BIRTH_QUERY = """

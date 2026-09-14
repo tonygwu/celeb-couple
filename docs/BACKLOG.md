@@ -57,9 +57,12 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
   joint coverage from 2 to 3 distinct pairings, saturating at 6. Not done,
   because a wider bound reuses an estimate further from the period it describes.
   **Difficulty: a decision, not a task.**
-- **Partner gender is `unknown` for the whole partner universe**, since it was
-  built from episode records rather than sourced. Fine for observations, not
-  fine for a gendered view. **Difficulty: easy.**
+- ~~Partner gender is `unknown` for the whole partner universe.~~ **Fixed
+  2026-09-14.** Sourced from Wikidata P21, which is a public-identity statement
+  and not an inference: 12 female, 10 male, zero unknown across the pilot's 22
+  partners. A person Wikidata does not record stays `unknown` rather than being
+  defaulted, and an unknown must keep that person out of a gendered view rather
+  than into a guess.
 
 ## Tooling
 

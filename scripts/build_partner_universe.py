@@ -15,6 +15,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.llmkit.artifacts import require  # noqa: E402
+from modules.records.wikidata import fetch_gender  # noqa: E402
 
 
 def main() -> int:
@@ -32,20 +33,28 @@ def main() -> int:
         if ep["scorable"] and ep["partner_qid"] not in roster:
             partners[ep["partner_qid"]] = ep["partner_label"]
 
+    genders = fetch_gender(sorted(partners)) if partners else {}
+    unsourced = [q for q in partners if q not in genders]
+
     payload = {
+        "gender_source": "wikidata P21 (sex or gender), sourced, never inferred",
+        "gender_unsourced_count": len(unsourced),
         "note": (
             "Outside-roster partners appearing in scorable episodes. Public "
             "figures only; scripts/partner_eligibility.py splits those with no "
             "evidence FOUND from those this project must never rate."
         ),
         "gender_caveat": (
-            "gender_category is 'unknown' throughout. These records are derived "
-            "from episode partners rather than sourced, and the plan requires a "
-            "sourced public-identity field before anyone enters a gendered view."
+            "gender_category comes from Wikidata P21 and is a SOURCED "
+            "public-identity field. It is never inferred from appearance and "
+            "never from who somebody dated. A partner Wikidata does not record "
+            "stays 'unknown' rather than being defaulted, and an unknown must "
+            "keep that person out of a gendered view rather than into a guess."
         ),
         "derived_from": args.episodes,
         "people": [
-            {"display_name": n, "wikidata_qid": q, "gender_category": "unknown",
+            {"display_name": n, "wikidata_qid": q,
+             "gender_category": genders.get(q, "unknown"),
              "cohort_note": "partner universe"}
             for q, n in sorted(partners.items(), key=lambda kv: kv[1])
         ],
@@ -54,6 +63,11 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2))
     print(f"outside-roster partners: {len(partners)}")
+    from collections import Counter
+    print(f"gender: {dict(Counter(genders.get(q, 'unknown') for q in partners))}")
+    if unsourced:
+        print(f"unsourced (left 'unknown', not guessed): "
+              f"{[partners[q] for q in unsourced]}")
     print(f"wrote {out}")
     return 0
 

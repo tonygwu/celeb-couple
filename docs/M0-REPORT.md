@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `80236ab85f19`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `f071e9a3cde0`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: regenerating it over unchanged artifacts produces an identical file, so a diff means the numbers moved.
 
