@@ -45,12 +45,8 @@ _REF = re.compile(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>", re.S)
 #: ``rowspan="3"`` on a date cell: the table itself declaring how many rows
 #: share that date. Read, never guessed.
 _ROWSPAN = re.compile(r'rowspan\s*=\s*"?(\d+)"?', re.I)
-#: What an unlinked winner cell has to look like before it is read as a name.
-#: Deliberately strict, and shared in spirit with the ranked parser: a
-#: plain-text cell is usually a note, and a fabricated person in the corpus
-#: costs far more than a row that stays dropped AND COUNTED.
-_LOOKS_LIKE_A_NAME = re.compile(
-    r"^[A-Z][A-Za-z.'\u2019\-]*(?: [A-Z][A-Za-z.'\u2019\-]*){1,4}$")
+#: Shared with the sibling parser. See modules/consensus/names.py.
+from modules.consensus.names import looks_like_a_name
 #: "November 13, 2024" -- People switched the Sexiest Man Alive table to plain
 #: English dates in 2024, and the {{dts}}-only parser dropped every row that
 #: used them.
@@ -161,7 +157,7 @@ def parse_award_table_with_stats(wikitext: str) -> tuple[list[AwardRow], TableSt
             # `to_records` only produces an observation for a winner already
             # in `name_to_person`.
             bare = _strip_markup(winner_cell)
-            if _LOOKS_LIKE_A_NAME.match(bare):
+            if looks_like_a_name(bare):
                 rows.append(AwardRow(int(y), value, prec, bare,
                                      winner_cell[:120], linked=False))
                 unlinked_recovered += 1

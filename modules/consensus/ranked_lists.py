@@ -51,12 +51,8 @@ ORDINAL = re.compile(
 ORDINAL_UNLINKED = re.compile(
     r"(\d{1,3})(?:st|nd|rd|th)\s*:\s*([^\[\]<>*|\n]+?)\s*(?:</small>|\n|$)"
 )
-#: What an unlinked cell has to look like before it is read as a person's name.
-#: Deliberately strict. A plain-text cell is usually a note, and the cost of
-#: being wrong is a fabricated person in the corpus; the cost of being too
-#: strict is a position that stays dropped and COUNTED, which is what the
-#: statistics are for.
-_LOOKS_LIKE_A_NAME = re.compile(r"^[A-Z][A-Za-z.'\u2019\-]*(?: [A-Z][A-Za-z.'\u2019\-]*){1,4}$")
+#: Shared with the sibling parser. See modules/consensus/names.py.
+from modules.consensus.names import looks_like_a_name
 _REF = re.compile(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>", re.S)
 
 
@@ -144,7 +140,7 @@ def parse_ranked_table(
             if rank > list_length or rank in seen_ranks:
                 continue
             candidate = raw.strip()
-            if not _LOOKS_LIKE_A_NAME.match(candidate):
+            if not looks_like_a_name(candidate):
                 stats["unlinked_positions_rejected"] += 1
                 continue
             seen_ranks.add(rank)
