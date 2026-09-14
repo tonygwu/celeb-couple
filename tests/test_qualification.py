@@ -78,7 +78,11 @@ def test_year_precision_exposure_disqualifies_without_the_sensitivity_shown():
 def test_too_much_nearby_period_reuse_disqualifies():
     ks = [_k(f"f{i}", period=str(2016 + i), fid=f"se_{i}") for i in range(3)]
     q = qualify("p1", "on_screen", ks, support_levels=MULTI, period_precision=DAY,
-                period_support={f"se_{i}": "nearby_period" for i in range(3)})
+                # The partner id has to be named too. This test used to supply
+                # only the focal ids and lean on the permissive default, which
+                # is exactly what the completeness check exists to surface.
+                period_support={**{f"se_{i}": "nearby_period" for i in range(3)},
+                                "se_p": "contemporaneous"})
     assert q.share_nearby_reuse > MAX_SHARE_NEARBY_REUSE
     assert q.ranked is False
     assert any("nearby-period reuse" in r for r in q.reasons)
@@ -102,3 +106,45 @@ def test_every_threshold_is_a_named_constant_not_a_literal():
             f"threshold literal {literal!r} appears inside qualify(); it belongs "
             "in a named constant so a published number cannot rest on typed prose"
         )
+
+
+# -- partial metadata is an oversight, empty metadata is a statement ---------
+
+def test_an_empty_support_map_means_no_nearby_reuse():
+    """A caller with none of this metadata is making a coherent statement: no
+    special cases anywhere. That stays supported."""
+    ks = [_k(f"f{i}", period=str(2016 + i), fid=f"se_a{i}", pid_=f"se_b{i}")
+          for i in range(3)]
+    q = qualify("p", "real_life", ks, period_support={})
+    assert q.share_nearby_reuse == F(0)
+
+
+def test_a_partial_support_map_is_refused():
+    """Absent-from-a-populated-map is an oversight, not a statement.
+
+    `period_support.get(eid)` returning None counts the estimate as
+    contemporaneous, which UNDERSTATES share_nearby_reuse -- and that share is
+    compared against a CAP. Understating it is the direction that lets a
+    pairing qualify when it should not. Every other default in this function
+    errs the other way; this one did not.
+    """
+    import pytest
+    ks = [_k("f0", fid="se_a", pid_="se_b")]
+    with pytest.raises(ValueError, match="se_b"):
+        qualify("p", "real_life", ks, period_support={"se_a": "nearby_period"})
+
+
+def test_a_complete_support_map_is_accepted():
+    ks = [_k("f0", fid="se_a", pid_="se_b")]
+    q = qualify("p", "real_life", ks,
+                period_support={"se_a": "nearby_period",
+                                "se_b": "contemporaneous"})
+    assert q.share_nearby_reuse == F(1)
+
+
+def test_the_refusal_names_every_missing_estimate():
+    import pytest
+    ks = [_k("f0", fid="se_a", pid_="se_b")]
+    with pytest.raises(ValueError) as e:
+        qualify("p", "real_life", ks, period_support={"se_zzz": "nearby_period"})
+    assert "se_a" in str(e.value) and "se_b" in str(e.value)

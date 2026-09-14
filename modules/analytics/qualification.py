@@ -83,6 +83,27 @@ def qualify(
     period_precision = period_precision or {}
     period_support = period_support or {}
 
+    # An EMPTY period_support is a coherent statement: no nearby reuse
+    # anywhere. A PARTIAL one is an oversight, and the two look identical to
+    # `.get(eid)`, which returns None for both and counts the estimate as
+    # contemporaneous. That UNDERSTATES share_nearby_reuse, and that share is
+    # compared against a CAP -- so the understatement is in the direction that
+    # lets a pairing qualify when it should not. Every other default in this
+    # function errs the other way.
+    if period_support:
+        need = {eid for k in pairings for p in k.periods if p.both_scored
+                for eid in (p.focal_estimate_id, p.partner_estimate_id) if eid}
+        gaps = sorted(need - set(period_support))
+        if gaps:
+            raise ValueError(
+                "period_support is populated but says nothing about "
+                + ", ".join(gaps)
+                + ". An absent estimate counts as contemporaneous, which lowers "
+                "share_nearby_reuse toward the cap it is checked against. Pass "
+                "'contemporaneous' explicitly, or pass an empty map to say "
+                "there is no reuse anywhere."
+            )
+
     scored = [k for k in pairings if covered_share(k) > 0]
     total_w = sum((scored_weight(k) for k in scored), Fraction(0))
     all_w = sum((k.w for k in pairings), Fraction(0))
