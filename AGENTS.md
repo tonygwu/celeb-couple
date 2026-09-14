@@ -82,9 +82,10 @@ uv pip install --python .venv/bin/python -r requirements.txt
 .venv/bin/python -m pytest tests -q      # offline; spends no model quota
 ```
 
-**CI does not run.** `.github/workflows/tests.yml` exists, but all 30 of its
-runs have been refused at GitHub's billing gate before reaching pytest, so the
-repository's Actions state is red while the suite is green. Do not read a green
+**CI does not run.** `.github/workflows/tests.yml` exists, and every one of its
+runs — over a hundred now — has been refused at GitHub's billing gate before
+reaching pytest, so the repository's Actions state is red while the suite is
+green. Do not read a green
 Actions badge as verification and do not read a red one as a test failure. Run
 the suite locally; that is the only gate that has ever executed. See
 `docs/BACKLOG.md`.
@@ -92,8 +93,26 @@ the suite locally; that is the only gate that has ever executed. See
 The suite is offline and deterministic. The count is deliberately not written
 down here: a hand-typed number goes stale and then lies, which is the defect
 this project's sibling repo paid for five separate times. Run it and read it. **Treat any non-zero exit as failure,
-including 5**, which pytest returns when it collects no tests at all. Never
-write `pytest ...; echo $?` — the `;` reports the status of `echo`.
+including 5**, which pytest returns when it collects no tests at all.
+
+**Read pytest's own exit status, not something downstream of it.** Both of
+these report the wrong command's status and will happily let you commit a red
+suite:
+
+```sh
+pytest tests -q; echo $?              # the status of echo
+pytest tests -q | tail -2 && git commit    # the status of tail
+```
+
+Use this instead, which is what the rest of this repository's tooling does:
+
+```sh
+.venv/bin/python -m pytest tests -q > /dev/null 2>&1; RC=$?
+[ $RC -eq 0 ] && git commit ...
+```
+
+That is not a hypothetical. The pipeline form pushed a failing test twice in
+one night.
 
 ## The tools, and how to invoke them
 
