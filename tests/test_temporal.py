@@ -159,3 +159,60 @@ def test_closed_episode_must_not_be_given_ongoing_censoring():
 def test_interval_that_ends_before_it_starts_is_refused():
     with pytest.raises(ValueError):
         _span("2016-01-01", "2015-01-01")
+
+
+# -- clipped edges must cite the claim they came from ------------------------
+
+def test_a_clipped_end_cites_the_end_claim_not_the_start_claim():
+    """`clip()` built the clipped END date with `self.start.source_ref`.
+
+    The module's own header says source_ref is required "so an unsourced date
+    cannot enter a record by accident". A date carrying the WRONG source is
+    worse than one carrying none: it looks sourced and traces to a claim that
+    says nothing about it. In a project whose product is traceability, an
+    adult-window clip attributed the relationship's END to the claim that
+    established its START.
+    """
+    iv = Interval(
+        PreciseDate("2000-01-01", Precision.DAY, "claim_START"),
+        PreciseDate("2010-12-31", Precision.DAY, "claim_END"),
+    )
+    clipped = iv.clip(not_after=date(2005, 6, 30))
+    assert clipped is not None
+    assert clipped.end.value == "2005-06-30"
+    assert "claim_END" in clipped.end.source_ref, clipped.end.source_ref
+    assert "claim_START" not in clipped.end.source_ref
+
+
+def test_a_clipped_start_still_cites_the_start_claim():
+    iv = Interval(
+        PreciseDate("2000-01-01", Precision.DAY, "claim_START"),
+        PreciseDate("2010-12-31", Precision.DAY, "claim_END"),
+    )
+    clipped = iv.clip(not_before=date(2003, 4, 1))
+    assert clipped.start.value == "2003-04-01"
+    assert "claim_START" in clipped.start.source_ref
+
+
+def test_clipping_an_ongoing_interval_cites_the_supported_active_claim():
+    """An ongoing interval has no end claim. What closes it is
+    last_supported_active, so that is what a clipped end derives from -- never
+    the run date and never the start."""
+    iv = Interval(
+        PreciseDate("2000-01-01", Precision.DAY, "claim_START"),
+        None, Censoring.ONGOING,
+        PreciseDate("2012-12-31", Precision.DAY, "claim_ACTIVE"),
+    )
+    clipped = iv.clip(not_after=date(2005, 6, 30))
+    assert clipped.end.value == "2005-06-30"
+    assert "claim_ACTIVE" in clipped.end.source_ref, clipped.end.source_ref
+
+
+def test_both_edges_clipped_cite_their_own_claims():
+    iv = Interval(
+        PreciseDate("2000-01-01", Precision.DAY, "claim_START"),
+        PreciseDate("2010-12-31", Precision.DAY, "claim_END"),
+    )
+    c = iv.clip(not_before=date(2003, 4, 1), not_after=date(2005, 6, 30))
+    assert "claim_START" in c.start.source_ref
+    assert "claim_END" in c.end.source_ref

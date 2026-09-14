@@ -218,7 +218,14 @@ class Interval:
             return Interval(start, self.end, Censoring.CLOSED)
         if hi == self.last_day() and self.censoring is Censoring.ONGOING:
             return Interval(start, None, Censoring.ONGOING, self.last_supported_active)
-        end = PreciseDate(hi.isoformat(), Precision.DAY, f"clip:{self.start.source_ref}")
+        # Cite the claim that actually bounded this edge. This used to reuse
+        # self.start.source_ref, so a clipped END traced to the claim that
+        # established the START. A date carrying the WRONG source is worse than
+        # one carrying none: it looks sourced and leads a reader to a statement
+        # that says nothing about it.
+        closing = self.end if self.censoring is Censoring.CLOSED else self.last_supported_active
+        assert closing is not None
+        end = PreciseDate(hi.isoformat(), Precision.DAY, f"clip:{closing.source_ref}")
         return Interval(start, end, Censoring.CLOSED)
 
     def year_shares(self) -> dict[int, Fraction]:
