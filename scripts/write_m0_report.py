@@ -35,6 +35,7 @@ def main() -> int:
     density = load("data/pilot/run/evidence_density.json")
     align = load("data/pilot/run/alignment_gap.json")
     elig = load("data/pilot/records/partner_eligibility.json")
+    shape = load("data/pilot/run/shape_confound.json")
 
     L: list[str] = []
     w = L.append
@@ -352,6 +353,41 @@ def main() -> int:
           "one.")
         w("")
         w(f"*{align['caveat']}*")
+        w("")
+
+    # ---------- shape confounding ----------
+    if shape:
+        w("## 5a. The most serious bias: evidence shape drives the estimate")
+        w("")
+        w(f"**Evidence type alone explains "
+          f"{round((shape['eta_squared_shape_explains'] or 0) * 100)}% of the "
+          f"variance in the estimates** (eta-squared "
+          f"{shape['eta_squared_shape_explains']}).")
+        w("")
+        w("| Evidence shape | n | mean | range | SD |")
+        w("|---|---|---|---|---|")
+        for k, v in shape["by_shape"].items():
+            w(f"| `{k}` | {v['n']} | {v['mean']} | {v['min']}–{v['max']} | {v['sd']} |")
+        w("")
+        w(f"**{shape['pairings_with_mismatched_shapes']} of "
+          f"{shape['jointly_covered_pairings']} jointly covered pairings have "
+          f"MISMATCHED evidence shapes on the two sides.**")
+        w("")
+        for m in shape["mismatched"]:
+            w(f"- {m['pairing']} {m['period']}: {m['a']} `{m['a_shape']}` vs "
+              f"{m['b']} `{m['b_shape']}`")
+        w("")
+        w("This is the project's most serious systematic bias and it is not "
+          "hypothetical. The Brad Pitt and Jennifer Aniston gap of −12 pairs a "
+          "Sexiest Man Alive win, which is superlative by construction and lands "
+          "at 92, against ranked list placements, which spread lower. A large "
+          "part of that gap is a statement about which publication covered whom "
+          "in what format, not about the two people.")
+        w("")
+        w("Any published pairing whose sides carry different evidence shapes must "
+          "carry this caveat on the row. A board that shows the number without it "
+          "would be reporting a property of the sources as a property of the "
+          "couple.")
         w("")
 
     # ---------- partner eligibility ----------
