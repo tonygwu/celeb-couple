@@ -104,6 +104,40 @@ def decisive_measurement(shape_conf: dict, n_scored: int) -> str:
         f"carries a degree, so it can tell people apart.")
 
 
+def noise_floor(noise: dict | None) -> float | None:
+    """The largest MEASURED least significant difference, or None.
+
+    Every stress case reports a spread in estimate points, and a spread only
+    means something against the floor those points are known to wobble by.
+    """
+    if not noise:
+        return None
+    by_shape = (noise.get("headline") or {}).get("by_shape") or {}
+    floors = [s["least_significant_difference_95pct"] for s in by_shape.values()
+              if s.get("least_significant_difference_95pct") is not None]
+    return max(floors) if floors else None
+
+
+def spread_verdict(spread, floor: float | None, within: str, beyond: str) -> str:
+    """Judge a stress-case spread against the measured noise floor.
+
+    The stored `reading` strings were written before any noise floor existed
+    and were never revisited. S2 recorded a 4-point spread across award, rank
+    and prose renderings of the SAME judgment and called it "formats scored
+    comparably" -- but 4 exceeds the measured 2.22, so it is the opposite: an
+    independent format effect, corroborating the evidence-shape confound that
+    dominates this project's conclusions. It was being reported as a pass.
+    """
+    if spread is None:
+        return "no spread recorded"
+    if floor is None:
+        return (f"spread {spread}; no measured noise floor to compare against, "
+                f"so this is not yet evidence either way")
+    if spread <= floor:
+        return f"spread **{spread}**, within the measured floor of {floor} — {within}"
+    return f"spread **{spread}**, ABOVE the measured floor of {floor} — {beyond}"
+
+
 def identity_leakage_row(s6: dict, noise: dict | None) -> str:
     """Describe the identity-leakage case from its DATA, not its stored string.
 
@@ -456,16 +490,26 @@ def main() -> int:
     w("| Case | Question | Result |")
     w("|---|---|---|")
     s1 = f.get("S1_single_vs_multi", {})
+    _floor = noise_floor(noise)
     w(f"| S1 single vs multi | Does publication count impose the ordering? | "
       f"strong single-source **{s1.get('strong_single_mean')}** vs weak multi-source "
       f"**{s1.get('weak_multi_mean')}** — {s1.get('reading')} |")
     s2 = f.get("S2_format_equivalence", {})
     w(f"| S2 format | Award vs rank vs prose | {json.dumps(s2.get('per_format'))}, "
-      f"spread {s2.get('spread')} — {s2.get('reading')} |")
+      + spread_verdict(
+          s2.get("spread"), _floor,
+          "the same judgment scored the same in all three renderings",
+          "format moved the estimate on identical substance, which is the "
+          "evidence-shape confound showing up under controlled conditions")
+      + " |")
     s3 = f.get("S3_corroboration_no_new_judgment", {})
     w(f"| S3 corroboration | Does an extra publisher jump a band? | "
-      f"{s3.get('one_publisher_mean')} → {s3.get('three_publishers_mean')} "
-      f"(delta {s3.get('delta')}) — {s3.get('reading')} |")
+      f"{s3.get('one_publisher_mean')} → {s3.get('three_publishers_mean')}, "
+      + spread_verdict(
+          s3.get("delta"), _floor,
+          "corroboration left the estimate where it was",
+          "corroboration alone moved the estimate, which the rubric forbids")
+      + " |")
     s4 = f.get("S4_contradiction", {})
     w(f"| S4 contradiction | Does the rationale address the conflict? | "
       f"estimate {s4.get('estimates')}, names both placements: "
@@ -477,11 +521,35 @@ def main() -> int:
     w(identity_leakage_row(f.get("S6_identity_leakage") or {}, noise))
     s7 = f.get("S7_order_sensitivity", {})
     w(f"| S7 order | Reordered observations | {json.dumps(s7.get('per_order'))}, "
-      f"spread {s7.get('spread')} |")
+      + spread_verdict(
+          s7.get("spread"), _floor,
+          "observation order did not move the estimate",
+          "observation order moved the estimate")
+      + " |")
     s8 = f.get("S8_volume_without_content", {})
-    w(f"| S8 copy volume | One copy vs five | {json.dumps(s8.get('per_arm'))} — "
-      f"{s8.get('reading')} |")
+    w(f"| S8 copy volume | One copy vs five | {json.dumps(s8.get('per_arm'))}, "
+      + spread_verdict(
+          s8.get("spread"), _floor,
+          "copy volume changed nothing",
+          "copy volume alone moved the estimate")
+      + " |")
     w("")
+    w("Every spread above is judged against the MEASURED noise floor rather "
+      "than against a stored sentence, because a difference in estimate points "
+      "only means something next to the amount those points are known to "
+      "wobble by.")
+    w("")
+    _s2_spread = (f.get("S2_format_equivalence") or {}).get("spread")
+    if _floor is not None and _s2_spread is not None and _s2_spread > _floor:
+        w(f"**S2 is the one that did not pass, and it matters.** The same "
+          f"substantive judgment, rendered as an award, as a ranked placement "
+          f"and as prose, moved {_s2_spread} points — above the floor. That is "
+          f"the evidence-shape confound measured under CONTROLLED conditions, "
+          f"where the substance is held identical by construction. The "
+          f"observational estimate of the same effect appears later in this "
+          f"report, and the two are independent routes to the same conclusion: "
+          f"how a judgment is published changes the number it receives.")
+        w("")
 
     # ---------- coverage ----------
     section("Coverage, the two numbers that matter")

@@ -369,3 +369,46 @@ def test_no_noise_floor_means_no_verdict():
     row = gen.identity_leakage_row(
         {"per_arm": {"named": 82, "anonymised": 82.5}}, None)
     assert "not yet evidence either way" in row
+
+
+def test_a_spread_above_the_floor_is_not_called_comparable():
+    """S2 renders the SAME judgment as an award, a rank and prose. It recorded
+    a 4-point spread and the stored reading called it "formats scored
+    comparably" -- but 4 exceeds the measured 2.22, so it is the opposite: a
+    format effect on identical substance, which is the evidence-shape confound
+    under controlled conditions. It was being reported as a pass."""
+    gen = _gen()
+    v = gen.spread_verdict(4, 2.22, "comparable", "format moved the estimate")
+    assert "ABOVE" in v and "format moved the estimate" in v
+
+
+def test_a_spread_within_the_floor_reads_as_no_effect():
+    gen = _gen()
+    v = gen.spread_verdict(1, 2.22, "left the estimate where it was", "moved it")
+    assert "within" in v and "left the estimate where it was" in v
+
+
+def test_a_spread_exactly_at_the_floor_is_within_it():
+    gen = _gen()
+    assert "within" in gen.spread_verdict(2.22, 2.22, "no effect", "effect")
+
+
+def test_no_floor_means_no_verdict_for_any_case():
+    gen = _gen()
+    assert "not yet evidence" in gen.spread_verdict(4, None, "a", "b")
+
+
+def test_a_missing_spread_says_so():
+    gen = _gen()
+    assert gen.spread_verdict(None, 2.22, "a", "b") == "no spread recorded"
+
+
+def test_the_floor_comes_from_a_measured_shape_only():
+    """The award shape has no LSD -- every repeat returned the same value --
+    and a None must not be picked up as a floor of zero, which would make every
+    spread look significant."""
+    gen = _gen()
+    assert gen.noise_floor(NOISE) == 2.22
+    assert gen.noise_floor({"headline": {"by_shape": {
+        "award": {"least_significant_difference_95pct": None}}}}) is None
+    assert gen.noise_floor(None) is None

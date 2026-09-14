@@ -89,13 +89,17 @@ On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in 
 | Case | Question | Result |
 |---|---|---|
 | S1 single vs multi | Does publication count impose the ordering? | strong single-source **92** vs weak multi-source **63** — the stronger substantive judgment scored higher |
-| S2 format | Award vs rank vs prose | {"as_award": 92, "as_rank": 92, "as_prose": 88}, spread 4 — formats scored comparably |
-| S3 corroboration | Does an extra publisher jump a band? | 69 → 70 (delta 1) — corroboration left the estimate where it was |
+| S2 format | Award vs rank vs prose | {"as_award": 92, "as_rank": 92, "as_prose": 88}, spread **4**, ABOVE the measured floor of 2.22 — format moved the estimate on identical substance, which is the evidence-shape confound showing up under controlled conditions |
+| S3 corroboration | Does an extra publisher jump a band? | 69 → 70, spread **1**, within the measured floor of 2.22 — corroboration left the estimate where it was |
 | S4 contradiction | Does the rationale address the conflict? | estimate [80], names both placements: [True] |
 | S5 empty / off-topic | Unscored, or a low number? | empty unscored: True, off-topic unscored: True |
 | S6 identity | Same evidence, different name | {"named": 82, "anonymised": 82.5, "swapped_name": 82} — spread **0.5**, at or below the measured noise floor of 2.22 — identity did NOT move the score |
-| S7 order | Reordered observations | {"order_a": 84, "order_b": 82}, spread 2 |
-| S8 copy volume | One copy vs five | {"one_copy": 72, "five_copies": 72} — copy volume changed nothing |
+| S7 order | Reordered observations | {"order_a": 84, "order_b": 82}, spread **2**, within the measured floor of 2.22 — observation order did not move the estimate |
+| S8 copy volume | One copy vs five | {"one_copy": 72, "five_copies": 72}, spread **0**, within the measured floor of 2.22 — copy volume changed nothing |
+
+Every spread above is judged against the MEASURED noise floor rather than against a stored sentence, because a difference in estimate points only means something next to the amount those points are known to wobble by.
+
+**S2 is the one that did not pass, and it matters.** The same substantive judgment, rendered as an award, as a ranked placement and as prose, moved 4 points — above the floor. That is the evidence-shape confound measured under CONTROLLED conditions, where the substance is held identical by construction. The observational estimate of the same effect appears later in this report, and the two are independent routes to the same conclusion: how a judgment is published changes the number it receives.
 
 ## 5. Coverage, the two numbers that matter
 
