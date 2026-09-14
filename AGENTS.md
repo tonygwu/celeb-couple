@@ -128,7 +128,19 @@ mentions file) → `score_evidenced` → `joint_coverage` → `evidence_density`
 `alignment_gap` → `shape_confound` → `grounding_audit` → `offset_diagnostic` →
 `write_m0_report`.
 
-Quota rules for the three that spend:
+Run the free stages and the reports with the chain script, which encodes the
+dependency order so a stage cannot run before the one it needs:
+
+```sh
+bash scripts/run_chain.sh free      # no model calls
+bash scripts/run_chain.sh reports   # regenerate every report from artifacts
+bash scripts/run_chain.sh all
+```
+
+The quota-spending stages are deliberately NOT in it. They need an account and a
+cap chosen by a human who has looked at `quotapick status`.
+
+Quota rules for the ones that spend:
 
 - **Subscription only. API billing is asserted off at start-up** — a visible
   `ANTHROPIC_API_KEY` aborts the run.
