@@ -93,3 +93,18 @@ def test_the_write_is_atomic_leaving_no_temp_file(tmp_path):
     m.write(tmp_path)
     assert not list(tmp_path.glob("*.tmp"))
     assert len(list(tmp_path.glob("*.json"))) == 1
+
+
+def test_a_record_that_falls_through_every_bucket_is_caught(tmp_path):
+    """The real bug this caught: a `continue` on empty input incremented
+    attempted and never touched a bucket, so three of twenty-two records
+    vanished silently while the run still looked clean."""
+    from packages.llmkit.manifest import ReconciliationError, RunManifest
+    m = RunManifest(stage_name="extract", repo=REPO, args={})
+    st = m.stage("extract")
+    st.attempted = 22
+    st.succeeded = 19          # three records went nowhere
+    with pytest.raises(ReconciliationError, match="dropped or double-counted"):
+        m.write(tmp_path)
+    st.excluded = 3            # now they are accounted for
+    m.write(tmp_path)

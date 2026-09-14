@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 08:52 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 08:56 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
 
 **Private pilot. Nothing here is published, ranked, or deployed. Every relationship and every on-screen pairing is an UNVERIFIED candidate.**
 
@@ -150,7 +150,7 @@ This was predicted in the plan's worked example A and is now measured. It is the
 
 ## 6. Evidence density — the actual bottleneck
 
-Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.056**. Distribution: `{'1': 17, '2': 1}`. Person-periods carrying two or more publishers: **1**. Person-periods that are a lone one-winner award: **13 of 18**.
+Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.042**. Distribution: `{'1': 23, '2': 1}`. Person-periods carrying two or more publishers: **1**. Person-periods that are a lone one-winner award: **15 of 24**.
 
 | Corpus | n | range | distinct values | SD |
 |---|---|---|---|---|
@@ -160,6 +160,32 @@ Coverage asks whether a person-year has any evidence. Density asks how much. Mea
 The rubric discriminates; the corpus does not let it. A lone one-winner award is superlative by construction and can only land in one band, so a person-period carrying exactly that produces the same number every time. What the board needs is not more sources covering more people, but sources landing on the SAME person-year as an existing observation.
 
 This reframes what "more sources" has to mean. A source that adds a hundred new people at one observation each raises coverage and changes nothing about the board, because every one of those dossiers still lands in a single band. Only a source that puts a SECOND observation on a person-year that already has one can widen the distribution.
+
+## 6e. Why joint coverage does not move
+
+The corpus grew from 13 observations to 25 and joint coverage did not move. This is why.
+
+- Pairings considered (romance-verified films plus scorable episodes): **30**
+- With evidence on BOTH sides at any distance: **8**
+- Missing evidence on one side entirely: **22**
+
+Joint coverage if the nearby-period bound were widened:
+
+| Bound | Pairings jointly covered |
+|---|---|
+| ±0 | 0 |
+| ±1 | 1 ← current |
+| ±2 | 3 |
+| ±3 | 4 |
+| ±4 | 5 |
+| ±5 | 5 |
+| ±6 | 5 |
+| ±7 | 5 |
+| ±8 | 6 |
+
+Two things follow. Widening the bound from ±1 to ±2 would triple joint coverage, from 1 to 3. And it would not matter much beyond that: the count saturates at 6, because **22 of 30 pairings have no evidence on one side at all**. The bound is a real cost but absence is the bigger one.
+
+*This measures what the bound costs. It is NOT an argument for widening it: a wider bound reuses an estimate further from the period it is supposed to describe, which is the manufactured precision the bound exists to prevent.*
 
 ## 6a. On-screen romance verification
 

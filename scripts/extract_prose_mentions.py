@@ -52,10 +52,11 @@ def main() -> int:
     ap.add_argument("--max-calls", type=int, default=16)
     ap.add_argument("--pace", type=float, default=1.5)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--cohort", default="docs/pilot-cohort.json")
     ap.add_argument("--out", default="data/pilot/observations/prose_mentions.json")
     args = ap.parse_args()
 
-    cohort = json.loads((REPO / "docs/pilot-cohort.json").read_text())["people"]
+    cohort = json.loads((REPO / args.cohort).read_text())["people"]
     if args.dry_run:
         print(f"would fetch and extract {len(cohort)} articles, "
               f"{len(cohort)} model calls, cap {args.max_calls}")
@@ -88,6 +89,11 @@ def main() -> int:
                 else:
                     time.sleep(4 * (attempt + 1))
         if not text:
+            # Without this the record vanishes between `attempted` and the
+            # buckets. The manifest's reconciliation caught exactly that: 22
+            # attempted, 19 succeeded, nothing else, three records gone.
+            stage.excluded += 1
+            print(f"  EMPTY {name}: no article text")
             continue
         prompt = (f"{rubric}\n\n---\n\nSchema:\n\n{schema}\n\n---\n\n"
                   f"PERSON: {name}\n\nARTICLE TEXT:\n\n{text}\n\n---\n\n"

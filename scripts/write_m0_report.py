@@ -33,6 +33,7 @@ def main() -> int:
     offset = load("data/pilot/run/offset_diagnostic.json")
     grounding = load("data/pilot/run/grounding_audit.json")
     density = load("data/pilot/run/evidence_density.json")
+    align = load("data/pilot/run/alignment_gap.json")
 
     L: list[str] = []
     w = L.append
@@ -318,6 +319,38 @@ def main() -> int:
           "nothing about the board, because every one of those dossiers still "
           "lands in a single band. Only a source that puts a SECOND observation "
           "on a person-year that already has one can widen the distribution.")
+        w("")
+
+    # ---------- alignment ----------
+    if align:
+        w("## 6e. Why joint coverage does not move")
+        w("")
+        w(f"The corpus grew from 13 observations to "
+          f"{density['observations'] if density else '?'} and joint coverage did "
+          f"not move. This is why.")
+        w("")
+        w(f"- Pairings considered (romance-verified films plus scorable episodes): "
+          f"**{align['pairings_considered']}**")
+        w(f"- With evidence on BOTH sides at any distance: "
+          f"**{align['pairings_with_evidence_on_both_sides']}**")
+        w(f"- Missing evidence on one side entirely: "
+          f"**{align['pairings_with_no_evidence_on_one_or_both_sides']}**")
+        w("")
+        w("Joint coverage if the nearby-period bound were widened:")
+        w("")
+        w("| Bound | Pairings jointly covered |")
+        w("|---|---|")
+        for b in sorted(align["jointly_covered_at_bound"], key=int)[:9]:
+            mark = " ← current" if int(b) == align["current_bound"] else ""
+            w(f"| ±{b} | {align['jointly_covered_at_bound'][b]}{mark} |")
+        w("")
+        w("Two things follow. Widening the bound from ±1 to ±2 would triple joint "
+          "coverage, from 1 to 3. And it would not matter much beyond that: the "
+          "count saturates at 6, because **22 of 30 pairings have no evidence on "
+          "one side at all**. The bound is a real cost but absence is the bigger "
+          "one.")
+        w("")
+        w(f"*{align['caveat']}*")
         w("")
 
     # ---------- romance ----------
