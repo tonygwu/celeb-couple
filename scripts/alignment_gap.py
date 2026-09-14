@@ -22,6 +22,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.llmkit.artifacts import require  # noqa: E402
+from modules.consensus.nearby import NEARBY_BOUND_YEARS  # noqa: E402
 
 
 def main() -> int:
@@ -92,7 +93,7 @@ def main() -> int:
         "pairings_with_no_evidence_on_one_or_both_sides": len(rows) - len(resolvable),
         "min_bound_histogram": {str(k): v for k, v in sorted(hist.items())},
         "jointly_covered_at_bound": cumulative,
-        "current_bound": 1,
+        "current_bound": NEARBY_BOUND_YEARS,
         "reading": (
             "A pairing needs BOTH people judged near the same year. Growing the "
             "corpus from 13 observations to 25 did not move joint coverage, "
@@ -117,11 +118,13 @@ def main() -> int:
           f"missing a side entirely: {len(rows) - len(resolvable)}")
     print("\njointly covered at each bound:")
     for b in range(0, min(args.max_bound, 10) + 1):
-        mark = "  <-- current" if b == 1 else ""
+        # Was a literal 1. The declared bound lives in one place; a display
+        # that hardcodes it labels the wrong row the day it changes.
+        mark = "  <-- current" if b == NEARBY_BOUND_YEARS else ""
         print(f"   +/-{b:2}  {cumulative[b]:3}{mark}")
     print("\nclosest unmet pairings:")
     for r in payload["pairings"][:8]:
-        if r["min_bound"] > 1:
+        if r["min_bound"] > NEARBY_BOUND_YEARS:
             print(f"   bound {r['min_bound']:2}  {r['label'][:44]:44} "
                   f"{r['a'][:16]} {r['a_years']} + {r['b'][:16]} {r['b_years']}")
     print(f"\nwrote {out}")

@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+
 from modules.consensus.nearby import NEARBY_BOUND_YEARS, resolve_period
 
 
@@ -44,3 +48,23 @@ def test_reuse_carries_the_source_period_so_one_estimate_keeps_one_identity():
     assert len({r.source_period for r in resolutions}) == 1, (
         "one source estimate, so the simulation draws it once rather than three times"
     )
+
+
+def test_the_alignment_report_takes_its_bound_from_the_constant():
+    """`"current_bound": 1` was typed into the artifact the M0 report reads,
+    and two console labels hardcoded it as well. The declared bound lives in
+    one place; anything that repeats it labels the wrong row the day it
+    changes, and the report would state a bound the pipeline did not use."""
+    src = (Path(__file__).resolve().parent.parent
+           / "scripts/alignment_gap.py").read_text()
+    assert '"current_bound": 1' not in src
+    assert "NEARBY_BOUND_YEARS" in src
+
+
+def test_the_live_artifact_agrees_with_the_constant():
+    import json
+    f = (Path(__file__).resolve().parent.parent
+         / "data/pilot/run/alignment_gap.json")
+    if not f.exists():
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+    assert json.loads(f.read_text())["current_bound"] == NEARBY_BOUND_YEARS
