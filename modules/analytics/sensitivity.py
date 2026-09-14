@@ -94,6 +94,18 @@ class SensitivityResult:
         }
 
 
+def _required_estimate_ids(pairings: list[Pairing]) -> set[str]:
+    """Every estimate id the pairings actually read a value through."""
+    need: set[str] = set()
+    for k in pairings:
+        for p in k.periods:
+            if p.focal is not None and p.focal_estimate_id:
+                need.add(p.focal_estimate_id)
+            if p.partner is not None and p.partner_estimate_id:
+                need.add(p.partner_estimate_id)
+    return need
+
+
 def _redraw(pairings: list[Pairing], drawn: dict[str, float]) -> list[Pairing]:
     """Rebuild pairings substituting drawn values BY ESTIMATE ID.
 
@@ -139,6 +151,20 @@ def simulate(
     draw that silently stopped being shared would break that identity, and a
     broken identity is the failure this whole design exists to prevent.
     """
+    missing = sorted(_required_estimate_ids(pairings) - set(specs))
+    if missing:
+        raise ValueError(
+            "no EstimateSpec for "
+            + ", ".join(missing)
+            + ". Every estimate a pairing reads must declare how far it may "
+            "move. Without a spec the draw falls back to the unperturbed "
+            "value, which silently NARROWS the interval -- an empty spec map "
+            "produced a zero-width one, and a zero-width sensitivity interval "
+            "reads as certainty. An estimate that genuinely should not move "
+            "takes a spec with sd=0.0, so the choice is visible here rather "
+            "than implied by an omission."
+        )
+
     rng = random.Random(seed)
     point_total = float(paw_total(pairings))
     pr = paw_rate(pairings)

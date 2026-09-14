@@ -106,3 +106,62 @@ def test_an_unscored_pairing_contributes_nothing_under_perturbation():
     r = simulate(ks, SPECS, draws=300)
     assert r.point_total == 0.0
     assert r.total_low == r.total_high == 0.0, "no evidence, so nothing to perturb"
+
+
+# -- a missing spec must not read as certainty -------------------------------
+
+def test_an_estimate_with_no_spec_is_refused():
+    """Measured: _redraw fell back to the ORIGINAL value for any estimate id
+    with no spec, so a forgotten spec silently narrowed the interval and an
+    empty spec map produced a ZERO-WIDTH one:
+
+        both specs     interval width 16.679
+        se_b MISSING   interval width 11.544
+        no specs       interval width  0.000
+
+    A zero-width sensitivity interval reads as "this total is certain". That is
+    the exact accept-and-guess failure: a missing input became a confident
+    answer with nothing raised.
+
+    An estimate that genuinely should not move is expressed by a spec with
+    sd=0.0, so the choice is visible in the caller.
+    """
+    import pytest
+    ks = [_pair("k", "a", "b", [_exp("2016", F(1), 70.0, 85.0, "se_a", "se_b")])]
+    with pytest.raises(ValueError, match="se_b"):
+        simulate(ks, {"se_a": EstimateSpec("se_a", 70.0, 3.0)}, draws=10)
+
+
+def test_an_empty_spec_map_is_refused_rather_than_returning_zero_width():
+    import pytest
+    ks = [_pair("k", "a", "b", [_exp("2016", F(1), 70.0, 85.0, "se_a", "se_b")])]
+    with pytest.raises(ValueError):
+        simulate(ks, {}, draws=10)
+
+
+def test_an_explicit_zero_sd_is_allowed():
+    """Not moving is a legitimate choice. It just has to be stated."""
+    ks = [_pair("k", "a", "b", [_exp("2016", F(1), 70.0, 85.0, "se_a", "se_b")])]
+    r = simulate(ks, {"se_a": EstimateSpec("se_a", 70.0, 0.0),
+                      "se_b": EstimateSpec("se_b", 85.0, 0.0)}, draws=50)
+    assert r.total_high - r.total_low == 0.0
+
+
+def test_an_unscored_period_needs_no_spec():
+    """A period with no estimate on either side references no estimate id, so
+    there is nothing to require a spec for."""
+    ks = [_pair("k", "a", "b", [_exp("2016", F(1, 2), 70.0, 85.0, "se_a", "se_b"),
+                                _exp("2017", F(1, 2), None, None, None, None)])]
+    r = simulate(ks, {"se_a": EstimateSpec("se_a", 70.0, 2.0),
+                      "se_b": EstimateSpec("se_b", 85.0, 2.0)}, draws=50)
+    assert r.total_high > r.total_low
+
+
+def test_the_error_names_every_missing_estimate_not_just_the_first():
+    import pytest
+    ks = [_pair("k", "a", "b", [_exp("2016", F(1), 70.0, 85.0, "se_a", "se_b")])]
+    with pytest.raises(ValueError) as e:
+        simulate(ks, {}, draws=10)
+    assert "se_a" in str(e.value) and "se_b" in str(e.value), (
+        "naming one at a time turns a two-line fix into two runs"
+    )
