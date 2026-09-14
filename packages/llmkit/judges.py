@@ -38,6 +38,7 @@ __all__ = [
     "FakeJudge",
     "ClaudeJudge",
     "GeminiJudge",
+    "CodexJudge",
     "assert_subscription_only",
     "JudgeError",
 ]
@@ -256,5 +257,91 @@ class GeminiJudge:
                 "input_tokens": usage.get("input_tokens"),
                 "output_tokens": usage.get("output_tokens"),
                 "thinking_tokens": usage.get("thinking_tokens"),
+            },
+        )
+
+
+class CodexJudge:
+    """Drives `codex exec --json`.
+
+    Identity caveat, recorded rather than papered over: the JSONL event stream
+    names no model anywhere, so ``served_model`` can only echo the request and
+    ``served_model_verified`` is false.  The one identity-adjacent assertion
+    available is that a reasoning effort actually took effect, which shows up as
+    a non-zero ``reasoning_output_tokens`` in the turn usage.  When effort was
+    requested and that count is zero, the request was not served as asked.
+    """
+
+    def __init__(self, name: str, model: str, binary: str = "codex",
+                 effort: str = "high") -> None:
+        self.name = name
+        self.model = model
+        self.binary = binary
+        self.effort = effort
+
+    def __call__(self, prompt: str, timeout: int = 900) -> JudgeResult:
+        assert_subscription_only()
+        cmd = [
+            self.binary, "exec", "--json",
+            "-m", self.model,
+            "-c", f'model_reasoning_effort="{self.effort}"',
+            "-s", "read-only",
+            "--skip-git-repo-check",
+            "--ephemeral",
+            "--ignore-user-config",   # no MCP servers, no project rules
+            prompt,
+        ]
+        with tempfile.TemporaryDirectory(prefix="celeb-judge-") as jail:
+            try:
+                proc = subprocess.run(
+                    cmd, cwd=jail, capture_output=True, text=True,
+                    timeout=timeout, stdin=subprocess.DEVNULL,
+                )
+            except subprocess.TimeoutExpired as exc:
+                raise JudgeError(E_TIMEOUT, f"{self.name} exceeded {timeout}s") from exc
+
+        message, usage = "", {}
+        for line in proc.stdout.splitlines():
+            line = line.strip()
+            if not line.startswith("{"):
+                continue
+            try:
+                ev = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if ev.get("type") == "item.completed":
+                item = ev.get("item") or {}
+                if item.get("type") == "agent_message":
+                    message = item.get("text", "") or message
+            elif ev.get("type") == "turn.completed":
+                usage = ev.get("usage") or {}
+
+        if proc.returncode != 0 and not message:
+            raise JudgeError(
+                classify_cli_failure(proc.returncode, proc.stdout, proc.stderr),
+                f"{self.name} rc={proc.returncode} stderr={proc.stderr[:400]!r}",
+            )
+        if not message:
+            raise JudgeError(E_EMPTY, f"{self.name} produced no agent message")
+
+        reasoning = usage.get("reasoning_output_tokens")
+        if self.effort in ("high", "max") and not reasoning:
+            raise JudgeError(
+                E_MODEL_MISMATCH,
+                f"{self.name}: effort {self.effort!r} was requested but the turn "
+                f"reports reasoning_output_tokens={reasoning!r}, so it did not take effect",
+            )
+
+        return JudgeResult(
+            text=message,
+            telemetry={
+                "harness": "codex-cli",
+                "requested_model": self.model,
+                "served_model": self.model,
+                "served_model_verified": False,   # the stream names no model
+                "effort": self.effort,
+                "input_tokens": usage.get("input_tokens"),
+                "output_tokens": usage.get("output_tokens"),
+                "reasoning_output_tokens": reasoning,
             },
         )
