@@ -202,7 +202,7 @@ dossiers the jointly covered pairings need, which is about nine rather than the
 ## What has been measured
 
 `docs/M0-REPORT.md`, generated from `data/pilot/`. Read it before proposing
-anything. The four findings that should shape any next step:
+anything. The findings that should shape any next step:
 
 1. **The rubric is not the problem.** On synthetic dossiers it spans 63 to 92
    and produces ten distinct values.
@@ -221,6 +221,20 @@ anything. The four findings that should shape any next step:
    halved it to 1.2, which several documents published. Every one of the four
    ranked dossiers moved between repeats; both award dossiers returned the
    same number eight times out of eight.
+
+5. **The shape effect is confirmed under controlled conditions.** Stress case
+   S2 renders ONE substantive judgment as an award, as a ranked placement and
+   as prose. The estimates spread 4 points — above the 2.22 floor — so format
+   moves the number with the substance held identical by construction. That is
+   an independent route to finding 3, and it is the strongest form of the
+   argument because nothing about the person varies.
+6. **Every real estimate came from ONE judge family.** The plan decided J = 2
+   so a one-family idiosyncrasy could be told from a property of the rubric.
+   Codex reached 0% of its 7-day window mid-run, so all 39 person-periods were
+   scored by `fable` alone and the `astra` column in the report is empty for
+   that reason, not because the judges agreed. Both families DID run on the
+   stress corpus. Re-scoring with codex when its quota returns is the single
+   cheapest thing that would strengthen every conclusion above.
 
 Do not treat a bigger confounded number as progress over a smaller comparable
 one.
