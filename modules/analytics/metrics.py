@@ -87,6 +87,30 @@ class Pairing:
     periods: tuple[PeriodExposure, ...]
     w: Fraction = Fraction(1)
 
+    def __post_init__(self) -> None:
+        """The temporal shares must partition the pairing exactly.
+
+        `q` is a SHARE of the pairing's exposure, so the shares across all its
+        periods sum to 1 by definition. Nothing checked it. A pairing whose
+        shares summed to 1.5 would give `covered_share` 1.5 and
+        `scored_weight` w*1.5, silently overweighting it in every total -- and
+        `covered_share` is what the qualification threshold compares against,
+        so an unqualified pairing could pass on arithmetic that cannot be right.
+
+        Empty is allowed: a pairing with no eligible periods is a real state
+        and is reported as unscored.
+        """
+        if not self.periods:
+            return
+        total = sum((p.q for p in self.periods), Fraction(0))
+        if total != 1:
+            raise ValueError(
+                f"pairing {self.pairing_id!r}: temporal shares sum to {total}, "
+                f"not 1. q is a share of this pairing's exposure, so the "
+                f"periods must partition it exactly. Periods: "
+                + ", ".join(f"{p.period}={p.q}" for p in self.periods)
+            )
+
     def scored_periods(self) -> tuple[PeriodExposure, ...]:
         return tuple(p for p in self.periods if p.both_scored)
 

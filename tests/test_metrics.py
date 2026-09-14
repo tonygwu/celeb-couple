@@ -169,7 +169,14 @@ def test_adding_unrelated_people_does_not_change_an_existing_score():
 def test_partner_war_equals_partner_mass_minus_baseline_times_exposure():
     ks = [
         _pair("k1", "a", "b", [_p("2016", F(1), 70.0, 85.0)]),
-        _pair("k2", "a", "c", [_p("2018", F(1, 2), 72.0, 91.0)]),
+        # Partial coverage is expressed by an UNSCORED period, not by shares
+        # that fail to add up. q is a share of this pairing's exposure, so
+        # omitting the uncovered half would make the shares sum to 1/2 and
+        # `covered_share` would still read 1/2 -- the same answer by accident.
+        # The pairing now says what it means: two half-year periods, one of
+        # which has no estimate on either side.
+        _pair("k2", "a", "c", [_p("2018", F(1, 2), 72.0, 91.0),
+                               _p("2019", F(1, 2), None, None)]),
     ]
     B = F(80)
     mass = F(0)
@@ -261,3 +268,53 @@ def test_offset_reverses_sign_in_the_mirrored_view():
         [apply_cross_gender_offset(k, delta).mirror() for k in ks]
     )
     assert up == down == delta * scored_exposure(ks)
+
+
+# -- the temporal-share partition -------------------------------------------
+
+def test_shares_that_do_not_partition_the_pairing_are_refused():
+    """`q` is a SHARE of the pairing's exposure, so it sums to 1 by definition.
+    Nothing checked it. A pairing whose shares summed to 1.5 would give
+    covered_share 1.5 and scored_weight w*1.5, overweighting it silently in
+    every total -- and covered_share is what MIN_JOINT_COVERAGE compares
+    against, so an unqualified pairing could pass on arithmetic that cannot be
+    right."""
+    import pytest
+    with pytest.raises(ValueError, match="sum to 3/2"):
+        _pair("bad", "a", "b",
+              [_p("2016", F(1), 70.0, 85.0), _p("2017", F(1, 2), 70.0, 85.0)])
+
+
+def test_the_error_names_the_periods_and_their_shares():
+    import pytest
+    with pytest.raises(ValueError) as e:
+        _pair("bad", "a", "b", [_p("2016", F(1, 3), 70.0, 85.0)])
+    msg = str(e.value)
+    assert "'bad'" in msg and "2016=1/3" in msg, (
+        "an error that does not say which period is wrong leaves the reader "
+        "to diff two fraction lists by hand"
+    )
+
+
+def test_a_pairing_with_no_eligible_periods_is_allowed():
+    """No eligible period is a real state, reported as unscored, not an error."""
+    k = _pair("empty", "a", "b", [])
+    assert covered_share(k) == 0
+    assert gap(k) is None
+
+
+def test_partial_coverage_is_expressed_by_an_unscored_period():
+    """The supported way to say "half of this pairing has no estimates": list
+    the period with None on both sides. The shares still partition."""
+    k = _pair("half", "a", "b",
+              [_p("2016", F(1, 2), 70.0, 85.0), _p("2017", F(1, 2), None, None)])
+    assert covered_share(k) == F(1, 2)
+    assert gap(k) == F(15)
+
+
+def test_mirroring_preserves_the_partition():
+    k = _pair("k", "a", "b",
+              [_p("2016", F(1, 2), 70.0, 85.0), _p("2017", F(1, 2), None, None)])
+    m = k.mirror()
+    assert sum((p.q for p in m.periods), F(0)) == 1
+    assert gap(m) == -gap(k)
