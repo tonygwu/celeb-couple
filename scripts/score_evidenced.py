@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Score every person-period that actually has evidence, then work the pairings."""
 from __future__ import annotations
-import json, sys
+import argparse, json, os, sys
 from datetime import datetime, timezone
 from fractions import Fraction
 from pathlib import Path
@@ -19,6 +19,22 @@ from modules.analytics.metrics import (Pairing, PeriodExposure,             # no
 from modules.consensus.dossier import build_dossier                         # noqa: E402
 from modules.consensus.nearby import resolve_period                         # noqa: E402
 from modules.consensus.score import score_dossier                           # noqa: E402
+
+# Parse arguments BEFORE anything else. Without argparse this script treated
+# `--help` as a normal invocation and began a scoring run, which spends model
+# quota to answer a question about its own usage.
+_ap = argparse.ArgumentParser(
+    description=("Score every person-period that has evidence, then work the "
+                 "jointly covered pairings. SPENDS MODEL QUOTA."))
+_ap.add_argument("--judges", default=os.environ.get("CELEB_JUDGES", "fable,astra"),
+                 help="comma-separated; env CELEB_JUDGES")
+_ap.add_argument("--account", default=os.environ.get("CELEB_ACCOUNT",
+                                                     "/Users/tonygwu/.claude-e"),
+                 help="CLAUDE_CONFIG_DIR for the fable judge; env CELEB_ACCOUNT")
+_ap.add_argument("--max-calls", type=int,
+                 default=int(os.environ.get("CELEB_MAX_CALLS", "60")),
+                 help="per-judge cap; the run halts at it; env CELEB_MAX_CALLS")
+_args = _ap.parse_args()
 
 RUBRIC, SCHEMA = REPO / "rubrics/standing/RUBRIC.md", REPO / "rubrics/standing/estimate.schema.json"
 obs_blob = json.loads((REPO / "data/pilot/observations/observations.json").read_text())
@@ -52,15 +68,14 @@ for o in obs_blob["observations"]:
 
 contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
 rt, st = RUBRIC.read_text(), SCHEMA.read_text()
-import os
-_JUDGES = os.environ.get("CELEB_JUDGES", "fable,astra").split(",")
+_JUDGES = [j.strip() for j in _args.judges.split(",") if j.strip()]
 judges = []
 if "fable" in _JUDGES:
     judges.append(("fable", ClaudeJudge("fable", "claude-fable-5-1",
-                                        config_dir=os.environ.get("CELEB_ACCOUNT", "/Users/tonygwu/.claude-e"))))
+                                        config_dir=_args.account)))
 if "astra" in _JUDGES:
     judges.append(("astra", CodexJudge("astra", "gpt-6-astra", effort="high")))
-_CAP = int(os.environ.get("CELEB_MAX_CALLS", "60"))
+_CAP = _args.max_calls
 budgets = {"fable": Budget(max_calls=_CAP), "astra": Budget(max_calls=_CAP)}
 out = REPO / "data/pilot/run"; (out / "raw").mkdir(parents=True, exist_ok=True)
 

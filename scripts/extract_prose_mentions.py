@@ -47,7 +47,7 @@ def _norm(s: str) -> str:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description='Extract dated list memberships from biographical prose. SPENDS MODEL QUOTA.')
     ap.add_argument("--account", default="/Users/tonygwu/.claude-e")
     ap.add_argument("--max-calls", type=int, default=16)
     ap.add_argument("--pace", type=float, default=1.5)

@@ -66,7 +66,7 @@ def _rebuild(blob):
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description='Repeat-score unchanged dossiers to measure rater spread. SPENDS MODEL QUOTA.')
     ap.add_argument("--repeats", type=int, default=4)
     ap.add_argument("--account", default="/Users/tonygwu/.claude-e")
     ap.add_argument("--max-calls-per-judge", type=int, default=12)

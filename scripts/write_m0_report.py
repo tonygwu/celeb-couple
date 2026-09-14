@@ -38,6 +38,11 @@ def _fingerprint() -> str:
 
 
 def main() -> int:
+    import argparse
+    argparse.ArgumentParser(
+        description=("Render docs/M0-REPORT.md from the run artifacts. Reads "
+                     "only; spends no model quota.")).parse_args()
+
     cohort = load("docs/pilot-cohort.json")
     records = load("data/pilot/records/relationship_candidates.json")
     episodes = load("data/pilot/records/episodes.json")

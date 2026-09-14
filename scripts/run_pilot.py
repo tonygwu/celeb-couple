@@ -86,7 +86,7 @@ def _pick_periods(years: list[int]) -> list[str]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description='Bounded pairing selection and coverage for the pilot. SPENDS MODEL QUOTA.')
     ap.add_argument("--judges", default="fable,astra")
     ap.add_argument("--fable-account", default="/Users/tonygwu/.claude-e")
     ap.add_argument("--max-fable", type=int, default=40)

@@ -20,7 +20,7 @@ SCHEMA = REPO / "rubrics/romance/romance.schema.json"
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description='Classify whether each co-starring pair is a romance in the film. SPENDS MODEL QUOTA.')
     ap.add_argument("--account", default="/Users/tonygwu/.claude-e")
     ap.add_argument("--model", default="claude-fable-5-1")
     ap.add_argument("--max-calls", type=int, default=25)

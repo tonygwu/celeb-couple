@@ -32,7 +32,7 @@ SCHEMA = REPO / "rubrics/standing/estimate.schema.json"
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description='Run the measurement stress cases against the judges. SPENDS MODEL QUOTA.')
     ap.add_argument("--out", required=True)
     ap.add_argument("--fable-account", default="/Users/tonygwu/.claude-e")
     ap.add_argument("--fable-model", default="claude-fable-5-1")

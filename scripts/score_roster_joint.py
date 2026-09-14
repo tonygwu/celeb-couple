@@ -36,7 +36,7 @@ SCHEMA = REPO / "rubrics/standing/estimate.schema.json"
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description='Score only what the roster-scale joint pairings need. SPENDS MODEL QUOTA.')
     ap.add_argument("--account", default="/Users/tonygwu/.claude-c")
     ap.add_argument("--max-calls", type=int, default=20)
     ap.add_argument("--out", default="data/roster100/run/joint_scores.json")
