@@ -678,3 +678,23 @@ def test_the_assessment_does_not_omit_the_stress_case_that_failed():
     assert "S2_format_equivalence" in tail, (
         "the failing case must appear in the section that summarises them"
     )
+
+
+def test_the_report_carries_no_stale_section_cross_references():
+    """Sections are numbered by render order now. A hardcoded "section 6b"
+    survived that change and pointed at a section that no longer exists — rater
+    noise is section 13.
+
+    Cross-references are by NAME for that reason, so renumbering cannot break
+    them. This fails on any numeric reference that does not match a heading.
+    """
+    import re
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "The answer first" not in text:
+        pytest.skip("report not generated in this clone")
+
+    headings = {int(m) for m in re.findall(r"^## (\d+)\. ", text, re.M)}
+    refs = re.findall(r"[Ss]ection (\d+)([a-z-]*)", text)
+    bad = [f"section {n}{suffix}" for n, suffix in refs
+           if suffix or int(n) not in headings]
+    assert not bad, f"cross-references that do not resolve: {bad}"

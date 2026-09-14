@@ -379,7 +379,7 @@ A constant cross-gender offset shifts every PAW rate by exactly delta, so rate r
 
 3 person-periods carry a byte-identical dossier in both runs under the same contract id. 1 returned the same estimate and 2 did not, with a largest move of 2.0 points. A move here is pure run-to-run variance: the evidence, the rubric and the judge family were identical.
 
-This is independent of section 6b and agrees with it. The repeats there were deliberate re-invocations inside one run; these two runs did not know about each other. Both say the award shape holds still and the ranked shape does not.
+This is independent of the rater-noise section and agrees with it. The repeats there were deliberate re-invocations inside one run; these two runs did not know about each other. Both say the award shape holds still and the ranked shape does not.
 
 ## 17. The bottom line, stated plainly
 

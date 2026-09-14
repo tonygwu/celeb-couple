@@ -1052,7 +1052,11 @@ def main() -> int:
         w("")
         w(xrun["reading"])
         w("")
-        w("This is independent of section 6b and agrees with it. The repeats "
+        # Named, not numbered. Sections are numbered by render order now, so a
+        # hardcoded "section 6b" survived the renumbering and pointed at a
+        # section that no longer exists -- rater noise is 13.
+        w("This is independent of the rater-noise section and agrees with it. "
+          "The repeats "
           "there were deliberate re-invocations inside one run; these two runs "
           "did not know about each other. Both say the award shape holds still "
           "and the ranked shape does not.")
