@@ -74,6 +74,54 @@ git config user.email 446441+tonygwu@users.noreply.github.com
 This is set so the history never needs an author rewrite if the repository is
 made public later.
 
+## Setup, in a fresh clone
+
+```sh
+uv venv --python 3.12 .venv
+uv pip install --python .venv/bin/python -r requirements.txt
+.venv/bin/python -m pytest tests -q      # 134 tests, no model quota spent
+```
+
+The suite is offline and deterministic. **Treat any non-zero exit as failure,
+including 5**, which pytest returns when it collects no tests at all. Never
+write `pytest ...; echo $?` — the `;` reports the status of `echo`.
+
+## The tools, and how to invoke them
+
+Run every one from a clone root with `.venv/bin/python`. The first four are
+read-only against Wikidata and Wikipedia. The last three spend model quota.
+
+| Command | What it does | Spends quota |
+|---|---|---|
+| `scripts/fetch_records.py` | relationship candidates + birth dates for the cohort | no |
+| `scripts/build_episodes.py` | merges progressions, flags defects, applies the adult window | no |
+| `scripts/fetch_observations.py` | award observations from Wikipedia tables | no |
+| `scripts/write_m0_report.py` | renders `docs/M0-REPORT.md` from the JSON artifacts | no |
+| `scripts/run_stress.py --out data/pilot/stress` | the eight measurement stress cases | **yes** |
+| `scripts/score_evidenced.py` | scores person-periods that have evidence | **yes** |
+| `scripts/run_pilot.py` | bounded pairing selection and coverage | **yes** |
+
+Quota rules for the three that spend:
+
+- **Subscription only. API billing is asserted off at start-up** — a visible
+  `ANTHROPIC_API_KEY` aborts the run.
+- Judges are `fable` (Claude, via `claude -p`) and `astra` (via `codex exec`).
+  **Gemini via `agy` does not work headlessly**: it reaches for a shell tool,
+  headless mode auto-denies it, and the turn returns empty. Do not fix that by
+  granting the permission — a judge with filesystem access is not isolated from
+  the corpus it is being kept away from.
+- Check `quotapick status` first. Fable headroom moves between accounts; on
+  2026-09-14 only `~/.claude-e` had both 5-hour and weekly room.
+- Every runner takes `--max-calls` style caps and **halts at the cap**, reporting
+  the halt and the work it did not reach.
+
+## What M0 measured
+
+`docs/M0-REPORT.md`, generated from `data/pilot/`. Short version: the rubric
+reads substance rather than counting documents, but the permitted sources
+yielded 7 observations for 14 people, and award-shaped evidence compresses every
+winner into a half-point band. Read it before proposing M1.
+
 ## New shared tooling
 
 A new tool is not done until it is committed **and** registered in this file
