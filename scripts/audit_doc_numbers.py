@@ -160,6 +160,14 @@ RULES: tuple[Rule, ...] = (
         why="how much rank-shaped evidence the pilot corpus holds",
     ),
     Rule(
+        name="partners_total",
+        artifact="data/pilot/records/partner_eligibility.json",
+        extract=lambda d: d["partners"],
+        render=str,
+        pattern=r"Of (\d+)\s*partners",
+        why="the denominator for how much of the board is reachable",
+    ),
+    Rule(
         name="ranked_lsd",
         artifact="data/pilot/run/rater_noise.json",
         extract=lambda d: (d["headline"]["by_shape"]["ranked"]

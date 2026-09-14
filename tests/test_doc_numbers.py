@@ -100,6 +100,7 @@ def test_every_rule_matches_the_text_it_claims_to_match():
         "female_ranked_observations": "Women hold 99 ranked observations",
         "real_distinct_values": "It now produces 99 across a range of 30.0",
         "ranked_lsd": "against an LSD of 99.9",
+        "partners_total": "Of 99 partners, 7 are people the plan forbids rating",
         "roster_observations": "Corpus: 99 observations over 49 of 100 roster people",
         "roster_people_with_evidence": "131 observations over 99 of 100 roster people",
         "scorable_episodes": "and 99 scorable relationship episodes",

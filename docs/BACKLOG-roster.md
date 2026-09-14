@@ -37,15 +37,15 @@ board mixing pools without saying so would be comparing different populations.
 version of this section said only ordered lists change the product. That was
 half right, and the half it missed matters more.
 
-- **Density, not just shape.** Every real dossier carried exactly one
+- **Density, not just shape.** Every real dossier once carried exactly one
   observation, which is why the corpus produced two distinct values while the
-  synthetic one produced ten. Adding prose mentions took the real corpus to six
-  distinct values, and the single person-period carrying two publishers is the
-  only one that scored above the award ceiling.
+  synthetic one produced ten. Adding prose mentions took the real corpus to
+  twelve distinct values, and two person-periods now carry more than one
+  publisher — still two out of thirty-nine.
 - **Shape confounds the gap.** Evidence type alone explains 31% of the
   estimate (omega-squared, unbiased; eta-squared reads 39%). Three of four jointly covered pairings pit an award against a list
   placement, so their gaps are substantially about publication format.
-- **The reachable ceiling is lower than the pairing count suggests.** Of 22
+- **The reachable ceiling is lower than the pairing count suggests.** Of 23
   partners, 7 are people the plan forbids rating at all.
 
 So the requirement is sharper than "find ordered lists". It is: **find sources
