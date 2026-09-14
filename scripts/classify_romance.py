@@ -67,8 +67,15 @@ def main() -> int:
 
         try:
             cast = fetch_cast(page)
-        except Exception:
-            cast = {}
+            cast_error = None
+        except Exception as exc:
+            # A silent {} here reverts the classifier to the exact condition
+            # that produced 15 of 20 `cannot_tell` earlier: a prompt naming
+            # ACTORS against a plot that names CHARACTERS. The verdicts then
+            # look like a data problem rather than a fetch problem, which is
+            # how that took a full investigation to diagnose the first time.
+            cast, cast_error = {}, f"{type(exc).__name__}: {exc}"
+            print(f"  CAST FAIL {label[:56]:56} {exc}")
         prompt = build_prompt(rubric, schema, c["title"], c["male"], c["female"],
                               plot, cast)
         try:
@@ -97,6 +104,7 @@ def main() -> int:
         stage.succeeded += 1
         results.append({**c, "wikipedia_page": page,
                         "cast_mapped": bool(cast.get(c["male"]) and cast.get(c["female"])),
+                        "cast_error": cast_error,
                         **v.as_dict()})
         mark = "ROMANCE" if v.qualifies else v.classification
         mapped = "cast+" if cast.get(c["male"]) and cast.get(c["female"]) else "cast?"
@@ -108,6 +116,10 @@ def main() -> int:
         "candidates": len(cands), "classified": stage.succeeded,
         "qualifying_romances": len(qualifying),
         "cast_mapped": sum(1 for r in results if r.get("cast_mapped")),
+        # A cast the fetch FAILED to retrieve is a different thing from a film
+        # whose article has no cast section. Both leave the prompt without
+        # characters; only one is fixable by retrying.
+        "cast_fetch_failed": sum(1 for r in results if r.get("cast_error")),
         "by_classification": {
             k: sum(1 for r in results if r.get("classification") == k)
             for k in sorted({r.get("classification") for r in results if r.get("classification")})

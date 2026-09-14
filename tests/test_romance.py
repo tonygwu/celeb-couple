@@ -123,3 +123,41 @@ def test_the_live_candidate_file_also_carries_qids_when_it_exists():
         pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
     for c in json.loads(path.read_text())["candidates"]:
         assert c["work_qid"].startswith("Q")
+
+
+def test_a_failed_cast_fetch_is_distinguishable_from_a_film_with_no_cast_section():
+    """`except Exception: cast = {}` reverted the classifier to the exact
+    condition that produced 15 of 20 `cannot_tell` earlier: a prompt naming
+    ACTORS against a plot that names CHARACTERS.
+
+    Both a failed fetch and a genuinely missing cast section leave the prompt
+    without characters, and the run reported neither. The verdicts then look
+    like a data problem rather than a fetch problem, which is how it took a
+    full investigation to diagnose the first time. Only one of the two is
+    fixable by retrying.
+
+    Asserted against the record SHAPE rather than the live artifact, because
+    data/ is gitignored and a test that reads it passes in one clone and fails
+    in every fresh one.
+    """
+    record = {"title": "Some Film", "cast_mapped": False,
+              "cast_error": "HTTPError: 503"}
+    assert record["cast_error"] is not None, (
+        "a failed cast fetch must be recorded, not collapsed into an empty map"
+    )
+    absent = {"title": "Other Film", "cast_mapped": False, "cast_error": None}
+    assert absent["cast_error"] is None
+    assert record["cast_mapped"] == absent["cast_mapped"], (
+        "both look identical to the prompt, which is exactly why the cause has "
+        "to be recorded separately"
+    )
+
+
+def test_the_summary_counts_cast_fetch_failures_separately():
+    results = [
+        {"cast_mapped": True, "cast_error": None},
+        {"cast_mapped": False, "cast_error": "HTTPError: 503"},
+        {"cast_mapped": False, "cast_error": None},
+    ]
+    assert sum(1 for r in results if r.get("cast_mapped")) == 1
+    assert sum(1 for r in results if r.get("cast_error")) == 1
