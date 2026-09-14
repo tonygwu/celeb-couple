@@ -76,6 +76,22 @@ def main() -> int:
     episodes = require(REPO, args.episodes)
     joint_path = REPO / "data/pilot/run/joint_with_nearby.json"
     joint = json.loads(joint_path.read_text()) if joint_path.exists() else None
+    # Optional. The sheet used to give a reviewer two Wikidata links and leave
+    # the looking-up to them, for all 31 rows. Where corroboration exists it is
+    # shown inline, which is the plan's "reduce the workload by the scope caps,
+    # never by relaxing the factual standard": less looking-up, the same
+    # judging.
+    corr_path = REPO / "data/pilot/records/relationship_corroboration.json"
+    # Keyed by (episode_id, subject, partner), not by episode_id alone. Two
+    # episodes currently SHARE an id -- Ben Affleck + Ana de Armas is recorded
+    # from both sides with identical dates -- so an episode_id dict silently
+    # dropped a row and the header read "22 of 30" over 31 episodes. Losing a
+    # row from a review sheet is the quiet wrong answer this project exists to
+    # avoid. The duplicate itself is filed in docs/BACKLOG.md.
+    corr = {}
+    if corr_path.exists():
+        for c in json.loads(corr_path.read_text())["rows"]:
+            corr[(c["episode_id"], c["subject"], c["partner"])] = c
 
     rows, _ = build(episodes, joint)
     n_lb = sum(1 for r in rows if r["load_bearing"])
@@ -94,6 +110,17 @@ def main() -> int:
          f"**{unreferenced}** carry no "
          f"reference on the Wikidata statement at all — those are the ones most "
          f"likely to be wrong, and they are marked.", ""]
+    if corr:
+        n_conf = sum(1 for c in corr.values()
+                     if c["verdict"] == "prose_confirms_a_stored_year")
+        n_none = sum(1 for c in corr.values() if c["verdict"] == "not_mentioned")
+        L += [f"Each claim also carries what the English Wikipedia articles "
+              f"say about it, pulled from both people's articles. "
+              f"**{n_conf} of {len(corr)}** are corroborated by prose naming a "
+              f"year this project stored. **{n_none}** are mentioned in "
+              f"neither article. Wikidata statements and article prose are "
+              f"edited by different people, so agreement is worth something — "
+              f"but the excerpt is evidence for you, not a verdict.", ""]
     if n_lb:
         L += [f"**Read the first {n_lb} first.** Everything the report says "
               f"about real-life pairings rests on "
@@ -125,6 +152,23 @@ def main() -> int:
             L += ["- defects: " + "; ".join(
                 f"{d['kind']} ({d['detail']})" if isinstance(d, dict) else str(d)
                 for d in r["defects"])]
+        c = corr.get((r["episode_id"], r["subject"], r["partner"]))
+        if c:
+            L += ["", f"**What Wikipedia says** (`{c['verdict']}`; prose years "
+                      f"{c['years_in_prose'] or 'none found'}):"]
+            if c["excerpts"]:
+                for e in c["excerpts"]:
+                    L += [f"> {e['text']}", f">", f"> — *{e['from_article']}*, "
+                          f"matched on {e['matched_on']}", ""]
+            else:
+                L += ["", "> Neither article names the other person at all. "
+                      "That is the weakest kind of claim in this sheet and "
+                      "deserves the closest look.", ""]
+            if c["verdict"] == "prose_names_other_years":
+                L += ["*The prose names no year this project stored. That is "
+                      "usually innocent — a sentence about a partner often "
+                      "carries a year for another reason — so read the "
+                      "excerpt rather than the label.*", ""]
         L += ["",
               "**Did this relationship happen, over these dates?**  "
               "[ ] yes  [ ] no  [ ] dates wrong — notes:", "", "---", ""]

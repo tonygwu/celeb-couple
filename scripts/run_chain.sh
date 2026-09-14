@@ -49,6 +49,9 @@ if [[ "$MODE" == "free" || "$MODE" == "all" ]]; then
   # This is the only stage that checks the observations against the live pages
   # they were extracted from; everything downstream takes them on trust.
   run scripts/verify_observations.py
+  # Needs episodes.json. Feeds the review sheet in the reports pass, so it has
+  # to run before it rather than beside it.
+  run scripts/corroborate_relationships.py
 fi
 
 if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then

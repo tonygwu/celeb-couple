@@ -72,6 +72,32 @@ fired on a downstream number. Neither would have surfaced on its own.
   English Wikipedia sitelinks naming them Angelina Jolie and Tom Holland, which
   is a sourced name rather than a guess, so that is the fallback. A person with
   neither stays unresolved and their episode stays excluded.
+- **The same relationship enters the episode list twice, once from each
+  side, and two episodes SHARE an id.** Found 2026-09-14 by
+  `corroborate_relationships.py`, whose output keyed by `episode_id` silently
+  lost a row and reported "22 of 30" over 31 episodes.
+
+  Both people being in the cohort means Wikidata's symmetric statement is read
+  from both items. Ben Affleck + Ana de Armas produces two rows with identical
+  dates and therefore the IDENTICAL id `ep_6241261f5c07`; Ben Affleck +
+  Jennifer Garner produces two rows with different ids because the two items
+  disagree about the start (`2004-10` on Garner's, `2005-06-29` on Affleck's,
+  and only Garner's side carries the unmarried_partner stage).
+
+  `packages/ids/keys.py` states the rule this breaks: a pair key is
+  order-independent "or the same couple enters the corpus twice and the
+  mirrored-gap invariant breaks".
+
+  **No published number is affected today.** `jointly_covered` and
+  `scored_pairings` carry no duplicates, because neither pairing is jointly
+  covered. What IS wrong is the episode count, which says 31 for 29 distinct
+  relationships, and any consumer keyed by `episode_id`.
+
+  The fix is to keep one episode per pair key and record the other direction
+  rather than discard it, because the Affleck/Garner disagreement is a real
+  disagreement between two sources and hiding it would be worse than the
+  duplicate. **Difficulty: medium.**
+
 - **One Wikidata episode has an end date before its start date.** Flagged,
   excluded, left exactly as sourced. Worth reporting upstream.
   **Difficulty: easy.**

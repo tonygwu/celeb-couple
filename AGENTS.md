@@ -164,6 +164,7 @@ running anything in the first group.
 | `scripts/offset_diagnostic.py` | cross-gender offset sensitivity; exits non-zero if the identity breaks | no |
 | `scripts/grounding_audit.py` | automated grounding checks + the human review sheet | no |
 | `scripts/write_m0_report.py` | renders `docs/M0-REPORT.md` from the JSON artifacts | no |
+| `scripts/corroborate_relationships.py` | pulls Wikipedia's own sentences about each relationship so the review sheet shows evidence, not just Wikidata links | no |
 | `scripts/relationship_review.py` | the human review sheet for relationship claims, load-bearing ones first | no |
 | `scripts/conclusion_robustness.py` | do the capstone's claims survive other settings of the bound and the romance filter | no |
 | `scripts/verify_trap.py` | re-derive THE-TRAP.md's three structural claims; exits 1 if any stopped holding | no |
@@ -190,7 +191,7 @@ The quota-spending scripts take `CELEB_JUDGES` (default `fable,astra`) and
 `CELEB_MAX_CALLS`, or equivalent flags. Run the whole chain in this order after
 changing any source: `fetch_records` → `build_episodes` → `build_partner_universe` →
 `fetch_observations` → `merge_prose_mentions` (once per
-mentions file) → `verify_observations` → `score_evidenced` → `joint_coverage` → `evidence_density` →
+mentions file) → `verify_observations` → `corroborate_relationships` → `score_evidenced` → `joint_coverage` → `evidence_density` →
 `alignment_gap` → `shape_confound` → `grounding_audit` → `offset_diagnostic` →
 `relationship_review` → `conclusion_robustness` → `verify_trap` →
 `cross_run_stability` →
