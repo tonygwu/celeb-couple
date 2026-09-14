@@ -90,7 +90,24 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
   narrow: one declared field, strictly-lower only, because a guard that judges
   overall richness will eventually block a legitimate write and teach everyone
   to pass `--force` by reflex.
-- ~~No CI.~~ Added 2026-09-14: `.github/workflows/tests.yml`, treating any
-  non-zero exit as failure including pytest's 5.
+- **CI is configured and has never once executed.** `.github/workflows/tests.yml`
+  was added 2026-09-14 and treats any non-zero exit as failure, pytest's 5
+  included. Every one of its 30 runs has failed in about 2 seconds with:
+
+  > The job was not started because recent account payments have failed or your
+  > spending limit needs to be increased.
+
+  So the job is blocked at GitHub's billing gate and never reaches pytest. The
+  workflow file itself is untested, and the repository's Actions state reads
+  **red while the suite is green** — which is worse than having no CI, because
+  a red badge that means "billing" looks exactly like a red badge that means
+  "the tests fail".
+
+  Only the operator can clear this: Settings → Billing & plans. Private
+  repositories consume billable Actions minutes, and this one must stay
+  private, so going public is not the workaround.
+
+  Until then **the real gate is local**: `.venv/bin/python -m pytest tests -q`.
+  **Difficulty: blocked on the operator.**
 - **No page-weight or export tooling**, because there is no site yet.
   **Difficulty: deferred until there is a board worth rendering.**

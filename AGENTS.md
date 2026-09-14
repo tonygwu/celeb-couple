@@ -82,6 +82,13 @@ uv pip install --python .venv/bin/python -r requirements.txt
 .venv/bin/python -m pytest tests -q      # offline; spends no model quota
 ```
 
+**CI does not run.** `.github/workflows/tests.yml` exists, but all 30 of its
+runs have been refused at GitHub's billing gate before reaching pytest, so the
+repository's Actions state is red while the suite is green. Do not read a green
+Actions badge as verification and do not read a red one as a test failure. Run
+the suite locally; that is the only gate that has ever executed. See
+`docs/BACKLOG.md`.
+
 The suite is offline and deterministic. The count is deliberately not written
 down here: a hand-typed number goes stale and then lies, which is the defect
 this project's sibling repo paid for five separate times. Run it and read it. **Treat any non-zero exit as failure,
