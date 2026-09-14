@@ -368,6 +368,7 @@ def main() -> int:
     shape_conf = load("data/pilot/run/shape_confound.json")
     gsc = load("data/pilot/run/gender_shape_confound.json")
     xrun = load("data/pilot/run/cross_run_stability.json")
+    robust = load("data/pilot/run/conclusion_robustness.json")
 
     L: list[str] = []
     w = L.append
@@ -1118,6 +1119,44 @@ def main() -> int:
           "there were deliberate re-invocations inside one run; these two runs "
           "did not know about each other. Both say the award shape holds still "
           "and the ranked shape does not.")
+        w("")
+
+    # ---------- robustness ----------
+    if robust and robust.get("settings"):
+        section("Do the conclusions depend on the choices that were made?")
+        w("")
+        w("The ±1 nearby-period bound, the romance filter on co-starring films "
+          "and the enforcement of shape comparability were all argued in the "
+          "plan and could defensibly have gone the other way. A conclusion "
+          "that only holds at one setting of three dials is a property of the "
+          "dials.")
+        w("")
+        w("| Bound | Romance filter | Jointly covered | Comparable | "
+          "Comparable with a non-zero gap | Non-zero gaps | ...shape-mismatched |")
+        w("|---|---|---|---|---|---|---|")
+        for s in robust["settings"]:
+            w(f"| ±{s['bound']} | {s['romance_filter']} | "
+              f"{s['jointly_covered']} | {s['comparable']} | "
+              f"**{s['comparable_with_a_nonzero_gap']}** | "
+              f"{s['nonzero_gaps_total']} | "
+              f"{s['nonzero_gaps_that_are_shape_mismatched']} |")
+        w("")
+        _fails = robust["claim_every_comparable_gap_is_zero"]["fails_at"]
+        _holds = robust["claim_every_comparable_gap_is_zero"]["holds_at"]
+        w(f"The claim that a shape-comparable pairing has a gap of exactly zero "
+          f"holds at **{len(_holds)} of {len(robust['settings'])}** settings"
+          + (f". It fails at {', '.join(_fails)}." if _fails else "."))
+        for s in robust["settings"]:
+            if s["comparable_with_a_nonzero_gap"] and s["examples"]:
+                w("")
+                w(f"The counterexample there is `{s['examples'][0]}` — a film "
+                  f"co-appearance never established as a romance, scored from "
+                  f"estimates {s['bound']} years from the year in question. It "
+                  f"takes both dials at their loosest, in the two directions "
+                  f"this project argues against, to produce it.")
+                break
+        w("")
+        w(f"*{robust['caveat']}*")
         w("")
 
     # ---------- bottom line ----------

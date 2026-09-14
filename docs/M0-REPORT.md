@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `343c21fa4c9b`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `e11936721b11`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -387,7 +387,30 @@ A constant cross-gender offset shifts every PAW rate by exactly delta, so rate r
 
 This is independent of the rater-noise section and agrees with it. The repeats there were deliberate re-invocations inside one run; these two runs did not know about each other. Both say the award shape holds still and the ranked shape does not.
 
-## 17. The bottom line, stated plainly
+## 17. Do the conclusions depend on the choices that were made?
+
+The ±1 nearby-period bound, the romance filter on co-starring films and the enforcement of shape comparability were all argued in the plan and could defensibly have gone the other way. A conclusion that only holds at one setting of three dials is a property of the dials.
+
+| Bound | Romance filter | Jointly covered | Comparable | Comparable with a non-zero gap | Non-zero gaps | ...shape-mismatched |
+|---|---|---|---|---|---|---|
+| ±0 | True | 1 | 0 | **0** | 1 | 1 |
+| ±0 | False | 1 | 0 | **0** | 1 | 1 |
+| ±1 | True | 4 | 1 | **0** | 3 | 3 |
+| ±1 | False | 6 | 3 | **0** | 3 | 3 |
+| ±2 | True | 8 | 3 | **0** | 5 | 5 |
+| ±2 | False | 11 | 6 | **0** | 5 | 5 |
+| ±3 | True | 11 | 6 | **0** | 5 | 5 |
+| ±3 | False | 15 | 10 | **0** | 5 | 5 |
+| ±4 | True | 15 | 9 | **0** | 6 | 6 |
+| ±4 | False | 20 | 14 | **1** | 7 | 6 |
+
+The claim that a shape-comparable pairing has a gap of exactly zero holds at **9 of 10** settings. It fails at bound 4, romance_filter False.
+
+The counterexample there is `Thor: Love and Thunder 2022: +3` — a film co-appearance never established as a romance, scored from estimates 4 years from the year in question. It takes both dials at their loosest, in the two directions this project argues against, to produce it.
+
+*Every setting reuses the SAME estimates. This tests whether the conclusions depend on the three methodological dials, not whether they survive different evidence.*
+
+## 18. The bottom line, stated plainly
 
 Of 4 jointly covered pairing-periods, **1** compares two people judged by the same kind of evidence. The rest compare an award against a list placement, where format explains much of the gap.
 
@@ -396,7 +419,7 @@ Of 4 jointly covered pairing-periods, **1** compares two people judged by the sa
 
 So the project can now produce a signed, exactly mirrored, evidence-backed gap for a real couple. It cannot yet produce one that is both comparable and larger than its own measurement noise. That is a much better place than this run started, and it is not a leaderboard.
 
-## 18. Cost and budget
+## 19. Cost and budget
 
 Stages that record a call budget in their own artifact:
 
@@ -420,7 +443,7 @@ Repeated runs of a stage are summed. A superseded run spent quota too, and this 
 - Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and inventing a figure for the other arm would be a fabricated number.
 - **Human review time: 0 minutes so far.** The plan budgeted 60–90 minutes for one batch covering the pairing relationship claims and a sample of rationales for the grounding audit. None of it has happened, so every real-life relationship claim in this report remains an unverified candidate and the grounding audit remains automated-only.
 
-## 19. Do the estimates reflect substance, or source availability?
+## 20. Do the estimates reflect substance, or source availability?
 
 **Substance, where evidence exists. Availability decides whether it exists at all.**
 
@@ -430,7 +453,7 @@ With one exception, and it is about FORMAT rather than count: **S2_format_equiva
 
 But which person-years have any evidence is decided entirely by which publishers happen to be reachable. On the permitted routes the men's award is an annual one-winner prize reported on Wikipedia since 1985, and the women's equivalent is a single number-one per year since 2000. Everything deeper sits behind terms that forbid this use.
 
-## 20. Against the plan's M0 deliverables
+## 21. Against the plan's M0 deliverables
 
 The plan's section 8.2 lists six things M0 should produce. Where each one is, and whether it is done:
 
@@ -440,12 +463,12 @@ The plan's section 8.2 lists six things M0 should produce. Where each one is, an
 | 2 | Dossiers, estimates, support, rationales, exclusions, lineage | `data/pilot/run/evidenced_scores.json`, sections 6 and 15 | yes — 39 person-periods |
 | 3 | VERIFIED pairings, with mirrored contribution arithmetic | section 6; `docs/RELATIONSHIP-REVIEW.md` for the verification | arithmetic yes, mirrors exact; **verification NOT done** — it needs a person, and the sheet is ready |
 | 4 | Person-period and joint pairing-period coverage, with failures | sections 5 and 8, and the near-miss list | yes |
-| 5 | Stress tests, offset diagnostic, actual costs, review minutes | sections 4, 14 and 18 | yes — review minutes are **0**, stated |
-| 6 | An assessment: substance, or source availability? | section 19 | yes |
+| 5 | Stress tests, offset diagnostic, actual costs, review minutes | sections 4, 14 and 19 | yes — review minutes are **0**, stated |
+| 6 | An assessment: substance, or source availability? | section 20 | yes |
 
 **One deliverable is outstanding and it is the one only a person can do.** Everything else is here. The two review sheets each lead with the entries that carry a published conclusion, so the load-bearing part of the work is the first part encountered.
 
-## 21. What M0 did not establish
+## 22. What M0 did not establish
 
 - **Human verification has not happened.** Every relationship remains a Wikidata candidate that no person has checked, and the plan budgeted 60-90 minutes for exactly that.
   On-screen pairings ARE romance-filtered — 8 of 20 candidates are confirmed reciprocal romances from the plot text — so that is no longer an open item, but the filter is a model's reading of a Wikipedia summary, not a human's.
