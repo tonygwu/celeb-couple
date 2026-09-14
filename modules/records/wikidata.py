@@ -1,0 +1,163 @@
+"""Relationship and birth-date ingestion from Wikidata.
+
+Wikidata is CC0 and carries date qualifiers with an explicit precision code, so
+it is the one route in this project where facts can be retained and republished
+with no attribution obligation.
+
+It is also INCOMPLETE, measured 2026-09-13: a probe of four subjects returned
+13 episodes and missed a widely reported earlier engagement for one of them and
+an eight-year relationship for another. So these records are CANDIDATES. Every
+one enters review before it can affect a published number.
+"""
+
+from __future__ import annotations
+
+import json
+import time
+import urllib.parse
+import urllib.request
+from dataclasses import dataclass
+
+from packages.ids.keys import pair_key, stable_id
+from packages.temporal.dates import Censoring, Interval, PreciseDate, from_wikidata
+
+__all__ = ["RelationshipCandidate", "fetch_relationships", "fetch_birth_dates", "SPARQL"]
+
+SPARQL = "https://query.wikidata.org/sparql"
+USER_AGENT = (
+    "celeb-couple-M0/0.1 (https://github.com/tonygwu/celeb-couple; read-only research)"
+)
+#: Wikidata asks for polite pacing and will 429. Commons returned 429 after
+#: about twenty sequential calls during the feasibility probe.
+PACE_SECONDS = 1.2
+
+
+def _query(sparql: str, timeout: int = 60) -> list[dict]:
+    url = SPARQL + "?" + urllib.parse.urlencode({"query": sparql})
+    req = urllib.request.Request(
+        url, headers={"User-Agent": USER_AGENT, "Accept": "application/sparql-results+json"}
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as fh:
+        return json.load(fh)["results"]["bindings"]
+
+
+def _val(row: dict, key: str) -> str | None:
+    return row.get(key, {}).get("value")
+
+
+@dataclass(frozen=True)
+class RelationshipCandidate:
+    episode_id: str
+    pair_key: str
+    subject_qid: str
+    partner_qid: str
+    partner_label: str
+    relation: str                      # "spouse" | "unmarried_partner"
+    start: PreciseDate | None
+    end: PreciseDate | None
+    has_reference: bool
+    review_status: str = "pending"
+
+    def interval(self, as_of: PreciseDate) -> Interval | None:
+        if self.start is None:
+            return None
+        if self.end is not None:
+            return Interval(self.start, self.end, Censoring.CLOSED)
+        # No supported end date. An ongoing episode closes at the last supported
+        # active date -- never at the run date and never at today.
+        return Interval(self.start, None, Censoring.ONGOING, last_supported_active=as_of)
+
+    def as_dict(self) -> dict:
+        return {
+            "episode_id": self.episode_id, "pair_key": self.pair_key,
+            "subject_qid": self.subject_qid, "partner_qid": self.partner_qid,
+            "partner_label": self.partner_label, "relation": self.relation,
+            "start": None if not self.start else
+                {"value": self.start.value, "precision": self.start.precision.value},
+            "end": None if not self.end else
+                {"value": self.end.value, "precision": self.end.precision.value},
+            "has_reference": self.has_reference,
+            "review_status": self.review_status,
+        }
+
+
+_REL_QUERY = """
+SELECT ?p ?rel ?partner ?partnerLabel ?start ?sPrec ?end ?ePrec ?ref WHERE {
+  VALUES ?p { %s }
+  { ?p p:P26 ?st . ?st ps:P26 ?partner . BIND("spouse" AS ?rel) }
+  UNION
+  { ?p p:P451 ?st . ?st ps:P451 ?partner . BIND("unmarried_partner" AS ?rel) }
+  OPTIONAL { ?st pq:P580 ?start . ?st pqv:P580 [ wikibase:timePrecision ?sPrec ] }
+  OPTIONAL { ?st pq:P582 ?end   . ?st pqv:P582 [ wikibase:timePrecision ?ePrec ] }
+  OPTIONAL { ?st prov:wasDerivedFrom ?ref }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+"""
+
+
+def fetch_relationships(qids: list[str]) -> list[RelationshipCandidate]:
+    """One batched query, so the endpoint is hit once rather than per person."""
+    values = " ".join(f"wd:{q}" for q in qids)
+    rows = _query(_REL_QUERY % values)
+    time.sleep(PACE_SECONDS)
+
+    seen: dict[tuple, RelationshipCandidate] = {}
+    for row in rows:
+        subject = (_val(row, "p") or "").rsplit("/", 1)[-1]
+        partner = (_val(row, "partner") or "").rsplit("/", 1)[-1]
+        relation = _val(row, "rel") or ""
+        if not subject or not partner:
+            continue
+        src = f"wikidata:{subject}:{relation}:{partner}"
+        start = end = None
+        if _val(row, "start") and _val(row, "sPrec"):
+            try:
+                start = from_wikidata(_val(row, "start"), int(_val(row, "sPrec")), src)
+            except ValueError:
+                start = None   # coarser than a year: refused, not widened
+        if _val(row, "end") and _val(row, "ePrec"):
+            try:
+                end = from_wikidata(_val(row, "end"), int(_val(row, "ePrec")), src)
+            except ValueError:
+                end = None
+        key = (subject, partner, relation)
+        cand = RelationshipCandidate(
+            episode_id=stable_id("rle", subject, partner, relation),
+            pair_key=pair_key(subject, partner),
+            subject_qid=subject, partner_qid=partner,
+            partner_label=_val(row, "partnerLabel") or partner,
+            relation=relation, start=start, end=end,
+            has_reference=bool(_val(row, "ref")),
+        )
+        # several reference rows collapse to one candidate; keep the richest
+        prior = seen.get(key)
+        if prior is None or (cand.start and not prior.start) or (cand.end and not prior.end):
+            seen[key] = cand
+        elif cand.has_reference and not prior.has_reference:
+            seen[key] = cand
+    return sorted(seen.values(), key=lambda c: (c.subject_qid, c.partner_label))
+
+
+_BIRTH_QUERY = """
+SELECT ?p ?dob ?prec WHERE {
+  VALUES ?p { %s }
+  ?p p:P569 ?st . ?st ps:P569 ?dob .
+  ?st psv:P569 [ wikibase:timePrecision ?prec ] .
+}
+"""
+
+
+def fetch_birth_dates(qids: list[str]) -> dict[str, PreciseDate]:
+    """Birth dates with precision, for the adult-window clip."""
+    rows = _query(_BIRTH_QUERY % " ".join(f"wd:{q}" for q in qids))
+    time.sleep(PACE_SECONDS)
+    out: dict[str, PreciseDate] = {}
+    for row in rows:
+        qid = (_val(row, "p") or "").rsplit("/", 1)[-1]
+        try:
+            out[qid] = from_wikidata(
+                _val(row, "dob"), int(_val(row, "prec")), f"wikidata:{qid}:P569"
+            )
+        except (ValueError, TypeError):
+            continue
+    return out

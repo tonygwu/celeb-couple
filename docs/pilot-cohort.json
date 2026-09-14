@@ -1,0 +1,105 @@
+{
+  "version": "pilot-cohort-2026-09-14",
+  "selected_on": "2026-09-14",
+  "selection_basis": "diversity of era, gender and casting type, chosen BEFORE any check of how easy each is to score",
+  "people": [
+    {
+      "display_name": "Ben Affleck",
+      "wikidata_qid": "Q483118",
+      "gender_category": "male",
+      "cohort_note": "1990s-2020s lead",
+      "description": "American film actor, director and screenwriter (born 1972)"
+    },
+    {
+      "display_name": "Brad Pitt",
+      "wikidata_qid": "Q35332",
+      "gender_category": "male",
+      "cohort_note": "1990s-2020s lead",
+      "description": "American actor (born 1963)"
+    },
+    {
+      "display_name": "Denzel Washington",
+      "wikidata_qid": "Q42101",
+      "gender_category": "male",
+      "cohort_note": "1980s-2020s lead",
+      "description": "American actor (born 1954)"
+    },
+    {
+      "display_name": "Harrison Ford",
+      "wikidata_qid": "Q81328",
+      "gender_category": "male",
+      "cohort_note": "1980s-2010s lead",
+      "description": "American actor (born 1942)"
+    },
+    {
+      "display_name": "Idris Elba",
+      "wikidata_qid": "Q342604",
+      "gender_category": "male",
+      "cohort_note": "2000s-2020s lead",
+      "description": "British actor"
+    },
+    {
+      "display_name": "Adam Sandler",
+      "wikidata_qid": "Q132952",
+      "gender_category": "male",
+      "cohort_note": "comic lead",
+      "description": "American actor and comedian"
+    },
+    {
+      "display_name": "Paul Giamatti",
+      "wikidata_qid": "Q208649",
+      "gender_category": "male",
+      "cohort_note": "character lead",
+      "description": "American actor (born 1967)"
+    },
+    {
+      "display_name": "Ana de Armas",
+      "wikidata_qid": "Q698173",
+      "gender_category": "female",
+      "cohort_note": "2010s-2020s lead",
+      "description": "Cuban-Spanish actress and model (born 1988)"
+    },
+    {
+      "display_name": "Jennifer Garner",
+      "wikidata_qid": "Q172044",
+      "gender_category": "female",
+      "cohort_note": "2000s-2010s lead",
+      "description": "American actress"
+    },
+    {
+      "display_name": "Kate Beckinsale",
+      "wikidata_qid": "Q179414",
+      "gender_category": "female",
+      "cohort_note": "1990s-2010s lead",
+      "description": "English actress (born 1973)"
+    },
+    {
+      "display_name": "Liv Tyler",
+      "wikidata_qid": "Q168763",
+      "gender_category": "female",
+      "cohort_note": "1990s-2000s lead",
+      "description": "American actress (born 1977)"
+    },
+    {
+      "display_name": "Michelle Pfeiffer",
+      "wikidata_qid": "Q159778",
+      "gender_category": "female",
+      "cohort_note": "1980s-1990s lead",
+      "description": "American actress (born 1958)"
+    },
+    {
+      "display_name": "Melissa McCarthy",
+      "wikidata_qid": "Q229048",
+      "gender_category": "female",
+      "cohort_note": "comic lead",
+      "description": "American actress and comedian"
+    },
+    {
+      "display_name": "Zendaya",
+      "wikidata_qid": "Q189489",
+      "gender_category": "female",
+      "cohort_note": "2010s-2020s lead",
+      "description": "American actress and singer (born 1996)"
+    }
+  ]
+}
