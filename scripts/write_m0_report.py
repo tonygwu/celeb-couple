@@ -956,10 +956,28 @@ def main() -> int:
         section("On-screen romance verification")
         w("")
         c = romance["counts"]
+        # "N were classifiable" sat above a table summing to N+1, with nothing
+        # explaining the difference: a film with no Plot section is excluded
+        # before any model call and still appears in the table as cannot_tell.
+        _excluded = [x for x in romance["candidates"] if x.get("exclusion")]
         w(f"Co-appearance in a cast list is not a pairing. All "
-          f"{c['candidates']} candidates were classified from the Wikipedia plot "
-          f"section alone; {c['classified']} were classifiable and "
+          f"{c['candidates']} candidates were put to the classifier from the "
+          f"Wikipedia plot section alone. {c['classified']} reached a model; "
           f"**{c['qualifying_romances']}** are confirmed reciprocal romances.")
+        if _excluded:
+            w("")
+            _n = len(_excluded)
+            w(f"{_n} never reached one and "
+              f"{'is' if _n == 1 else 'are'} recorded as `cannot_tell` with a "
+              f"reason, which is why the table below sums to "
+              f"{c['candidates']} rather than {c['classified']}:")
+            for x in _excluded:
+                # The exclusion string is prefixed with the title by the
+                # classifier, so rendering both repeats it.
+                _why = str(x["exclusion"])
+                if _why.startswith(x["title"]):
+                    _why = _why[len(x["title"]):].lstrip(": ")
+                w(f"  - *{x['title']}* — {_why}")
         w("")
         w("| Classification | Count |")
         w("|---|---|")

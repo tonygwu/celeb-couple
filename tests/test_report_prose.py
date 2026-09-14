@@ -866,3 +866,37 @@ def test_no_document_states_a_romance_count_it_does_not_own():
         pytest.skip("report not generated in this clone")
     assert "Seventeen of the" not in text
     assert "romance.json" in text
+
+
+def test_the_romance_counts_reconcile_in_the_report():
+    """"19 were classifiable" sat above a table summing to 20, with nothing
+    explaining the difference. A film with no Plot section is excluded before
+    any model call and still appears in the table as `cannot_tell`."""
+    import json
+    import re
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    f = REPO / "data/pilot/records/romance.json"
+    if "On-screen romance verification" not in text or not f.exists():
+        pytest.skip("needs the generated report and the artifact")
+
+    c = json.loads(f.read_text())["counts"]
+    table_total = sum(c["by_classification"].values())
+    if table_total == c["classified"]:
+        return          # nothing to reconcile
+    assert f"sums to {table_total} rather than {c['classified']}" in text, (
+        "the report must explain why the classification table and the "
+        "classified count differ"
+    )
+
+
+def test_an_exclusion_reason_is_not_printed_twice():
+    """The classifier prefixes its exclusion string with the film title, so
+    rendering both gives "*Title* — Title: reason"."""
+    import re
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "never reached one" not in text:
+        pytest.skip("no excluded candidates in this corpus")
+    for line in text.splitlines():
+        m = re.match(r"\s+- \*(.+?)\* — (.+)$", line)
+        if m:
+            assert not m.group(2).startswith(m.group(1)), line

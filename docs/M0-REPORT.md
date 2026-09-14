@@ -320,7 +320,10 @@ A pairing needs both sides. The partners missing evidence are two different popu
 
 ## 12. On-screen romance verification
 
-Co-appearance in a cast list is not a pairing. All 20 candidates were classified from the Wikipedia plot section alone; 19 were classifiable and **8** are confirmed reciprocal romances.
+Co-appearance in a cast list is not a pairing. All 20 candidates were put to the classifier from the Wikipedia plot section alone. 19 reached a model; **8** are confirmed reciprocal romances.
+
+1 never reached one and is recorded as `cannot_tell` with a reason, which is why the table below sums to 20 rather than 19:
+  - *Daredevil: The Director's Cut* — no Plot or Synopsis section
 
 | Classification | Count |
 |---|---|
