@@ -48,7 +48,35 @@ def main() -> int:
     for c in cands:
         stage.attempted += 1
         label = f"{c['title']} ({c['male']} + {c['female']})"
-        page = title_for_qid(c["work_qid"]) or c["title"]
+        # No fallback to c["title"]. Guessing the article from the film's
+        # title is what sent 13 of 20 candidates to the wrong subject -- Pearl
+        # Harbor the harbour, Elektra the Greek tragedy -- and each returned a
+        # real article with no plot, indistinguishable from a genuinely missing
+        # one. `or c["title"]` quietly restored that path whenever the sitelink
+        # lookup came back empty, and the artifact could not tell a resolved
+        # title from a guessed one: 8 of 20 records have page == title either
+        # way.
+        try:
+            page = title_for_qid(c["work_qid"])
+        except Exception as exc:
+            # Was outside the try below, so a network blip here killed the
+            # whole batch instead of costing one candidate.
+            stage.record_failure("transient_retryable")
+            results.append({**c, "wikipedia_page": None,
+                            "page_resolved_from": None,
+                            "classification": "cannot_tell", "qualifies": False,
+                            "exclusion": f"sitelink lookup failed: {exc}"})
+            print(f"  FAIL  {label[:60]:60} sitelink lookup: {exc}")
+            continue
+        if not page:
+            stage.excluded += 1
+            results.append({**c, "wikipedia_page": None,
+                            "page_resolved_from": None,
+                            "classification": "cannot_tell", "qualifies": False,
+                            "exclusion": "no English Wikipedia sitelink for "
+                                         f"{c['work_qid']}"})
+            print(f"  SKIP  {label[:60]:60} no enwiki sitelink")
+            continue
         try:
             plot, plot_sha = fetch_plot(page)
         except PlotUnavailable as exc:
@@ -103,6 +131,7 @@ def main() -> int:
             continue
         stage.succeeded += 1
         results.append({**c, "wikipedia_page": page,
+                        "page_resolved_from": "wikidata_sitelink",
                         "cast_mapped": bool(cast.get(c["male"]) and cast.get(c["female"])),
                         "cast_error": cast_error,
                         **v.as_dict()})
@@ -120,6 +149,8 @@ def main() -> int:
         # whose article has no cast section. Both leave the prompt without
         # characters; only one is fixable by retrying.
         "cast_fetch_failed": sum(1 for r in results if r.get("cast_error")),
+        "no_enwiki_sitelink": sum(
+            1 for r in results if r.get("exclusion", "").startswith("no English")),
         "by_classification": {
             k: sum(1 for r in results if r.get("classification") == k)
             for k in sorted({r.get("classification") for r in results if r.get("classification")})

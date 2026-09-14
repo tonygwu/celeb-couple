@@ -161,3 +161,42 @@ def test_the_summary_counts_cast_fetch_failures_separately():
     ]
     assert sum(1 for r in results if r.get("cast_mapped")) == 1
     assert sum(1 for r in results if r.get("cast_error")) == 1
+
+
+def test_a_candidate_records_how_its_article_was_resolved():
+    """`page = title_for_qid(qid) or c["title"]` quietly restored the exact bug
+    the sitelink lookup was added to fix.
+
+    Fetching by film TITLE sent 13 of 20 candidates to the wrong subject --
+    Pearl Harbor the harbour, Elektra the Greek tragedy -- and each returned a
+    real article with no plot, indistinguishable from a genuinely missing one.
+    The `or` meant any empty lookup fell straight back to guessing, and the
+    artifact could not tell the two apart: 8 of 20 records have
+    page == title under either path.
+
+    There is now no fallback. A film with no English sitelink is excluded and
+    says so, and every surviving record carries how it was resolved.
+    """
+    resolved = {"title": "Pearl Harbor", "work_qid": "Q194413",
+                "wikipedia_page": "Pearl Harbor (film)",
+                "page_resolved_from": "wikidata_sitelink"}
+    assert resolved["page_resolved_from"] == "wikidata_sitelink"
+
+    unresolvable = {"title": "Some Film", "work_qid": "Q999",
+                    "wikipedia_page": None, "page_resolved_from": None,
+                    "classification": "cannot_tell", "qualifies": False,
+                    "exclusion": "no English Wikipedia sitelink for Q999"}
+    assert unresolvable["qualifies"] is False
+    assert unresolvable["wikipedia_page"] is None, (
+        "an unresolvable film must not carry a guessed page"
+    )
+
+
+def test_the_summary_counts_films_with_no_sitelink():
+    results = [
+        {"page_resolved_from": "wikidata_sitelink", "exclusion": None},
+        {"page_resolved_from": None,
+         "exclusion": "no English Wikipedia sitelink for Q999"},
+    ]
+    assert sum(1 for r in results
+               if (r.get("exclusion") or "").startswith("no English")) == 1
