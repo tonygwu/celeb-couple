@@ -154,11 +154,13 @@ def test_an_empty_dossier_produces_unscored_not_a_number(tmp_path):
     assert failures == []
     assert est.estimate is None
     assert est.missingness_reason.value == "no_observations"
+    assert j.calls == [], "short-circuited before the judge"
 
 
 def test_an_unscored_reply_carrying_an_estimate_is_rejected(tmp_path):
+    # a NON-empty dossier, because an empty one short-circuits before any judge
     j = _judge("fable", scored=False, estimate=40)
-    _, _, failures = _score([j], _dossier(obs=[]), tmp_path)
+    _, _, failures = _score([j], _dossier(), tmp_path)
     assert failures[0]["error_type"] == E_SCHEMA
 
 
@@ -218,3 +220,16 @@ def test_the_contract_id_covers_the_rubric_and_the_schema(tmp_path):
     r.write_text("rubric ")
     b = load_contract(r, s, "v1")
     assert a.contract_id != b.contract_id
+
+
+def test_an_empty_dossier_costs_no_model_call(tmp_path):
+    """S5 proved both judges return unscored on an empty dossier. Do not pay
+    a second time to re-learn it."""
+    j = _judge("fable")
+    budget = Budget(max_calls=10)
+    est, verdicts, failures = _score([j], _dossier(obs=[]), tmp_path, budget)
+    assert j.calls == [], "no judge may be invoked for an empty dossier"
+    assert budget.calls_made == 0, "an empty dossier must not spend budget"
+    assert est.estimate is None
+    assert est.reducer == "short_circuit"
+    assert est.missingness_reason.value == "no_observations"

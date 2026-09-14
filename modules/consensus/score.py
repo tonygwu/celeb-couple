@@ -134,6 +134,24 @@ def score_dossier(
     timeout: int = 600,
 ) -> tuple[StandingEstimate | None, list[JudgeVerdict], list[dict]]:
     """Returns (estimate, verdicts, failures)."""
+    if dossier.is_empty:
+        # An empty dossier needs no model call. The dossier builder already
+        # knows there is nothing to weigh, and stress case S5 confirmed both
+        # judges return unscored on one. Paying to re-learn that would spend
+        # quota to produce a value this function can state itself.
+        return (
+            StandingEstimate(
+                estimate_id=stable_id("se", dossier.person_id, dossier.period),
+                person_id=dossier.person_id, periods=(dossier.period,),
+                estimate=None, rubric_version=contract.rubric_version,
+                contract_id=contract.contract_id, judges={}, reducer="short_circuit",
+                evidence_ids=(), support=None, rationale="",
+                missingness_reason=MissingnessReason.NO_OBSERVATIONS,
+            ),
+            [],
+            [],
+        )
+
     prompt = build_prompt(dossier, rubric_text, schema_text)
     raw_dir.mkdir(parents=True, exist_ok=True)
     verdicts: list[JudgeVerdict] = []
