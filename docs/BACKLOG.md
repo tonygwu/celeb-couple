@@ -151,6 +151,18 @@ fired on a downstream number. Neither would have surfaced on its own.
   would be a real finding — but it must not be quoted as evidence about format.
   **Difficulty: easy, but it costs a stress re-run (~27 calls).**
 
+- **`rubrics/mentions/MENTIONS.md` lists an undated example it then forbids.**
+  "What to extract" includes *"voted the sexiest man in a readers' poll"*,
+  which carries no year, while rule 3 says "Never infer a year. If the sentence
+  does not carry one, skip it." A judge following the examples and a judge
+  following the rules would disagree about that one.
+
+  Not changed now: the rubric is part of the hashed extraction contract, so
+  editing it changes the contract id and the stored prose mentions were
+  extracted under the old one. Bundle it with the next rubric version bump,
+  alongside the `contract_id` boundary item above, when the id changes anyway.
+  **Difficulty: trivial, must be bundled.**
+
 ## Tooling
 
 - ~~Smoke tests can clobber production artifacts.~~ **Fixed 2026-09-14.**
