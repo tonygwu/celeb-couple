@@ -11,11 +11,19 @@ the real episode structure and the real 100-name roster. The curve:
 | Names per year | Episodes jointly covered (median of 239) |
 |---|---|
 | 1 | 0 |
-| 10 | 3 |
-| 25 | 10 |
-| 50 | 16 |
-| 100 | 22 |
-| 200 | 22 (saturates) |
+| 10 | 4 |
+| 25 | 13 |
+| 50 | 23 |
+| 100 | 25 |
+| 200 | 25 (saturates) |
+
+*Corrected 2026-09-14.* The simulation drew its annual list WITH replacement,
+so a rung labelled "100 names" listed a median of 48 distinct people and no
+rung above it listed more — the saturation was partly the sampler rather than
+the coverage problem. A published ranked list of 100 has 100 distinct names, so
+it now samples without replacement. The curve rises more steeply and still
+saturates at 100, this time because the roster is exhausted. The conclusion is
+unchanged and now rests on the right mechanism.
 
 So the product needs **an annual list of roughly a hundred names**, covering the
 roster's population and era, on a route this project may use. One name a year

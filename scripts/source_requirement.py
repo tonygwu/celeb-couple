@@ -26,6 +26,25 @@ from modules.consensus.nearby import resolve_period  # noqa: E402
 SEED = 20260914
 
 
+def _weighted_sample_without_replacement(pool, weights, k, rng):
+    """``k`` DISTINCT names, drawn with the given weights.
+
+    `rng.choices` samples WITH replacement, and `set(picks)` then collapsed the
+    duplicates -- so a rung labelled "100 names per year" actually listed a
+    median of 48 distinct people, and no rung above it listed more. The curve's
+    saturation was therefore partly an artifact of the sampler rather than a
+    property of the coverage problem.
+
+    A published annual ranked list of 100 names contains 100 distinct people.
+    Efraimidis-Spirakis gives exactly that: key each item by U^(1/w) and take
+    the top k, which is weighted sampling without replacement.
+    """
+    if k >= len(pool):
+        return list(pool)
+    keys = {q: rng.random() ** (1.0 / weights[q]) for q in pool}
+    return sorted(pool, key=lambda q: keys[q], reverse=True)[:k]
+
+
 def simulate(episodes, roster_qids, *, names_per_year: int, first_year: int,
              last_year: int, bound: int, trials: int, rng: random.Random) -> dict:
     covered_counts = []
@@ -37,9 +56,9 @@ def simulate(episodes, roster_qids, *, names_per_year: int, first_year: int,
         listed: dict[str, dict[str, float]] = {}
         pool = list(weights)
         for year in range(first_year, last_year + 1):
-            picks = rng.choices(pool, weights=[weights[q] for q in pool],
-                                k=min(names_per_year, len(pool)))
-            for q in set(picks):
+            picks = _weighted_sample_without_replacement(
+                pool, weights, names_per_year, rng)
+            for q in picks:
                 listed.setdefault(q, {})[str(year)] = 1.0
         covered = 0
         for e in episodes:

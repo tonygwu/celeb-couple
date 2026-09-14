@@ -31,13 +31,13 @@ Joint coverage is a conjunction of independently rare conditions: both people ju
 | Names per year | p10 | median | p90 |
 |---|---|---|---|
 | 1 | 0 | 0 | 0 |
-| 5 | 0 | 1 | 3 |
-| 10 | 0 | 3 | 7 |
-| 25 | 5 | 10 | 15 |
-| 50 | 11 | 16 | 20 |
-| 100 | 19 | 22 | 25 |
-| 200 | 18 | 22 | 25 |
-| 400 | 19 | 22 | 25 |
+| 5 | 0 | 1 | 4 |
+| 10 | 2 | 4 | 7 |
+| 25 | 8 | 13 | 18 |
+| 50 | 20 | 23 | 25 |
+| 100 | 25 | 25 | 25 |
+| 200 | 25 | 25 | 25 |
+| 400 | 25 | 25 | 25 |
 
 Read against what actually exists:
 
@@ -51,9 +51,9 @@ Read against what actually exists:
 
 **One name a year covers nothing.** Every award source this project can currently reach sits on that rung. That is not a shortfall to be closed by adding more such sources.
 
-**The requirement is about 100 names a year.** At that depth the median reaches 22 episodes. That is the shape of FHM's real published list, which exists and is not reachable: Wikipedia carries only its top ten, and the publisher blocks the AI crawlers.
+**The requirement is about 100 names a year.** At that depth the median reaches 25 episodes. That is the shape of FHM's real published list, which exists and is not reachable: Wikipedia carries only its top ten, and the publisher blocks the AI crawlers.
 
-**It saturates there.** Beyond 100 names a year the median stays at 22, because the binding constraint becomes the roster and the era span rather than the list depth. So the ceiling for this design, with a perfect source, is 22 of 239 episodes — 9 percent — before the shape-comparability filter cuts it further.
+**It saturates there.** Beyond 100 names a year the median stays at 25, because the binding constraint becomes the roster and the era span rather than the list depth. So the ceiling for this design, with a perfect source, is 25 of 239 episodes — 10 percent — before the shape-comparability filter cuts it further.
 
 *A simulation of COVERAGE only. It invents no score, and a real list's pool would not be the roster. Read the shape of the curve, not the absolute numbers.*
 
