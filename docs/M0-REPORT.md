@@ -202,7 +202,7 @@ This was predicted in the plan's worked example A and is now measured. It is the
 - covered share 1, period support `nearby_period`
 - gap in the men's view **-14.0**, in the women's view **+14.0**, mirrors exactly: True
 
-## 6. Evidence density — the actual bottleneck
+## 7. Evidence density — the actual bottleneck
 
 Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.051**. Distribution: `{'1': 37, '2': 2}`. Person-periods carrying two or more publishers: **2**. Person-periods that are a lone one-winner award: **18 of 39**.
 
@@ -215,7 +215,7 @@ The rubric discriminates; the corpus does not let it. A lone one-winner award is
 
 This reframes what "more sources" has to mean. A source that adds a hundred new people at one observation each raises coverage and changes nothing about the board, because every one of those dossiers still lands in a single band. Only a source that puts a SECOND observation on a person-year that already has one can widen the distribution.
 
-## 6e. Why joint coverage does not move
+## 8. Why joint coverage does not move
 
 The corpus grew from 13 observations to 41 and joint coverage did not move. This is why.
 
@@ -241,7 +241,7 @@ Two things follow. Widening the bound from ±1 to ±2 would triple joint coverag
 
 *This measures what the bound costs. It is NOT an argument for widening it: a wider bound reuses an estimate further from the period it is supposed to describe, which is the manufactured precision the bound exists to prevent.*
 
-## 5. The confound is aligned with gender
+## 9. The confound is aligned with gender
 
 | Gender | `editorial_award` | `ordered_rank` | `unordered_inclusion` |
 |---|---|---|---|
@@ -257,7 +257,7 @@ Men hold 0 ranked observations and women 17. Because an award pins near the top 
 
 **A four-view product compares a man against a woman in every row. With the shapes distributed this unevenly, the sign of a typical gap is decided by which sex the person is, not by the judgments. This has to be disclosed on every row, or the board reports a publishing artifact as a finding about people.**
 
-## 5b. Evidence shape drives the estimate
+## 10. Evidence shape drives the estimate
 
 **Evidence type alone explains 39% of the variance in the estimates** (eta-squared 0.389).
 
@@ -279,7 +279,7 @@ This is the project's most serious systematic bias and it is not hypothetical. T
 
 Any published pairing whose sides carry different evidence shapes must carry this caveat on the row. A board that shows the number without it would be reporting a property of the sources as a property of the couple.
 
-## 6f. How much of the board is even reachable
+## 11. How much of the board is even reachable
 
 A pairing needs both sides. The partners missing evidence are two different populations, and counting them together overstates what the project can reach.
 
@@ -294,7 +294,7 @@ A pairing needs both sides. The partners missing evidence are two different popu
 
 7 of 23 partners are people this project must not rate: the plan forbids rating a private individual merely because they dated a celebrity. Those pairings are a PERMANENT exclusion, not a coverage gap, and counting them in the denominator overstates how much of the board is reachable.
 
-## 6a. On-screen romance verification
+## 12. On-screen romance verification
 
 Co-appearance in a cast list is not a pairing. All 20 candidates were classified from the Wikipedia plot section alone; 19 were classifiable and **8** are confirmed reciprocal romances.
 
@@ -307,7 +307,7 @@ Co-appearance in a cast list is not a pairing. All 20 candidates were classified
 
 Three results worth naming. *Being John Malkovich* came back `cannot_tell` for Brad Pitt and Michelle Pfeiffer, who both appear as themselves; before this filter existed the coverage count treated them as a couple. *Pearl Harbor* separated correctly: the romance is Affleck and Beckinsale, not Affleck and Garner. *What Lies Beneath* was classified `coerced_or_assault` and is therefore excluded rather than scored.
 
-## 6b. Rater noise
+## 13. Rater noise
 
 4 repeats of each unchanged dossier.
 
@@ -325,7 +325,7 @@ The POOLED figure is SD 0.433 and LSD 1.2. It is reported only for continuity wi
 
 Measured on one judge (fable). Codex reached 0% of its 7-day quota window mid-run, so this describes one model family and not a panel.
 
-## 6c. Cross-gender offset sensitivity
+## 14. Cross-gender offset sensitivity
 
 Deltas [-6.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0] applied to the partner side, on 2 people.
 
@@ -337,13 +337,13 @@ A constant cross-gender offset shifts every PAW rate by exactly delta, so rate r
 
 *This is a sensitivity scenario, not an estimate of real-world bias. Genders are never silently recentred.*
 
-## 6d. Grounding audit
+## 15. Grounding audit
 
 39 rationales checked: **39** passed the automated checks, 0 failed, 34 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
 
 *These checks prove a rationale does not assert MORE than its evidence carries. They do not prove it is a fair reading. Only the human sheet can establish that.*
 
-## 6c-bis. The same dossier, scored in two separate runs
+## 16. The same dossier, scored in two separate runs
 
 `data/pilot/run/evidenced_scores.json` and `data/roster100/run/joint_scores.json` were scored in separate runs. 3 person-periods carry a byte-identical dossier in both -- the same observation ids, the same contract id, the same judge family -- so any difference is run-to-run variance and nothing else.
 
@@ -357,7 +357,7 @@ A constant cross-gender offset shifts every PAW rate by exactly delta, so rate r
 
 This is independent of section 6b and agrees with it. The repeats there were deliberate re-invocations inside one run; these two runs did not know about each other. Both say the award shape holds still and the ranked shape does not.
 
-## 6g. The bottom line, stated plainly
+## 17. The bottom line, stated plainly
 
 Of 4 jointly covered pairing-periods, **1** compares two people judged by the same kind of evidence. The rest compare an award against a list placement, where format explains much of the gap.
 
@@ -366,16 +366,31 @@ Of 4 jointly covered pairing-periods, **1** compares two people judged by the sa
 
 So the project can now produce a signed, exactly mirrored, evidence-backed gap for a real couple. It cannot yet produce one that is both comparable and larger than its own measurement noise. That is a much better place than this run started, and it is not a leaderboard.
 
-## 7. Cost and budget
+## 18. Cost and budget
+
+Stages that record a call budget in their own artifact:
 
 - Stress tests: 27 model calls ({"fable": 17, "astra": 10}).
 - Scoring: 39 model calls ({"fable": 39, "astra": 0}).
-- First pilot pass: 0 model calls — all 32 dossiers were empty and short-circuited.
-- **Total: 66 model calls**, against a cap of 300.
+- First pilot pass: 0 model calls — every dossier came back empty and short-circuited before any judge was called.
+
+Stages that write a run manifest, with the reconciliation each records. `attempted` equals `succeeded + cached + excluded + failed` by construction, so a stage that failed on every item cannot hide behind a call count:
+
+| Stage | Runs | Attempted | Succeeded | Cached | Excluded | Failed | Errors |
+|---|---|---|---|---|---|---|---|
+| `prose-mentions` | 1 | 28 | 28 | 0 | 0 | 0 | — |
+| `rater-noise` | 4 | 50 | 34 | 0 | 0 | 16 | auth_or_quota=16 |
+| `romance` | 3 | 80 | 52 | 0 | 28 | 0 | — |
+
+Repeated runs of a stage are summed. A superseded run spent quota too, and this section answers what the pilot cost rather than how many calls stand behind the final artifacts.
+
+**Model calls: 66 from the budgeted stages, plus 158 attempts recorded across the manifested stages — 224 in total, against a cap of 300.**
+
 - Subscription quota only. API billing was asserted off at start-up.
 - Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and inventing a figure for the other arm would be a fabricated number.
+- **Human review time: 0 minutes so far.** The plan budgeted 60–90 minutes for one batch covering the pairing relationship claims and a sample of rationales for the grounding audit. None of it has happened, so every real-life relationship claim in this report remains an unverified candidate and the grounding audit remains automated-only.
 
-## 8. Do the estimates reflect substance, or source availability?
+## 19. Do the estimates reflect substance, or source availability?
 
 **Substance, where evidence exists. Availability decides whether it exists at all.**
 
@@ -383,7 +398,7 @@ The stress cases say the rubric is reading the judgments rather than counting do
 
 But which person-years have any evidence is decided entirely by which publishers happen to be reachable. On the permitted routes the men's award is an annual one-winner prize reported on Wikipedia since 1985, and the women's equivalent is a single number-one per year since 2000. Everything deeper sits behind terms that forbid this use.
 
-## 9. What M0 did not establish
+## 20. What M0 did not establish
 
 - Nothing here is verified. Every relationship is a Wikidata candidate and every on-screen pairing is co-appearance only, with no romance evidence.
 - The grounding audit is not done: a human still has to read the rationales and judge whether the cited observations support what they claim.

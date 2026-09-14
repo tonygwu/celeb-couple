@@ -104,6 +104,72 @@ def decisive_measurement(shape_conf: dict, n_scored: int) -> str:
         f"carries a degree, so it can tell people apart.")
 
 
+def spend_rows(repo: Path) -> tuple[list[dict], list[str]]:
+    """Per-stage spend from every run manifest under data/pilot/manifests/.
+
+    The cost section used to total three hardcoded stages -- stress, scoring
+    and the first pilot pass -- and call the result "Total: 66 model calls".
+    Romance classification, prose extraction and rater noise all spent quota
+    and appeared nowhere, so the published total was an undercount presented
+    as a total.
+
+    Returns (rows, stages_without_telemetry). Every row carries the full
+    reconciliation the manifests record, because a bare call count cannot
+    distinguish a stage that worked from one that failed on every item.
+
+    Repeated runs of a stage are summed. That is deliberate: this section
+    answers "what did this cost", and a superseded run cost quota too.
+    """
+    rows: list[dict] = []
+    for f in sorted((repo / "data/pilot/manifests").glob("*.json")):
+        try:
+            m = json.loads(f.read_text())
+        except ValueError:
+            continue          # a .tmp or half-written manifest is not spend
+        agg = {"stage": m.get("stage_name", f.stem), "runs": 1,
+               "attempted": 0, "succeeded": 0, "failed": 0,
+               "cached": 0, "excluded": 0, "errors": {}}
+        for s in m.get("summaries", []):
+            for k in ("attempted", "succeeded", "failed", "cached", "excluded"):
+                agg[k] += s.get(k, 0) or 0
+            for kind, n in (s.get("error_taxonomy") or {}).items():
+                agg["errors"][kind] = agg["errors"].get(kind, 0) + n
+        rows.append(agg)
+
+    merged: dict[str, dict] = {}
+    for r in rows:
+        cur = merged.setdefault(r["stage"], dict(r, runs=0))
+        for k in ("runs", "attempted", "succeeded", "failed", "cached", "excluded"):
+            cur[k] = cur.get(k, 0) + r[k] if k != "stage" else cur[k]
+        for kind, n in r["errors"].items():
+            cur["errors"][kind] = cur["errors"].get(kind, 0) + n
+    return sorted(merged.values(), key=lambda r: r["stage"]), []
+
+
+class Sections:
+    """Number headings by the order they are actually rendered.
+
+    The numbers were typed into each heading. Sections were then added,
+    reordered and made conditional until the report shipped two section 6s and
+    ran 6, 6, 6e, 5, 5b, 6f, 6a, 6b, 6c, 6d, 6c-bis, 6g -- a reader could not
+    use them to navigate. A conditional section made it worse: whether a number
+    appeared at all depended on which artifacts existed.
+
+    Counting at render time makes a duplicate impossible and a gap impossible.
+    """
+
+    def __init__(self, write):
+        self._w = write
+        self._n = 0
+
+    def __call__(self, title: str) -> None:
+        self._n += 1
+        self._w(f"## {self._n}. {title}")
+
+    def unnumbered(self, title: str) -> None:
+        self._w(f"## {title}")
+
+
 def shape_paragraph(shape_conf: dict, density: dict) -> str:
     """Describe the corpus's evidence shapes FROM the artifacts.
 
@@ -171,6 +237,7 @@ def main() -> int:
 
     L: list[str] = []
     w = L.append
+    section = Sections(w)
     w("# M0 pilot report — Celebrity Pairing WAR")
     w("")
     w(f"Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d')} from the run "
@@ -197,7 +264,7 @@ def main() -> int:
     w("")
 
     # ---------- the answer first ----------
-    w("## The answer first")
+    section.unnumbered("The answer first")
     w("")
     cov = obs["coverage"]
     n_people = cov["cohort_people_total"]
@@ -228,7 +295,7 @@ def main() -> int:
     w("")
 
     # ---------- cohort ----------
-    w("## 1. Cohort")
+    section("Cohort")
     w("")
     w(f"`{cohort['version']}`, selected {cohort['selected_on']}. "
       f"{cohort['selection_basis']}")
@@ -243,7 +310,7 @@ def main() -> int:
     w("")
 
     # ---------- access decisions ----------
-    w("## 2. Source access decisions")
+    section("Source access decisions")
     w("")
     w(obs["route_note"])
     w("")
@@ -273,7 +340,7 @@ def main() -> int:
     w("")
 
     # ---------- records ----------
-    w("## 3. Records")
+    section("Records")
     w("")
     c = records["counts"]
     e = episodes["counts"]
@@ -298,7 +365,7 @@ def main() -> int:
     w("")
 
     # ---------- stress ----------
-    w("## 4. Measurement stress tests")
+    section("Measurement stress tests")
     w("")
     w(f"{stress['attempted']} scorings attempted, {stress['succeeded']} succeeded, "
       f"{stress['failed']} failed. Taxonomy: `{json.dumps(stress['error_taxonomy'])}`.")
@@ -337,7 +404,7 @@ def main() -> int:
     w("")
 
     # ---------- coverage ----------
-    w("## 5. Coverage, the two numbers that matter")
+    section("Coverage, the two numbers that matter")
     w("")
     if first_pass:
         r = first_pass["reconciliation"]
@@ -371,7 +438,7 @@ def main() -> int:
 
     # ---------- scored pairings ----------
     if scored:
-        w("## 6. Scored person-periods and pairing contributions")
+        section("Scored person-periods and pairing contributions")
         w("")
         rec = scored["reconciliation"]
         w(f"{rec['scored']} of {rec['person_periods_with_evidence']} evidenced "
@@ -436,7 +503,7 @@ def main() -> int:
 
     # ---------- density ----------
     if density:
-        w("## 6. Evidence density — the actual bottleneck")
+        section("Evidence density — the actual bottleneck")
         w("")
         d = density
         w(f"Coverage asks whether a person-year has any evidence. Density asks how "
@@ -466,7 +533,7 @@ def main() -> int:
 
     # ---------- alignment ----------
     if align:
-        w("## 6e. Why joint coverage does not move")
+        section("Why joint coverage does not move")
         w("")
         w(f"The corpus grew from 13 observations to "
           f"{density['observations'] if density else '?'} and joint coverage did "
@@ -498,7 +565,7 @@ def main() -> int:
 
     # ---------- gender-aligned confound ----------
     if gsc:
-        w("## 5. The confound is aligned with gender")
+        section("The confound is aligned with gender")
         w("")
         w("| Gender | `editorial_award` | `ordered_rank` | `unordered_inclusion` |")
         w("|---|---|---|---|")
@@ -522,7 +589,7 @@ def main() -> int:
 
     # ---------- shape confounding ----------
     if shape_conf:
-        w("## 5b. Evidence shape drives the estimate")
+        section("Evidence shape drives the estimate")
         w("")
         w(f"**Evidence type alone explains "
           f"{round((shape_conf['eta_squared_shape_explains'] or 0) * 100)}% of the "
@@ -557,7 +624,7 @@ def main() -> int:
 
     # ---------- partner eligibility ----------
     if elig:
-        w("## 6f. How much of the board is even reachable")
+        section("How much of the board is even reachable")
         w("")
         w("A pairing needs both sides. The partners missing evidence are two "
           "different populations, and counting them together overstates what the "
@@ -582,7 +649,7 @@ def main() -> int:
 
     # ---------- romance ----------
     if romance:
-        w("## 6a. On-screen romance verification")
+        section("On-screen romance verification")
         w("")
         c = romance["counts"]
         w(f"Co-appearance in a cast list is not a pairing. All "
@@ -607,7 +674,7 @@ def main() -> int:
     # ---------- rater noise ----------
     if noise:
         h = noise["headline"]
-        w("## 6b. Rater noise")
+        section("Rater noise")
         w("")
         w(f"{noise['repeats']} repeats of each unchanged dossier.")
         w("")
@@ -650,7 +717,7 @@ def main() -> int:
 
     # ---------- offset diagnostic ----------
     if offset:
-        w("## 6c. Cross-gender offset sensitivity")
+        section("Cross-gender offset sensitivity")
         w("")
         w(f"Deltas {offset['deltas']} applied to the partner side, on "
           f"{len(offset['people'])} people.")
@@ -669,7 +736,7 @@ def main() -> int:
     # ---------- grounding ----------
     if grounding:
         g = grounding["counts"]
-        w("## 6d. Grounding audit")
+        section("Grounding audit")
         w("")
         w(f"{g['rationales']} rationales checked: **{g['passed_automated']}** passed "
           f"the automated checks, {g['failed_automated']} failed, "
@@ -681,7 +748,7 @@ def main() -> int:
 
     # ---------- cross-run stability ----------
     if xrun and xrun.get("rows"):
-        w("## 6c-bis. The same dossier, scored in two separate runs")
+        section("The same dossier, scored in two separate runs")
         w("")
         w(f"`{'` and `'.join(xrun['runs'].values())}` were scored in separate "
           f"runs. {xrun['comparable_person_periods']} person-periods carry a "
@@ -716,7 +783,7 @@ def main() -> int:
                        if s["least_significant_difference_95pct"] is not None]
         lsd = (max(_shape_lsds) if _shape_lsds
                else noise["headline"].get("least_significant_difference_95pct"))
-        w("## 6g. The bottom line, stated plainly")
+        section("The bottom line, stated plainly")
         w("")
         n_comp = len(comp)
         w(f"Of {len(joint.get('jointly_covered', []))} jointly covered "
@@ -748,26 +815,65 @@ def main() -> int:
         w("")
 
     # ---------- costs ----------
-    w("## 7. Cost and budget")
+    section("Cost and budget")
     w("")
     stress_calls = sum(b["calls_made"] for b in stress["budgets"].values())
     scored_calls = (sum(b["calls_made"] for b in scored["budgets"].values())
                     if scored else 0)
+
+    w("Stages that record a call budget in their own artifact:")
+    w("")
     w(f"- Stress tests: {stress_calls} model calls "
       f"({json.dumps({k: v['calls_made'] for k, v in stress['budgets'].items()})}).")
     if scored:
         w(f"- Scoring: {scored_calls} model calls "
           f"({json.dumps({k: v['calls_made'] for k, v in scored['budgets'].items()})}).")
-    w(f"- First pilot pass: 0 model calls — all 32 dossiers were empty and "
-      f"short-circuited.")
-    w(f"- **Total: {stress_calls + scored_calls} model calls**, against a cap of 300.")
+    if first_pass is not None:
+        _n = len(first_pass.get("dossiers", [])) or first_pass.get("dossiers_seen")
+        _d = (f"all {_n} dossiers" if _n is not None else "every dossier")
+        w(f"- First pilot pass: 0 model calls — {_d} came back empty and "
+          f"short-circuited before any judge was called.")
+    w("")
+
+    rows, _ = spend_rows(REPO)
+    if rows:
+        w("Stages that write a run manifest, with the reconciliation each "
+          "records. `attempted` equals `succeeded + cached + excluded + "
+          "failed` by construction, so a stage that failed on every item "
+          "cannot hide behind a call count:")
+        w("")
+        w("| Stage | Runs | Attempted | Succeeded | Cached | Excluded | Failed | Errors |")
+        w("|---|---|---|---|---|---|---|---|")
+        for r in rows:
+            errs = (", ".join(f"{k}={v}" for k, v in sorted(r["errors"].items()))
+                    or "—")
+            w(f"| `{r['stage']}` | {r['runs']} | {r['attempted']} | "
+              f"{r['succeeded']} | {r['cached']} | {r['excluded']} | "
+              f"{r['failed']} | {errs} |")
+        w("")
+        w("Repeated runs of a stage are summed. A superseded run spent quota "
+          "too, and this section answers what the pilot cost rather than how "
+          "many calls stand behind the final artifacts.")
+        w("")
+
+    manifest_attempts = sum(r["attempted"] for r in rows)
+    w(f"**Model calls: {stress_calls + scored_calls} from the budgeted stages, "
+      f"plus {manifest_attempts} attempts recorded across the manifested "
+      f"stages — {stress_calls + scored_calls + manifest_attempts} in total, "
+      f"against a cap of 300.**")
+    w("")
     w("- Subscription quota only. API billing was asserted off at start-up.")
     w("- Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and "
       "inventing a figure for the other arm would be a fabricated number.")
+    w("- **Human review time: 0 minutes so far.** The plan budgeted 60–90 "
+      "minutes for one batch covering the pairing relationship claims and a "
+      "sample of rationales for the grounding audit. None of it has happened, "
+      "so every real-life relationship claim in this report remains an "
+      "unverified candidate and the grounding audit remains automated-only.")
     w("")
 
     # ---------- assessment ----------
-    w("## 8. Do the estimates reflect substance, or source availability?")
+    section("Do the estimates reflect substance, or source availability?")
     w("")
     w("**Substance, where evidence exists. Availability decides whether it exists at all.**")
     w("")
@@ -784,7 +890,7 @@ def main() -> int:
       "behind terms that forbid this use.")
     w("")
 
-    w("## 9. What M0 did not establish")
+    section("What M0 did not establish")
     w("")
     w("- Nothing here is verified. Every relationship is a Wikidata candidate and "
       "every on-screen pairing is co-appearance only, with no romance evidence.")

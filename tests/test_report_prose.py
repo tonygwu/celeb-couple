@@ -140,3 +140,43 @@ def test_a_meaningful_date_is_never_stripped():
 def test_a_non_json_input_is_still_hashed():
     gen = _gen()
     assert gen.stable_bytes(b"raw bytes") == b"raw bytes"
+
+
+# --------------------------------------------------------------------------
+# Section numbering
+# --------------------------------------------------------------------------
+
+def test_sections_are_numbered_by_render_order():
+    """The numbers were typed into each heading, and after sections were added,
+    reordered and made conditional the report shipped TWO section 6s and ran
+    6, 6, 6e, 5, 5b, 6f, 6a, 6b, 6c, 6d, 6c-bis, 6g. A reader could not use
+    them to navigate."""
+    gen = _gen()
+    out = []
+    s = gen.Sections(out.append)
+    s.unnumbered("The answer first")
+    s("Cohort")
+    s("Records")
+    assert out == ["## The answer first", "## 1. Cohort", "## 2. Records"]
+
+
+def test_a_skipped_conditional_section_does_not_leave_a_gap():
+    """Whether a section renders depends on which artifacts exist. Typed
+    numbers left a hole; counted ones cannot."""
+    gen = _gen()
+    out = []
+    s = gen.Sections(out.append)
+    s("A")
+    # ...the section that would have been 2 has no artifact and is skipped...
+    s("C")
+    assert out == ["## 1. A", "## 2. C"]
+
+
+def test_the_committed_report_has_no_duplicate_or_out_of_order_sections():
+    """Optional: reads the committed report itself."""
+    import re
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    nums = [int(m) for m in re.findall(r"^## (\d+)\. ", text, re.M)]
+    assert nums == sorted(nums), f"sections out of order: {nums}"
+    assert len(nums) == len(set(nums)), f"duplicate section numbers: {nums}"
+    assert nums == list(range(1, len(nums) + 1)), f"gap in numbering: {nums}"
