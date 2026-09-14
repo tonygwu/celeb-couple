@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "standing estimate, one person, one period",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "dossier_id", "scored", "rationale", "evidence_ids", "support"],
+  "properties": {
+    "schema_version": {"const": "standing-estimate-2.0"},
+    "dossier_id": {"type": "string"},
+    "scored": {"type": "boolean"},
+    "estimate": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "null when scored is false. Never 0 to mean 'no evidence'."
+    },
+    "missingness_reason": {
+      "type": ["string", "null"],
+      "enum": ["no_observations", "all_rejected_in_review", "outside_adult_window",
+               "beyond_nearby_period_bound", "source_route_restricted", null]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Must cite the observation ids it rests on."
+    },
+    "evidence_ids": {"type": "array", "items": {"type": "string"}},
+    "band": {
+      "type": ["string", "null"],
+      "enum": ["90-100", "75-89", "60-74", "45-59", "25-44", null]
+    },
+    "support": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reliability", "specificity", "contemporaneity", "source_disagreement"],
+      "properties": {
+        "reliability": {"enum": ["major_publication", "minor_publication", "mixed", "unknown"]},
+        "specificity": {"enum": ["names_appearance_explicitly", "appearance_implied", "not_about_appearance"]},
+        "contemporaneity": {"enum": ["contemporaneous", "retrospective", "mixed"]},
+        "source_disagreement": {"type": "string"}
+      }
+    },
+    "excluded_considerations_confirmed": {
+      "type": "boolean",
+      "description": "True when fame, wealth, success and partners were kept out of the estimate."
+    }
+  }
+}
