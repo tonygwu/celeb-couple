@@ -250,11 +250,30 @@ def test_no_document_claims_cross_family_agreement_on_the_real_dossiers():
 
     tracked = subprocess.run(["git", "ls-files", "*.md"], cwd=repo,
                              capture_output=True, text=True, check=True).stdout.split()
-    # "families agree ... real dossiers" within a sentence.
+    # Stop at a semicolon as well as a full stop. The first version matched
+    # across one, and flagged the CORRECT sentence "Two model families agree
+    # closely on the SYNTHETIC corpus; on the real dossiers only one family
+    # ran" -- a false alarm from the guard written to catch the false claim,
+    # which is the failure mode that teaches people to ignore guards.
     pattern = re.compile(
-        r"families?\s+(?:agree|agreed)[^.]{0,80}real dossiers", re.I)
+        r"families?\s+(?:agree|agreed)[^.;]{0,80}real dossiers", re.I)
     offenders = [p for p in tracked if pattern.search((repo / p).read_text())]
     assert not offenders, (
         f"only {sorted(families)} scored the real dossiers, but these claim "
         f"cross-family agreement on them: {offenders}"
     )
+
+
+def test_the_cross_family_guard_catches_the_claim_it_was_written_for():
+    """And does not fire on the corrected sentence. A guard tested only against
+    a clean repository passes whether or not it works."""
+    import re
+    pattern = re.compile(
+        r"families?\s+(?:agree|agreed)[^.;]{0,80}real dossiers", re.I)
+
+    wrong = "Two model families agree closely on real dossiers."
+    assert pattern.search(wrong), "the guard must catch the claim it exists for"
+
+    right = ("Two model families agree closely on the SYNTHETIC corpus; on the "
+             "real dossiers only one family ran.")
+    assert not pattern.search(right), "and must not fire on the correction"
