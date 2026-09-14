@@ -225,3 +225,56 @@ def test_the_leave_one_out_range_is_reported_for_a_shape_that_has_a_floor():
         "the award shape has no measured floor; a leave-one-out on zeros says "
         "nothing and would look like a result"
     )
+
+
+def test_recompute_runs_end_to_end_without_spending_a_call(tmp_path):
+    """`--recompute` is the project's stated reproducibility mechanism —
+    "reproducibility comes from replaying stored responses" — and it corrected
+    the published noise floor twice tonight at no quota cost.
+
+    It was covered only by a grep of its own source, which would pass on code
+    that could not run. This executes it as a subprocess against a synthetic
+    artifact, with CELEB_ACCOUNT unset, so a path that tried to reach a model
+    would fail rather than quietly succeed.
+    """
+    import json
+    import subprocess
+    import sys as _sys
+    from pathlib import Path as _P
+
+    repo = _P(__file__).resolve().parent.parent
+    art = tmp_path / "noise.json"
+    art.write_text(json.dumps({
+        "contract": {"contract_id": "test"},
+        "repeats": 4,
+        "headline": {"stale": "this must be replaced"},
+        "targets": [
+            {"person": "A", "period": "2000", "shape": "ranked",
+             "runs": {"fable": [80.0, 80.0, 82.0, 82.0]},
+             "per_judge_sd": {"fable": 999.0}},      # deliberately wrong
+            {"person": "B", "period": "2000", "shape": "award",
+             "runs": {"fable": [92.0, 92.0, 92.0, 92.0]},
+             "per_judge_sd": {"fable": 999.0}},
+        ],
+    }))
+
+    env = {"PATH": "/usr/bin:/bin", "HOME": str(_P.home())}
+    r = subprocess.run(
+        [_sys.executable, str(repo / "scripts/measure_rater_noise.py"),
+         "--recompute", str(art)],
+        capture_output=True, text=True, cwd=repo, env=env, timeout=120)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "no model calls" in r.stdout
+
+    out = json.loads(art.read_text())
+    assert out["headline"].get("recomputed_from_stored_runs") is True
+    assert "stale" not in out["headline"], "the old headline must be replaced"
+
+    # The stored 999.0 must have been discarded and the SD rebuilt from runs.
+    import statistics
+    expected = statistics.stdev([80.0, 80.0, 82.0, 82.0])
+    assert out["targets"][0]["per_judge_sd"]["fable"] == expected
+    assert round(out["headline"]["by_shape"]["ranked"]["mean_within_judge_sd"],
+                 3) == round(expected, 3)
+    assert out["headline"]["by_shape"]["award"][
+        "least_significant_difference_95pct"] is None
