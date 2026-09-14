@@ -372,6 +372,7 @@ def main() -> int:
     robust = load("data/pilot/run/conclusion_robustness.json")
     srcver = load("data/pilot/run/observation_verification.json")
     relcorr = load("data/pilot/records/relationship_corroboration.json")
+    absence = load("data/pilot/run/absence_audit.json")
 
     L: list[str] = []
     w = L.append
@@ -1165,6 +1166,39 @@ def main() -> int:
           "Wikipedia itself carries is reproduced here and confirmed here. "
           "The check is that extraction was faithful, which is a smaller "
           "claim than the sources being right.*")
+        w("")
+
+    # ---------- absence ----------
+    # Placed with the other verification sections. "4 have none" appears in the
+    # answer-first paragraph as a bare count, and a bare count of absences is
+    # the most over-readable number in the report.
+    if absence and absence.get("rows"):
+        section("Why four people have no evidence at all")
+        w("")
+        _unreached = [r for r in absence["rows"]
+                      if r["verdict"] == "no_permitted_route_reaches_them"]
+        _gaps = [r for r in absence["rows"]
+                 if r["verdict"] == "named_somewhere_investigate"]
+        w(f"**{len(_unreached)} of {absence['checked']}**. Every source table "
+          f"was re-read in full — including the rows the pipeline discards — "
+          f"and none of them names "
+          + ", ".join(r["person"] for r in _unreached) + ". "
+          f"So the absence is a property of the reachable sources rather than "
+          f"of the search: there is nothing here that looking harder would "
+          f"find.")
+        w("")
+        if _gaps:
+            w(f"**{len(_gaps)} ARE named in a permitted source and still carry "
+              f"no observation**, which is a pipeline gap rather than a source "
+              f"gap: " + ", ".join(r["person"] for r in _gaps) + ".")
+            w("")
+        w("*What this does NOT establish. Wikipedia does not reproduce these "
+          "lists in full — it carries the single winner of Maxim's Hot 100 and "
+          "Esquire's Sexiest Woman Alive, and only the top ten of FHM's "
+          "hundred. Somebody absent from every table here could still have "
+          "placed 37th in a published list. The finding is that no permitted "
+          "ROUTE reaches evidence about them, never that no publication ever "
+          "rated them.*")
         w("")
 
     # ---------- relationship corroboration ----------

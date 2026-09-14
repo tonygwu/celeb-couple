@@ -52,6 +52,10 @@ if [[ "$MODE" == "free" || "$MODE" == "all" ]]; then
   # fetched under it wrong, and the fetchers above have already used them.
   run scripts/verify_identities.py
   run scripts/verify_observations.py
+  # Needs the merged corpus to know who has nothing. Separates "nobody looked"
+  # from "no permitted route reaches them", which is the difference between an
+  # invitation to look harder and a finding.
+  run scripts/absence_audit.py
   # Needs episodes.json. Feeds the review sheet in the reports pass, so it has
   # to run before it rather than beside it.
   run scripts/corroborate_relationships.py
