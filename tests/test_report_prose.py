@@ -535,3 +535,43 @@ def test_the_named_romance_results_match_the_artifact():
     assert "coerced_or_assault" not in text or any(
         c.get("classification") == "coerced_or_assault" for c in rom["candidates"]
     ), "the report names a classification no candidate carries"
+
+
+def test_the_limitations_section_does_not_deny_work_that_was_done():
+    """"What M0 did not establish" was a typed list and had gone stale in the
+    direction that UNDERSTATES the work. It said rater noise was not measured
+    while section 13 reported four repeats across six dossiers; that the offset
+    diagnostic had no board while section 14 ran it; and that every on-screen
+    pairing was co-appearance only with no romance evidence while section 12
+    confirmed eight reciprocal romances.
+
+    The honesty section being wrong is worse than any other section being
+    wrong, in either direction.
+    """
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "What M0 did not establish" not in text:
+        pytest.skip("report not generated in this clone")
+    tail = text[text.index("What M0 did not establish"):]
+    for denial in (
+        "Rater noise was not measured",
+        "has no board to run against",
+        "co-appearance only, with no romance evidence",
+    ):
+        assert denial not in tail, f"stale denial still present: {denial!r}"
+
+
+def test_the_limitations_section_still_names_the_real_gaps():
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "What M0 did not establish" not in text:
+        pytest.skip("report not generated in this clone")
+    tail = text[text.index("What M0 did not establish"):]
+    assert "grounding audit is not done" in tail
+    assert "Human verification has not happened" in tail
+    assert "unmeasured" in tail, "the single-family gap must survive"
+
+
+def test_a_list_valued_artifact_field_is_not_rendered_raw():
+    """`offset["people"]` is a list of names and rendered as "with
+    ['Ben Affleck', 'Brad Pitt'] people"."""
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    assert "['" not in text, "a Python list leaked into the rendered report"

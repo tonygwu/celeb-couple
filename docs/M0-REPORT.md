@@ -422,9 +422,10 @@ But which person-years have any evidence is decided entirely by which publishers
 
 ## 20. What M0 did not establish
 
-- Nothing here is verified. Every relationship is a Wikidata candidate and every on-screen pairing is co-appearance only, with no romance evidence.
-- The grounding audit is not done: a human still has to read the rationales and judge whether the cited observations support what they claim.
-- Rater noise was not measured by repeat scoring.
-- The cross-gender offset diagnostic has no board to run against yet.
-- Two judges from two families cannot separate a two-family idiosyncrasy from a property of the rubric.
+- **Human verification has not happened.** Every relationship remains a Wikidata candidate that no person has checked, and the plan budgeted 60-90 minutes for exactly that.
+  On-screen pairings ARE romance-filtered — 8 of 20 candidates are confirmed reciprocal romances from the plot text — so that is no longer an open item, but the filter is a model's reading of a Wikipedia summary, not a human's.
+- **The grounding audit is not done.** 34 rationales are flagged for a human to read and judge whether the cited observations support what they claim. The automated checks cannot establish that.
+- **Rater noise is measured but thin.** 4 repeats across 6 dossiers on 1 judge family. The award shape returned the same value every time, which cannot distinguish low variance from none, so no floor is quoted for it.
+- **The cross-gender offset diagnostic ran, on too small a board to be informative.** Cumulative ranks did not move over the tested range, but with 2 people and this little exposure spread that says the board is too small to be sensitive, not that it is robust.
+- **Cross-family agreement on the real dossiers is unmeasured.** Every estimate came from fable alone. The plan decided two families precisely so that a one-family idiosyncrasy could be told from a property of the rubric, and that check has not been run on real evidence.
 

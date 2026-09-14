@@ -1157,14 +1157,59 @@ def main() -> int:
 
     section("What M0 did not establish")
     w("")
-    w("- Nothing here is verified. Every relationship is a Wikidata candidate and "
-      "every on-screen pairing is co-appearance only, with no romance evidence.")
-    w("- The grounding audit is not done: a human still has to read the rationales "
-      "and judge whether the cited observations support what they claim.")
-    w("- Rater noise was not measured by repeat scoring.")
-    w("- The cross-gender offset diagnostic has no board to run against yet.")
-    w("- Two judges from two families cannot separate a two-family idiosyncrasy "
-      "from a property of the rubric.")
+    # This was a typed list, and it had gone stale in the direction that
+    # UNDERSTATES the work: it said rater noise was not measured, that the
+    # offset diagnostic had no board, and that every on-screen pairing was
+    # co-appearance only -- while sections above reported all three done. The
+    # honesty section being wrong is worse than any other section being wrong,
+    # so every line is now derived.
+    w("- **Human verification has not happened.** Every relationship remains a "
+      "Wikidata candidate that no person has checked, and the plan budgeted "
+      "60-90 minutes for exactly that.")
+    if romance:
+        _q = romance["counts"]["qualifying_romances"]
+        _c = romance["counts"]["candidates"]
+        w(f"  On-screen pairings ARE romance-filtered — {_q} of {_c} candidates "
+          f"are confirmed reciprocal romances from the plot text — so that is "
+          f"no longer an open item, but the filter is a model's reading of a "
+          f"Wikipedia summary, not a human's.")
+    if grounding:
+        _n = (grounding.get("counts") or {}).get("needing_human_read")
+        if _n:
+            w(f"- **The grounding audit is not done.** {_n} rationales are "
+              f"flagged for a human to read and judge whether the cited "
+              f"observations support what they claim. The automated checks "
+              f"cannot establish that.")
+    if noise:
+        _h = noise["headline"]
+        _shapes = _h.get("by_shape") or {}
+        _degenerate = _h.get("shapes_with_degenerate_sample") or []
+        w(f"- **Rater noise is measured but thin.** {noise['repeats']} repeats "
+          f"across {len(noise['targets'])} dossiers on "
+          f"{len(_h.get('judges_that_contributed') or [])} judge family. "
+          + (f"The {', '.join(_degenerate)} shape returned the same value every "
+             f"time, which cannot distinguish low variance from none, so no "
+             f"floor is quoted for it."
+             if _degenerate else ""))
+    if offset:
+        # offset["people"] is a LIST of names; it rendered as
+        # "with ['Ben Affleck', 'Brad Pitt'] people".
+        _people = offset.get("people") or []
+        _n_people = len(_people) if isinstance(_people, list) else _people
+        w(f"- **The cross-gender offset diagnostic ran, on too small a board to "
+          f"be informative.** Cumulative ranks did not move over the tested "
+          f"range"
+          + (f", but with {_n_people} people and this little exposure spread "
+             f"that says the board is too small to be sensitive, not that it "
+             f"is robust." if _n_people else "."))
+    if scored:
+        _contrib = sorted({j for r in scored["person_periods"] for j in r["judges"]})
+        if len(_contrib) < 2:
+            w(f"- **Cross-family agreement on the real dossiers is unmeasured.** "
+              f"Every estimate came from {_contrib[0] if _contrib else 'one'} "
+              f"alone. The plan decided two families precisely so that a "
+              f"one-family idiosyncrasy could be told from a property of the "
+              f"rubric, and that check has not been run on real evidence.")
     w("")
 
     out = REPO / "docs/M0-REPORT.md"
