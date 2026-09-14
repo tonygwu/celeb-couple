@@ -17,7 +17,7 @@
     "missingness_reason": {
       "type": ["string", "null"],
       "enum": ["no_observations", "all_rejected_in_review", "outside_adult_window",
-               "beyond_nearby_period_bound", "source_route_restricted", null]
+               "beyond_nearby_period_bound", "source_route_restricted"]
     },
     "rationale": {
       "type": "string",
@@ -27,7 +27,7 @@
     "evidence_ids": {"type": "array", "items": {"type": "string"}},
     "band": {
       "type": ["string", "null"],
-      "enum": ["90-100", "75-89", "60-74", "45-59", "25-44", null]
+      "enum": ["90-100", "75-89", "60-74", "45-59", "25-44"]
     },
     "support": {
       "type": "object",

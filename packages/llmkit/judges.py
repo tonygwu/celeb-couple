@@ -28,6 +28,7 @@ from packages.llmkit.taxonomy import (
     E_EMPTY,
     E_MODEL_MISMATCH,
     E_TIMEOUT,
+    E_TOOL_USE,
     classify_cli_failure,
 )
 
@@ -143,6 +144,9 @@ class ClaudeJudge:
                 proc = subprocess.run(
                     cmd, cwd=jail, env=self._env(), capture_output=True,
                     text=True, timeout=timeout,
+                    # The CLI waits 3s for stdin and then warns on stderr; closing
+                    # it makes the call deterministic instead of timing-dependent.
+                    stdin=subprocess.DEVNULL,
                 )
             except subprocess.TimeoutExpired as exc:
                 raise JudgeError(E_TIMEOUT, f"{self.name} exceeded {timeout}s") from exc
@@ -203,8 +207,11 @@ class GeminiJudge:
         with tempfile.TemporaryDirectory(prefix="celeb-judge-") as jail:
             try:
                 proc = subprocess.run(
-                    [self.binary, "-p", prompt, "--model", self.model],
+                    [self.binary, "-p", prompt, "--model", self.model,
+                     "--output-format", "json",
+                     "--print-timeout", f"{max(timeout - 60, 60)}s"],
                     cwd=jail, capture_output=True, text=True, timeout=timeout,
+                    stdin=subprocess.DEVNULL,
                 )
             except subprocess.TimeoutExpired as exc:
                 raise JudgeError(E_TIMEOUT, f"{self.name} exceeded {timeout}s") from exc
@@ -213,14 +220,41 @@ class GeminiJudge:
                 classify_cli_failure(proc.returncode, proc.stdout, proc.stderr),
                 f"{self.name} rc={proc.returncode} stderr={proc.stderr[:400]!r}",
             )
+        try:
+            payload = json.loads(proc.stdout)
+        except json.JSONDecodeError as exc:
+            raise JudgeError(E_EMPTY, f"{self.name} returned non-JSON envelope") from exc
+        if payload.get("status") != "SUCCESS":
+            raise JudgeError(
+                classify_cli_failure(1, proc.stdout, proc.stderr),
+                f"{self.name} status={payload.get('status')!r}",
+            )
+        denied = payload.get("denied_actions") or []
+        if denied and not (payload.get("response") or "").strip():
+            # Measured 2026-09-14: gemini-3.8-flash-high reaches for a shell tool,
+            # headless mode auto-denies it, and the turn ends with an empty
+            # response after spending thinking tokens. Granting the permission is
+            # not the fix -- a judge with filesystem access is not isolated from
+            # the corpus it is being kept away from.
+            raise JudgeError(
+                E_TOOL_USE,
+                f"{self.name} produced no answer after "
+                f"{[d.get('display_name') for d in denied]} was denied in headless mode",
+            )
+        usage = payload.get("usage", {}) or {}
         return JudgeResult(
-            text=proc.stdout,
+            text=payload.get("response", "") or "",
             telemetry={
                 "harness": "agy",
                 "requested_model": self.model,
+                # The envelope names no model, so the request model is echoed and
+                # the record says the identity was NOT verified rather than
+                # implying a check that did not happen.
                 "served_model": self.model,
-                # agy's plain -p output names no model, so we do not claim to
-                # have verified what served the request.
                 "served_model_verified": False,
+                "duration_ms": int(payload.get("duration_seconds", 0) * 1000),
+                "input_tokens": usage.get("input_tokens"),
+                "output_tokens": usage.get("output_tokens"),
+                "thinking_tokens": usage.get("thinking_tokens"),
             },
         )

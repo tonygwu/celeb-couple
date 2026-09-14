@@ -21,11 +21,12 @@ E_REFUSED = "judge_declined_to_score"
 E_BUDGET = "budget_cap_reached"
 E_ROUTE_RESTRICTED = "source_route_restricted"
 E_CITES_NOTHING = "rationale_cites_no_observation"
+E_TOOL_USE = "judge_attempted_tool_use"
 
 ALL_ERROR_TYPES: tuple[str, ...] = (
     E_CLI_NONZERO, E_TIMEOUT, E_EMPTY, E_NO_JSON, E_JSON_PARSE, E_SCHEMA,
     E_MODEL_MISMATCH, E_AUTH_QUOTA, E_TRANSIENT, E_REFUSED, E_BUDGET,
-    E_ROUTE_RESTRICTED, E_CITES_NOTHING,
+    E_ROUTE_RESTRICTED, E_CITES_NOTHING, E_TOOL_USE,
 )
 
 ErrorType = str
