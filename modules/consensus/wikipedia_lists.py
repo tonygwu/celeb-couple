@@ -31,7 +31,8 @@ from packages.ids.keys import content_sha256, stable_id
 from packages.schema.records import EvidenceType, Lineage, ListEdition, Observation
 from packages.temporal.dates import Precision, PreciseDate
 
-__all__ = ["AwardRow", "fetch_section_wikitext", "parse_award_table", "to_records"]
+__all__ = ["AwardRow", "TableStats", "fetch_section_wikitext", "parse_award_table",
+           "parse_award_table_with_stats", "to_records"]
 
 API = "https://en.wikipedia.org/w/api.php"
 USER_AGENT = (
@@ -42,6 +43,20 @@ USER_AGENT = (
 _DTS = re.compile(r"\{\{dts\|(\d{4})(?:\|(\d{1,2}))?(?:\|(\d{1,2}))?[^}]*\}\}")
 _LINK = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]+)?\]\]")
 _REF = re.compile(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>", re.S)
+
+
+@dataclass(frozen=True)
+class TableStats:
+    """How much of the table was read, so coverage has a visible denominator."""
+
+    row_blocks: int
+    parsed: int
+    skipped_no_date: int
+    skipped_no_link: int
+
+    @property
+    def skipped(self) -> int:
+        return self.skipped_no_date + self.skipped_no_link
 
 
 @dataclass(frozen=True)
@@ -66,15 +81,28 @@ def fetch_section_wikitext(page: str, section: int) -> tuple[str, str]:
 
 
 def parse_award_table(wikitext: str) -> list[AwardRow]:
+    return parse_award_table_with_stats(wikitext)[0]
+
+
+def parse_award_table_with_stats(wikitext: str) -> tuple[list[AwardRow], TableStats]:
     """Parse a two-or-three-column wikitable of date + winner.
 
-    Rows whose winner cell holds no wiki-link are skipped rather than guessed
-    at: a plain-text cell is usually a note, and inventing a name from one is
-    exactly the kind of quiet wrong answer this project is built to avoid.
+    Rows whose winner cell holds no wiki-link, or whose date cell holds no
+    date, are SKIPPED rather than guessed at. A plain-text cell is usually a
+    note, and inventing a name or a year from one is exactly the kind of quiet
+    wrong answer this project exists to avoid.
+
+    The commonest skip is a ``rowspan`` continuation row: when one year names
+    several people, only the first carries the date cell and the rest look
+    dateless. Measured on People's Most Beautiful table, that loses the two
+    continuation rows of the 2020 entry. Losing them is safe; MIS-DATING them
+    would not be. The count is returned so the loss is visible.
     """
     rows: list[AwardRow] = []
+    no_date = no_link = 0
     body = _REF.sub("", wikitext)
-    for block in body.split("\n|-"):
+    blocks = body.split("\n|-")
+    for block in blocks:
         cells = [c.strip() for c in block.split("\n|")[1:]]
         if len(cells) < 2:
             continue
@@ -90,13 +118,18 @@ def parse_award_table(wikitext: str) -> list[AwardRow]:
         else:
             bare = re.match(r"^\s*(\d{4})\s*$", cells[0])
             if not bare:
+                no_date += 1
                 continue
             value, prec, y = bare.group(1), Precision.YEAR, bare.group(1)
         link = _LINK.search(cells[1])
         if not link:
+            no_link += 1
             continue
         rows.append(AwardRow(int(y), value, prec, link.group(1).strip(), cells[1][:120]))
-    return rows
+    return rows, TableStats(
+        row_blocks=max(0, len(blocks) - 1), parsed=len(rows),
+        skipped_no_date=no_date, skipped_no_link=no_link,
+    )
 
 
 def to_records(

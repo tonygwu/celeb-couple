@@ -19,7 +19,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from modules.consensus.wikipedia_lists import (  # noqa: E402
-    fetch_section_wikitext, parse_award_table, to_records,
+    fetch_section_wikitext, parse_award_table_with_stats, to_records,
 )
 
 SOURCES = [
@@ -36,6 +36,17 @@ SOURCES = [
         "candidate_pool": "women in entertainment, chosen by the magazine; only the number one is reported here",
         "url": "https://en.wikipedia.org/wiki/Maxim_(magazine)#Maxim_Hot_100",
         "gender_served": "female",
+    },
+    {
+        "page": "People (magazine)", "section": 9,
+        "section_title": "100 Most Beautiful People",
+        "publisher": "PEOPLE", "award_name": "Most Beautiful cover choice",
+        "candidate_pool": (
+            "people worldwide, chosen editorially by the magazine for its annual "
+            "Beautiful Issue cover; mixed gender, though mostly women"
+        ),
+        "url": "https://en.wikipedia.org/wiki/People_(magazine)#100_Most_Beautiful_People",
+        "gender_served": "mixed",
     },
 ]
 
@@ -54,7 +65,7 @@ def main() -> int:
     all_editions, all_obs, source_notes = [], [], []
     for src in SOURCES:
         wikitext, sha = fetch_section_wikitext(src["page"], src["section"])
-        rows = parse_award_table(wikitext)
+        rows, stats = parse_award_table_with_stats(wikitext)
         editions, obs = to_records(
             rows, page=src["page"], section_title=src["section_title"],
             publisher=src["publisher"], award_name=src["award_name"],
@@ -70,8 +81,16 @@ def main() -> int:
             "years": [rows[0].year, rows[-1].year] if rows else [],
             "observations_for_cohort": len(obs),
             "content_sha256": sha,
+            "table_rows_in_wikitext": stats.row_blocks,
+            "rows_parsed": stats.parsed,
+            "rows_skipped": stats.skipped,
+            "skip_note": (
+                "skipped rows carry no date cell (usually a rowspan continuation "
+                "when one year names several people) or no wiki-link; they are "
+                "dropped rather than guessed at"
+            ) if stats.skipped else None,
         })
-        print(f"{src['award_name']:28} rows={len(rows):3} "
+        print(f"{src['award_name']:30} parsed={len(rows):3} skipped={stats.skipped} "
               f"cohort hits={len(obs)}  years={rows[0].year}-{rows[-1].year}")
 
     per_person = Counter(o.person_id for o in all_obs)
