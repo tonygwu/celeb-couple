@@ -40,6 +40,34 @@ SELECT ?p ?pLabel ?occLabel ?article WHERE {
 """
 
 
+def classify(*, has_evidence: bool, occupations: set[str],
+             has_article: bool) -> str:
+    """Which of the four eligibility statuses a partner falls into.
+
+    Extracted so the rule can be tested. It decides who this project MUST NOT
+    rate, which is the most consequential branch in the repository and had no
+    test of any kind.
+
+    Precedence, and why: evidence first, because someone already carrying a
+    published attractiveness judgment is by definition a public figure in this
+    respect. Then a public-facing occupation. Then a Wikipedia article, which
+    establishes notability but not that the person put their appearance in
+    public. Anything else is `not_a_public_figure_do_not_rate`.
+
+    Note the failure mode this gives: if the occupation lookup fails entirely,
+    everyone arrives with no occupations and no article and everyone is
+    classified DO NOT RATE. A broken fetch makes the project more cautious, not
+    less, which is the right direction for this particular question.
+    """
+    if has_evidence:
+        return "evidenced"
+    if occupations & PUBLIC_FACING:
+        return "public_figure_no_evidence_found"
+    if has_article:
+        return "notable_but_not_public_facing"
+    return "not_a_public_figure_do_not_rate"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="data/pilot/records/partner_eligibility.json")
@@ -66,16 +94,10 @@ def main() -> int:
         qid = p["wikidata_qid"]
         d = info.get(qid, {"occupations": set(), "article": None})
         occs = sorted(d["occupations"])
-        public_facing = bool(d["occupations"] & PUBLIC_FACING)
         has_article = bool(d["article"])
-        if qid in have:
-            status = "evidenced"
-        elif public_facing:
-            status = "public_figure_no_evidence_found"
-        elif has_article:
-            status = "notable_but_not_public_facing"
-        else:
-            status = "not_a_public_figure_do_not_rate"
+        status = classify(has_evidence=qid in have,
+                          occupations=d["occupations"],
+                          has_article=has_article)
         out.append({"name": p["display_name"], "qid": qid, "status": status,
                     "occupations": occs, "has_enwiki_article": has_article})
 
