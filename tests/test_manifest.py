@@ -108,3 +108,53 @@ def test_a_record_that_falls_through_every_bucket_is_caught(tmp_path):
         m.write(tmp_path)
     st.excluded = 3            # now they are accounted for
     m.write(tmp_path)
+
+
+# -- a failed record must be counted once ------------------------------------
+
+def test_a_fetch_failure_is_counted_as_failed_and_not_also_excluded():
+    """The bug this reproduces, found from a ZERO-BYTE file.
+
+    `data/pilot/manifests/20260914T085238Z-prose-mentions-5a9213c6.json.tmp`
+    was 0 bytes. `write()` opened the temp file and then called `as_dict()`,
+    which reconciles and raised, so the manifest was never written and the only
+    evidence of the failure was an empty file nobody looked at.
+
+    The cause: extract_prose_mentions.py records a fetch failure with
+    `record_failure("transient_retryable")` and then sets `text = ""`, so the
+    following `if not text:` ALSO fires `excluded += 1`. One attempted record,
+    two buckets:
+
+        attempted 1 but succeeded 0 + cached 0 + excluded 1 + failed 1 = 2
+
+    The `excluded` line was added earlier to stop a genuinely empty article
+    vanishing between attempted and the buckets. It was right for that case and
+    wrong for this one.
+    """
+    s = StageSummary(stage="extract")
+    s.attempted += 1
+    s.record_failure("transient_retryable")
+    with pytest.raises(ReconciliationError, match="double-counted"):
+        s.excluded += 1
+        s.reconcile()
+
+
+def test_an_empty_article_that_did_not_fail_is_excluded_once():
+    s = StageSummary(stage="extract")
+    s.attempted += 1
+    s.excluded += 1
+    s.reconcile()
+
+
+def test_write_leaves_no_temp_file_when_reconciliation_fails(tmp_path):
+    """A zero-byte .tmp is the worst possible record of a failure: it looks
+    like a stray file rather than a lost manifest."""
+    from pathlib import Path
+    m = RunManifest(stage_name="x", repo=Path("."), args={}, contracts={}, caps={})
+    s = m.stage("broken")
+    s.attempted = 1          # reconciles to 0, so as_dict() will raise
+    with pytest.raises(ReconciliationError):
+        m.write(tmp_path)
+    assert list(tmp_path.iterdir()) == [], (
+        f"left behind {[p.name for p in tmp_path.iterdir()]}"
+    )

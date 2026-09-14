@@ -81,6 +81,7 @@ def main() -> int:
     for p in cohort:
         name = p["display_name"]
         stage.attempted += 1
+        fetch_failed = False
         for attempt in range(3):
             try:
                 text, sha = extract_article(name)
@@ -88,10 +89,17 @@ def main() -> int:
             except Exception as exc:
                 if attempt == 2:
                     text, sha = "", ""
+                    fetch_failed = True
                     stage.record_failure("transient_retryable")
                     print(f"  FETCH FAIL {name}: {exc}")
                 else:
                     time.sleep(4 * (attempt + 1))
+        if fetch_failed:
+            # Already counted in `failed`. Falling through to the empty-text
+            # branch below counted it a second time as `excluded`, so the
+            # manifest failed to reconcile and was never written -- the only
+            # trace was a zero-byte .tmp file.
+            continue
         if not text:
             # Without this the record vanishes between `attempted` and the
             # buckets. The manifest's reconciliation caught exactly that: 22

@@ -147,11 +147,17 @@ class RunManifest:
 
     def write(self, out_dir: Path) -> Path:
         self.finished_at_utc = datetime.now(timezone.utc).isoformat()
+        # Serialise BEFORE touching the filesystem. as_dict() reconciles every
+        # stage and raises on a mismatch, and doing it inside the open() left a
+        # ZERO-BYTE .tmp behind -- which is the worst possible record of a
+        # failure, because it reads as a stray file rather than a lost
+        # manifest. One sat in data/pilot/manifests/ for hours.
+        payload = self.as_dict()
         out_dir.mkdir(parents=True, exist_ok=True)
         path = out_dir / f"{self.run_id}.json"
         tmp = path.with_suffix(".json.tmp")
         with open(tmp, "w") as fh:
-            json.dump(self.as_dict(), fh, indent=2, sort_keys=True)
+            json.dump(payload, fh, indent=2, sort_keys=True)
             fh.flush()
             os.fsync(fh.fileno())   # the rename orders only against flushed data
         os.replace(tmp, path)
