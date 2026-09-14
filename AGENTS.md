@@ -134,7 +134,15 @@ Use this instead, which is what the rest of this repository's tooling does:
 ```
 
 That is not a hypothetical. The pipeline form pushed a failing test twice in
-one night.
+one night, and it caught a third on 2026-09-14: `git push origin main | tail -3;
+echo "push RC=$?"` reported 0 while the push had not happened, and the clone sat
+one commit ahead with a green-looking result.
+
+**Do not run two `pytest tests` invocations at once.** The suite takes about 13
+seconds. Two concurrent runs, plus a git operation, took 17 and 34 minutes on
+2026-09-14 and looked exactly like a performance regression. Collection is
+0.43s and no single test exceeds 2.9s, so if the suite ever seems slow, check
+what else is running before looking for the cause in the code.
 
 ## Checking that the reports reproduce
 
