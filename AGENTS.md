@@ -53,10 +53,26 @@ Your checkout name is your **handle**. Use it when you claim work.
    behind for more than a day, gets surfaced to the operator. Never let it
    accumulate quietly.
 
-6. **Committed code must run from any checkout.** Never write a
-   checkout-absolute path into committed code. Derive the repo root at
-   runtime: `git rev-parse --show-toplevel`, or `Path(__file__).resolve()` in
-   Python. A hardcoded path is correct in one checkout and wrong in three.
+6. **Committed code must run from any checkout, any machine, any
+   environment.** Never write a checkout-absolute path into committed code.
+   Derive the repo root at runtime: `git rev-parse --show-toplevel`, or
+   `Path(__file__).resolve()` in Python. A hardcoded path is correct in one
+   checkout and wrong in three.
+
+   Two other flavours of the same defect, both found in this repository:
+
+   - **A home-absolute path.** All six quota-spending scripts defaulted
+     `--account` to `/Users/tonygwu/.claude-e`, which exists on one machine
+     and, on the night it was found, had 0% quota left. Use
+     `packages/llmkit/accounts.py`, which refuses rather than guessing.
+   - **A path that exists here and not in CI.** Three tests spawned
+     `repo/.venv/bin/python`. CI installs with setup-python and has no
+     `.venv`, so all three would have failed on its first run — and CI has
+     never run, so nobody found out. Use `sys.executable`.
+
+   The test for the first is that a fresh clone on another machine works. For
+   the second it is `python3 -m venv` plus plain `pip install -r
+   requirements.txt`, which is what the workflow does.
 
 7. **A refusing hook is another agent talking to you.** Read its text and the
    sentinel file it names. Never `--no-verify`, never delete the hook.
