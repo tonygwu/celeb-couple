@@ -404,6 +404,22 @@ fired on a downstream number. Neither would have surfaced on its own.
   private, so going public is not the workaround.
 
   Until then **the real gate is local**: `.venv/bin/python -m pytest tests -q`.
-  **Difficulty: blocked on the operator.**
+
+  **The workflow file itself is no longer untested** (2026-09-14). It cannot be
+  run, so it is checked instead. `tests/test_ci_workflow.py` asserts the parts
+  that would silently stop the gate from gating: `python -m pytest` rather than
+  a bare `pytest` off PATH, an install from `requirements.txt` that exists, no
+  pipe or `|| true` swallowing pytest's exit status, a pinned 3.12, a trigger
+  that fires, and no test in the suite making a live HTTP call. Each is
+  mutation-tested.
+
+  The workflow was also simulated end to end by hand: a fresh clone,
+  `python3 -m venv`, `pip install -r requirements.txt`, `python -m pytest tests
+  -q` exits 0 with 656 passed and 49 skipped -- and exits 0 again with the
+  network blocked behind an unroutable proxy, which is what the workflow's
+  "offline and deterministic" comment claims.
+
+  So when billing is cleared, the first run should be green rather than a
+  surprise. **Difficulty: still blocked on the operator, but only on billing.**
 - **No page-weight or export tooling**, because there is no site yet.
   **Difficulty: deferred until there is a board worth rendering.**
