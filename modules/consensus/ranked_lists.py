@@ -68,7 +68,12 @@ def parse_ranked_table(
     body = _REF.sub("", wikitext)
     entries: list[RankedEntry] = []
     stats = {"blocks": 0, "years_found": 0, "no_year": 0, "no_winner": 0,
-             "runner_up_positions": 0}
+             "runner_up_positions": 0,
+             # How often each heuristic was actually load-bearing. Without
+             # these, a run whose every winner came from the ambiguous
+             # fallback looked identical to one where every winner was bold.
+             "winner_from_fallback": 0,
+             "rank_beyond_declared_length": 0}
 
     for block in body.split("\n|-"):
         stats["blocks"] += 1
@@ -89,13 +94,20 @@ def parse_ranked_table(
             alt = _ANY_LINK.search(block)
             if alt:
                 entries.append(RankedEntry(year, 1, alt.group(1).strip(), True))
+                stats["winner_from_fallback"] += 1
             else:
                 stats["no_winner"] += 1
 
         seen_ranks = {1}
         for rank_s, name in ORDINAL.findall(block):
             rank = int(rank_s)
-            if rank in seen_ranks or rank > list_length:
+            if rank > list_length:
+                # Correct to skip -- the source says how long its list is --
+                # but skipping silently made a table that disagrees with its
+                # declared length look like one that simply stopped early.
+                stats["rank_beyond_declared_length"] += 1
+                continue
+            if rank in seen_ranks:
                 continue
             seen_ranks.add(rank)
             entries.append(RankedEntry(year, rank, name.strip(), False))

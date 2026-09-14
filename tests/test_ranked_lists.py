@@ -89,3 +89,39 @@ def test_ranked_observations_carry_the_order_basis_that_justifies_the_rank():
 def test_the_ordinal_pattern_does_not_match_a_file_link():
     assert ORDINAL.findall("3rd: [[File:x.jpg|thumb]]") == []
     assert ORDINAL.findall("3rd: [[Ada Vance]]") == [("3", "Ada Vance")]
+
+
+# -- the parser must report which heuristics it leaned on --------------------
+
+def test_a_winner_taken_from_the_fallback_link_is_counted():
+    """When a block has no bold link the parser takes the first non-File link
+    and records that person as rank 1 -- the top of the list. That is a
+    structural assumption about the table, and a run where every winner came
+    from it looked identical in `stats` to one where every winner was
+    explicitly bold.
+
+    The same class as the rest of tonight's finds: a heuristic that can put the
+    wrong person first, with nothing saying it was used.
+    """
+    wikitext = "\n|-\n! 2001\n| [[Some Person]]\n"
+    entries, stats = parse_ranked_table(wikitext, list_length=100)
+    assert any(e.rank == 1 for e in entries)
+    assert stats["winner_from_fallback"] == 1
+
+
+def test_a_bold_winner_is_not_counted_as_a_fallback():
+    wikitext = "\n|-\n! 2001\n| '''[[Some Person]]'''\n"
+    entries, stats = parse_ranked_table(wikitext, list_length=100)
+    assert stats["winner_from_fallback"] == 0
+
+
+def test_ranks_beyond_the_declared_length_are_counted_not_just_dropped():
+    """A rank past the source's stated list length is skipped, correctly. It
+    was skipped SILENTLY, so a table disagreeing with its declared length
+    looked like a table that simply stopped early."""
+    wikitext = ("\n|-\n! 2001\n| '''[[Winner]]'''\n"
+                "* <small>2nd: [[Second]]</small>\n"
+                "* <small>15th: [[Fifteenth]]</small>\n")
+    entries, stats = parse_ranked_table(wikitext, list_length=10)
+    assert stats["rank_beyond_declared_length"] == 1
+    assert all(e.rank <= 10 for e in entries)

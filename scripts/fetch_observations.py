@@ -166,10 +166,19 @@ def main() -> int:
             "observations_for_cohort": len(obs),
             "content_sha256": sha,
             "rows_skipped": stats["no_year"] + stats["no_winner"],
+            # How often each parsing heuristic was load-bearing. A winner taken
+            # from the fallback link is a structural guess that puts someone at
+            # rank 1, and it used to be invisible.
+            "winner_from_fallback": stats["winner_from_fallback"],
+            "rank_beyond_declared_length": stats["rank_beyond_declared_length"],
         })
         print(f"{src['list_title']:30} entries={len(entries):3} "
               f"ranked={stats['runner_up_positions']} cohort hits={len(obs)}  "
-              f"years={years[0]}-{years[-1]}")
+              f"years={years[0]}-{years[-1]}"
+              + (f"  fallback_winners={stats['winner_from_fallback']}"
+                 if stats["winner_from_fallback"] else "")
+              + (f"  beyond_length={stats['rank_beyond_declared_length']}"
+                 if stats["rank_beyond_declared_length"] else ""))
 
     per_person = Counter(o.person_id for o in all_obs)
     by_gender = Counter(gender.get(o.person_id, "?") for o in all_obs)
