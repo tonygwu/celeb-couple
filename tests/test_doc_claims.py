@@ -161,3 +161,17 @@ def test_regenerating_the_report_over_unchanged_artifacts_is_a_no_op():
         "regenerating over unchanged artifacts changed the file; the report's "
         "identity must be its input fingerprint, not the wall clock"
     )
+
+
+def test_the_gender_confound_numbers_match_the_artifact():
+    blob = _artifact("data/pilot/run/gender_shape_confound.json")
+    for rel in ("README.md", "docs/THE-TRAP.md"):
+        md = _doc(rel)
+        offset = blob["mean_offset_male_minus_female"]
+        assert str(offset) in md, f"{rel} should state the {offset}-point offset"
+    male_ranked = blob["observations_by_gender_and_shape"].get("male", {}).get(
+        "ordered_rank", 0)
+    assert male_ranked == 0, (
+        "THE-TRAP.md claims men hold zero ranked observations; the artifact "
+        f"now says {male_ranked}, so the document is stale"
+    )

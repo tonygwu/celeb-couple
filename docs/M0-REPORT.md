@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `f071e9a3cde0`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `2ecb248e5b47`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: regenerating it over unchanged artifacts produces an identical file, so a diff means the numbers moved.
 
@@ -235,7 +235,23 @@ Two things follow. Widening the bound from ±1 to ±2 would triple joint coverag
 
 *This measures what the bound costs. It is NOT an argument for widening it: a wider bound reuses an estimate further from the period it is supposed to describe, which is the manufactured precision the bound exists to prevent.*
 
-## 5a. The most serious bias: evidence shape drives the estimate
+## 5. The confound is aligned with gender
+
+| Gender | `editorial_award` | `ordered_rank` | `unordered_inclusion` |
+|---|---|---|---|
+| male | 8 | **0** | 1 |
+| female | 11 | **12** | 3 |
+
+| Gender | n | mean | SD | range |
+|---|---|---|---|---|
+| male | 8 | **91.0** | 3.04 | 83.0–93.0 |
+| female | 26 | **87.35** | 6.7 | 66.0–93.0 |
+
+Men hold 0 ranked observations and women 12. Because an award pins near the top of the scale and a ranked placement does not, that imbalance puts the male mean 3.65 points above the female mean before any fact about any individual enters. Every mixed-gender pairing therefore carries roughly that offset built in, in the same direction, and a signed gap that size is a statement about publishing rather than about the couple.
+
+**A four-view product compares a man against a woman in every row. With the shapes distributed this unevenly, the sign of a typical gap is decided by which sex the person is, not by the judgments. This has to be disclosed on every row, or the board reports a publishing artifact as a finding about people.**
+
+## 5b. Evidence shape drives the estimate
 
 **Evidence type alone explains 46% of the variance in the estimates** (eta-squared 0.46).
 

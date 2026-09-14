@@ -55,6 +55,7 @@ def main() -> int:
     align = load("data/pilot/run/alignment_gap.json")
     elig = load("data/pilot/records/partner_eligibility.json")
     shape_conf = load("data/pilot/run/shape_confound.json")
+    gsc = load("data/pilot/run/gender_shape_confound.json")
 
     L: list[str] = []
     w = L.append
@@ -388,9 +389,33 @@ def main() -> int:
         w(f"*{align['caveat']}*")
         w("")
 
+    # ---------- gender-aligned confound ----------
+    if gsc:
+        w("## 5. The confound is aligned with gender")
+        w("")
+        w("| Gender | `editorial_award` | `ordered_rank` | `unordered_inclusion` |")
+        w("|---|---|---|---|")
+        for g in ("male", "female"):
+            c = gsc["observations_by_gender_and_shape"].get(g, {})
+            w(f"| {g} | {c.get('editorial_award', 0)} | "
+              f"**{c.get('ordered_rank', 0)}** | {c.get('unordered_inclusion', 0)} |")
+        w("")
+        w("| Gender | n | mean | SD | range |")
+        w("|---|---|---|---|---|")
+        for g in ("male", "female"):
+            e = gsc["estimates_by_gender"].get(g)
+            if e:
+                w(f"| {g} | {e['n']} | **{e['mean']}** | {e['sd']} | "
+                  f"{e['min']}–{e['max']} |")
+        w("")
+        w(gsc["reading"])
+        w("")
+        w(f"**{gsc['consequence']}**")
+        w("")
+
     # ---------- shape confounding ----------
     if shape_conf:
-        w("## 5a. The most serious bias: evidence shape drives the estimate")
+        w("## 5b. Evidence shape drives the estimate")
         w("")
         w(f"**Evidence type alone explains "
           f"{round((shape_conf['eta_squared_shape_explains'] or 0) * 100)}% of the "
