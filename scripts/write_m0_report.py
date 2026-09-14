@@ -271,10 +271,28 @@ class Sections:
     def __init__(self, write):
         self._w = write
         self._n = 0
+        #: title -> number, so a cross-reference can be resolved instead of
+        #: typed. A typed "section 6b" survived the renumbering and pointed at
+        #: nothing; typed numbers that happen to be right today drift the
+        #: moment a section is inserted above them.
+        self.numbers: dict[str, int] = {}
 
     def __call__(self, title: str) -> None:
         self._n += 1
+        self.numbers[title] = self._n
         self._w(f"## {self._n}. {title}")
+
+    def ref(self, *titles: str) -> str:
+        """Render "section N" / "sections N and M" for titles already emitted."""
+        nums = [self.numbers[t] for t in titles if t in self.numbers]
+        if not nums:
+            return "above"
+        if len(nums) == 1:
+            return f"section {nums[0]}"
+        if len(nums) == 2:
+            return f"sections {nums[0]} and {nums[1]}"
+        return ("sections " + ", ".join(str(n) for n in nums[:-1])
+                + f" and {nums[-1]}")
 
     def unnumbered(self, title: str) -> None:
         self._w(f"## {title}")
@@ -1224,6 +1242,50 @@ def main() -> int:
       "an annual one-winner prize reported on Wikipedia since 1985, and the women's "
       "equivalent is a single number-one per year since 2000. Everything deeper sits "
       "behind terms that forbid this use.")
+    w("")
+
+    # ---------- against the plan ----------
+    section("Against the plan's M0 deliverables")
+    w("")
+    w("The plan's section 8.2 lists six things M0 should produce. Where each "
+      "one is, and whether it is done:")
+    w("")
+    w("| # | Deliverable | Where | Done |")
+    w("|---|---|---|---|")
+    _rows = [
+        ("1", "The revised rubric and the access decisions",
+         "`rubrics/standing/RUBRIC.md`, " + section.ref("Source access decisions"),
+         "yes" if stress else "rubric present, access decisions above"),
+        ("2", "Dossiers, estimates, support, rationales, exclusions, lineage",
+         "`data/pilot/run/evidenced_scores.json`, "
+         + section.ref("Scored person-periods and pairing contributions",
+                         "Grounding audit"),
+         f"yes — {len(scored['person_periods'])} person-periods"
+         if scored else "no scores"),
+        ("3", "VERIFIED pairings, with mirrored contribution arithmetic",
+         section.ref("Scored person-periods and pairing contributions")
+         + "; `docs/RELATIONSHIP-REVIEW.md` for the verification",
+         "arithmetic yes, mirrors exact; **verification NOT done** — it needs "
+         "a person, and the sheet is ready"),
+        ("4", "Person-period and joint pairing-period coverage, with failures",
+         section.ref("Coverage, the two numbers that matter",
+                     "Why joint coverage does not move") + ", and the near-miss list",
+         "yes"),
+        ("5", "Stress tests, offset diagnostic, actual costs, review minutes",
+         section.ref("Measurement stress tests", "Cross-gender offset sensitivity",
+                     "Cost and budget"),
+         "yes — review minutes are **0**, stated"),
+        ("6", "An assessment: substance, or source availability?",
+         section.ref("Do the estimates reflect substance, or source availability?"),
+         "yes"),
+    ]
+    for n, what, where, done in _rows:
+        w(f"| {n} | {what} | {where} | {done} |")
+    w("")
+    w("**One deliverable is outstanding and it is the one only a person can "
+      "do.** Everything else is here. The two review sheets each lead with the "
+      "entries that carry a published conclusion, so the load-bearing part of "
+      "the work is the first part encountered.")
     w("")
 
     section("What M0 did not establish")

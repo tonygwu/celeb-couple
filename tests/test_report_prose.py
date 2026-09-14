@@ -737,3 +737,53 @@ def test_the_stress_prose_arm_still_matches_the_rubric_example():
             "S2 no longer reuses the calibration example; the report's "
             "explanation of the overlap is now stale"
         )
+
+
+def test_section_cross_references_resolve_to_the_right_section():
+    """The earlier guard only checked that a referenced number EXISTS. The
+    deliverables table referenced sections 2, 4, 5, 6, 8, 14, 15, 18 and 19 by
+    number — all correct on the day, and all of them would silently point
+    somewhere else the moment a section was inserted above them.
+
+    References are resolved from the title now, through the same helper that
+    assigns the numbers, so they cannot disagree.
+    """
+    gen = _gen()
+    out = []
+    s = gen.Sections(out.append)
+    s("Alpha")
+    s("Beta")
+    s("Gamma")
+    assert s.ref("Beta") == "section 2"
+    assert s.ref("Alpha", "Gamma") == "sections 1 and 3"
+    assert s.ref("Alpha", "Beta", "Gamma") == "sections 1, 2 and 3"
+
+
+def test_an_unknown_title_degrades_to_above_rather_than_a_wrong_number():
+    gen = _gen()
+    s = gen.Sections([].append)
+    s("Alpha")
+    assert s.ref("Nonexistent") == "above"
+
+
+def test_the_deliverables_table_points_at_the_right_headings():
+    """Checks the rendered report, not the helper: each referenced number must
+    name a heading whose title matches what the row is about."""
+    import re
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "Against the plan's M0 deliverables" not in text:
+        pytest.skip("report not generated in this clone")
+    headings = {int(n): title for n, title in
+                re.findall(r"^## (\d+)\. (.+)$", text, re.M)}
+    table = text[text.index("Against the plan's M0 deliverables"):]
+    expect = {
+        "revised rubric": "Source access decisions",
+        "An assessment": "Do the estimates reflect substance",
+    }
+    for row_marker, want in expect.items():
+        row = next(l for l in table.splitlines() if row_marker in l)
+        nums = [int(n) for n in re.findall(r"section[s]? ([\d, and]+)", row)[0]
+                .replace("and", ",").split(",") if n.strip()]
+        assert any(want in headings[n] for n in nums), (
+            f"row {row_marker!r} points at {[headings[n] for n in nums]}, "
+            f"expected one to be {want!r}")
