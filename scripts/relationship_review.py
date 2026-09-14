@@ -49,7 +49,9 @@ def build(episodes: dict, joint: dict | None) -> tuple[list[dict], set[str]]:
         rows.append({
             "episode_id": ep["episode_id"],
             "subject": ep["subject_name"],
+            "subject_qid": ep["subject_qid"],
             "partner": ep["partner_label"],
+            "partner_qid": ep["partner_qid"],
             "stages": ep["stages"],
             "start": _date(ep.get("start")),
             "end": "ongoing" if ep.get("ongoing") else _date(ep.get("end")),
@@ -100,6 +102,14 @@ def main() -> int:
     for r in rows:
         flag = " — **LOAD-BEARING**" if r["load_bearing"] else ""
         L += [f"## {r['subject']} + {r['partner']}{flag}", "",
+              # The statement lives on the subject's Wikidata page. The sheet
+              # said only whether a reference EXISTS; a reviewer then had to
+              # find the page themselves for every one of 31 rows.
+              f"- Wikidata: "
+              f"[{r['subject']} ({r['subject_qid']})]"
+              f"(https://www.wikidata.org/wiki/{r['subject_qid']})"
+              f" · [{r['partner']} ({r['partner_qid']})]"
+              f"(https://www.wikidata.org/wiki/{r['partner_qid']})",
               f"- stages: {', '.join(r['stages'])}",
               f"- start: {r['start']}   end: {r['end']}",
               f"- Wikidata reference on the statement: "

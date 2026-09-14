@@ -86,10 +86,12 @@ def _relreview():
 
 EPISODES = {"episodes": [
     {"episode_id": "e1", "subject_name": "A", "partner_label": "B",
+     "subject_qid": "Q1", "partner_qid": "Q2",
      "stages": ["spouse"], "start": {"value": "2000", "precision": "year"},
      "end": {"value": "2005", "precision": "year"}, "has_reference": True,
      "scorable": True, "defects": [], "ongoing": False, "exclusion_reason": None},
     {"episode_id": "e2", "subject_name": "C", "partner_label": "D",
+     "subject_qid": "Q3", "partner_qid": "Q4",
      "stages": ["unmarried_partner"], "start": None, "end": None,
      "has_reference": False, "scorable": False, "ongoing": False,
      "defects": [{"kind": "no_start_date", "detail": "no candidate carries one"}],
@@ -145,3 +147,35 @@ def test_the_generated_sheet_covers_every_episode():
     assert len(re.findall(r"^## ", md.read_text(), re.M)) == n, (
         "the sheet must list every episode; review is not sampling"
     )
+
+
+def test_every_row_links_to_both_wikidata_pages():
+    """The sheet said only whether a reference EXISTS. A reviewer then had to
+    find the page themselves for every one of 31 rows, which is the mechanical
+    half of a task whose judgment half is the point."""
+    import json
+    import re
+    md = REPO / "docs/RELATIONSHIP-REVIEW.md"
+    eps = REPO / "data/pilot/records/episodes.json"
+    if not (md.exists() and eps.exists()):
+        pytest.skip("needs the generated sheet and the episodes artifact")
+
+    text = md.read_text()
+    for ep in json.loads(eps.read_text())["episodes"]:
+        for qid in (ep["subject_qid"], ep["partner_qid"]):
+            assert f"https://www.wikidata.org/wiki/{qid}" in text, (
+                f"{qid} has no link on the sheet")
+
+
+def test_a_qid_is_never_rendered_as_a_persons_name():
+    """Two partners once came back as bare Q-ids because they have no English
+    Wikidata label. A review sheet showing "Q13909 + Ben Affleck" asks a person
+    to confirm a relationship with an identifier."""
+    import re
+    md = REPO / "docs/RELATIONSHIP-REVIEW.md"
+    if not md.exists():
+        pytest.skip("needs the generated sheet")
+    headings = re.findall(r"^## (.+?)(?: — \*\*LOAD-BEARING\*\*)?$",
+                          md.read_text(), re.M)
+    bare = [h for h in headings if re.search(r"(?:^|\s)Q\d+(?:\s|$)", h)]
+    assert not bare, f"unresolved Q-ids used as names on the review sheet: {bare}"
