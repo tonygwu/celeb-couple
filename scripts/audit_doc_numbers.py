@@ -111,6 +111,44 @@ RULES: tuple[Rule, ...] = (
         pattern=r"[Ww]omen hold (\d+)",
         why="one half of the ranked-observation imbalance",
     ),
+    # --- roster-scale quantities -------------------------------------------
+    # These read a different corpus than the pilot rules above. Their patterns
+    # all name "roster", "scorable relationship" or "of 239", so they cannot
+    # match a pilot document by accident and need no skip list.
+    Rule(
+        name="roster_observations",
+        artifact="data/roster100/run/reachable.json",
+        extract=lambda d: d["corpus"]["observations"],
+        render=str,
+        pattern=r"(\d+) observations over \d+ of \d+ roster people",
+        why="the size of the 100-name roster corpus",
+    ),
+    Rule(
+        name="roster_people_with_evidence",
+        artifact="data/roster100/run/reachable.json",
+        extract=lambda d: d["corpus"]["roster_people_with_evidence"],
+        render=str,
+        pattern=r"\d+ observations over (\d+) of \d+ roster people",
+        why="how many of the 100 roster names carry any evidence at all",
+    ),
+    Rule(
+        name="scorable_episodes",
+        artifact="data/roster100/run/reachable.json",
+        extract=lambda d: d["corpus"]["scorable_episodes"],
+        render=str,
+        pattern=r"(\d+) scorable relationship episodes",
+        why="the denominator every reachable-product option is measured against",
+    ),
+    Rule(
+        name="coverage_saturation",
+        artifact="data/roster100/run/source_requirement.json",
+        # The curve flattens: 22 covered episodes at 100 names/year and still 22
+        # at 400. The ceiling is the maximum median, not the last rung.
+        extract=lambda d: max(r["median_covered"] for r in d["ladder"]),
+        render=str,
+        pattern=r"about (\d+) of 239 episodes",
+        why="the ceiling this design reaches even with a perfect source",
+    ),
     Rule(
         name="ranked_lsd",
         artifact="data/pilot/run/rater_noise.json",

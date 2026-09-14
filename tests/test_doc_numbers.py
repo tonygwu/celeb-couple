@@ -100,6 +100,10 @@ def test_every_rule_matches_the_text_it_claims_to_match():
         "female_ranked_observations": "Women hold 99 ranked observations",
         "real_distinct_values": "It now produces 99 across a range of 30.0",
         "ranked_lsd": "against an LSD of 99.9",
+        "roster_observations": "Corpus: 99 observations over 49 of 100 roster people",
+        "roster_people_with_evidence": "131 observations over 99 of 100 roster people",
+        "scorable_episodes": "and 99 scorable relationship episodes",
+        "coverage_saturation": "is about 99 of 239 episodes",
     }
     assert set(samples) == {r.name for r in mod.RULES}, (
         "a new rule was added without a sample proving its pattern matches"
@@ -145,3 +149,27 @@ def test_the_historical_pooled_figure_is_not_reported_as_stale():
                   "measured variance with the ranked dossier's.")
     assert mod.find_mismatches(
         _rule(mod, "ranked_lsd"), "2.4", {"docs/THE-TRAP.md": historical}) == []
+
+
+def test_a_roster_rule_cannot_match_a_pilot_sentence():
+    """The two corpora have different denominators. The roster patterns all name
+    "roster", "scorable relationship" or "of 239" so they cannot fire on a
+    pilot document, which is why they need no skip list."""
+    mod = _mod()
+    pilot_prose = {"README.md": (
+        "the permitted sources yielded 41 observations over 9 of 14 people, "
+        "and the corpus holds 31 episodes")}
+    for name in ("roster_observations", "roster_people_with_evidence",
+                 "scorable_episodes", "coverage_saturation"):
+        assert mod.find_mismatches(_rule(mod, name), "0", pilot_prose) == [], name
+
+
+def test_a_rule_whose_artifact_key_vanished_fails_loudly():
+    """Caught in the act: `coverage_saturation` was written against a key named
+    `rungs` and the artifact calls it `ladder`. It raised KeyError rather than
+    quietly extracting nothing and reporting the docs clean."""
+    import pytest as _pytest
+    mod = _mod()
+    rule = _rule(mod, "coverage_saturation")
+    with _pytest.raises(KeyError):
+        rule.extract({"not_the_ladder": []})
