@@ -29,7 +29,10 @@ The measurement works. The evidence does not support the product as specified.
 - Two model families agree closely on real dossiers, and repeat-scoring puts the
   least significant difference at about 1.2 points.
 - Evidence **density** was the first bottleneck: every dossier once held exactly
-  one observation, so the corpus produced two distinct values. It now produces six.
+  one observation, so the corpus produced 2 distinct values across a 5.5-point
+  range. It now produces 10 across a range of 29.0
+  (64.0–93.0), which matches the synthetic stress corpus's range of
+  29. The measurement apparatus is no longer the limiting factor.
 - Evidence **shape** explains 42% of the estimate. An award pins near 92 by
   construction; ranked placements spread lower.
 - **Coverage does not scale.** Going from 14 people to 100 gave 3.7x the
