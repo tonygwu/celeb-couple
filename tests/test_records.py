@@ -242,3 +242,17 @@ def test_list_edition_requires_its_candidate_pool_described():
     with pytest.raises(SchemaError, match="candidate_set_described"):
         ListEdition(candidate_set_described="", **kw)
     assert ListEdition(candidate_set_described="women in English-language film", **kw)
+
+
+def test_an_unstated_list_size_is_none_and_never_zero():
+    """A prose mention rarely states a size. Recording that as 0 rendered to the
+    judge as 'a set of 0 names', which is not merely odd but misleading about how
+    selective the list was. One real scored observation carried it."""
+    ok = _obs(EvidenceType.UNORDERED_INCLUSION, {"list_length": None})
+    assert ok.observed["list_length"] is None
+    with pytest.raises(SchemaError, match="not a real size"):
+        _obs(EvidenceType.UNORDERED_INCLUSION, {"list_length": 0})
+    with pytest.raises(SchemaError, match="not a real size"):
+        _obs(EvidenceType.UNORDERED_INCLUSION, {"list_length": -3})
+    with pytest.raises(SchemaError, match="list_length is required"):
+        _obs(EvidenceType.UNORDERED_INCLUSION, {})

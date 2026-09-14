@@ -154,8 +154,20 @@ def _check_unordered_inclusion(o: Observation) -> None:
             f"{o.observation_id}: an unordered_inclusion observation may not "
             "carry a rank. Do not invent an order the source did not state."
         )
-    if not isinstance(o.observed.get("list_length"), int):
-        raise SchemaError(f"{o.observation_id}: list_length is required")
+    if "list_length" not in o.observed:
+        raise SchemaError(
+            f"{o.observation_id}: list_length is required; use None when the "
+            "source does not state a size"
+        )
+    length = o.observed["list_length"]
+    if length is None:
+        return                      # "size not stated" is a legitimate value
+    if not isinstance(length, int) or length < 1:
+        raise SchemaError(
+            f"{o.observation_id}: list_length {length!r} is not a real size. A "
+            "list of zero people is not a thing, and rendering it told the judge "
+            "'a set of 0 names'. Use None for an unstated size."
+        )
 
 
 def _check_editorial_award(o: Observation) -> None:

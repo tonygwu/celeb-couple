@@ -98,7 +98,8 @@ def main() -> int:
         elif m["shape"] == "editorial_award":
             observed = {"award_name": m["list_name"], "winner": True}
         else:
-            observed = {"list_length": m.get("list_length") or 0}
+            # None, never 0: an unstated size is unknown, not empty
+            observed = {"list_length": m.get("list_length")}
         added.append({
             "observation_id": stable_id("obs", eid, m["person_id"]),
             "person_id": m["person_id"], "list_edition_id": eid,

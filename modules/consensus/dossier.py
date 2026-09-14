@@ -100,8 +100,11 @@ def _render_observation(o: Observation, edition: ListEdition, n: int) -> str:
             f"The page establishes the order as a ranking: {ob['order_basis']!r}."
         )
     elif o.evidence_type is EvidenceType.UNORDERED_INCLUSION:
+        size = ob.get("list_length")
+        how_many = (f"a set of {size} names" if size
+                    else "a set whose size the source does not state")
         body = (
-            f"Included in \"{edition.title}\", a set of {ob['list_length']} names. "
+            f"Included in \"{edition.title}\", {how_many}. "
             "The source does not state an order, so no position is implied."
         )
     elif o.evidence_type is EvidenceType.EDITORIAL_AWARD:

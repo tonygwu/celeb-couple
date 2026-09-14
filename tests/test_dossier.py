@@ -179,3 +179,18 @@ def test_retrospective_items_are_marked_as_such_to_the_judge():
 def test_the_pool_a_source_drew_from_always_reaches_the_judge():
     d = build_dossier("p_1", "Ada", "2010", [_rank_obs("obs_1", "le_1", 12)], EDITIONS)
     assert "pool the source drew from: people in English-language film" in d.text
+
+
+def test_an_unstated_list_size_does_not_render_as_zero_names():
+    o = Observation(
+        observation_id="obs_u2", person_id="p_1", list_edition_id="le_1",
+        evidence_type=EvidenceType.UNORDERED_INCLUSION,
+        observed={"list_length": None},
+        concerns_period=_pd("2004"), published_at=_pd("2004"),
+        lineage=Lineage(original_source="le_1"),
+        excerpt="named one of the most beautiful women of all time",
+        excerpt_locator="article prose",
+    )
+    text = build_dossier("p_1", "Ada", "2004", [o], EDITIONS).text
+    assert "a set of 0 names" not in text
+    assert "a set whose size the source does not state" in text
