@@ -44,6 +44,19 @@ _ANY_LINK = re.compile(r"\[\[(?!File:|Image:)([^\]|]+?)(?:\|[^\]]*)?\]\]")
 ORDINAL = re.compile(
     r"(\d{1,3})(?:st|nd|rd|th)\s*:\s*\[\[(?!File:|Image:)([^\]|]+?)(?:\|[^\]]*)?\]\]"
 )
+#: The same position written WITHOUT a wiki-link: "* <small>4th: Rosie Jones".
+#: FHM's 2012 list does this for rank 4, and the position was dropped in
+#: silence -- the year simply came out with nine entries instead of ten and no
+#: statistic said so.
+ORDINAL_UNLINKED = re.compile(
+    r"(\d{1,3})(?:st|nd|rd|th)\s*:\s*([^\[\]<>*|\n]+?)\s*(?:</small>|\n|$)"
+)
+#: What an unlinked cell has to look like before it is read as a person's name.
+#: Deliberately strict. A plain-text cell is usually a note, and the cost of
+#: being wrong is a fabricated person in the corpus; the cost of being too
+#: strict is a position that stays dropped and COUNTED, which is what the
+#: statistics are for.
+_LOOKS_LIKE_A_NAME = re.compile(r"^[A-Z][A-Za-z.'\u2019\-]*(?: [A-Z][A-Za-z.'\u2019\-]*){1,4}$")
 _REF = re.compile(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>", re.S)
 
 
@@ -53,6 +66,11 @@ class RankedEntry:
     rank: int
     name: str
     is_winner: bool
+    #: False when the source named the person in plain text rather than a
+    #: wiki-link. Such an entry only ever becomes an observation if the name
+    #: matches a roster member exactly, so it invents nobody -- but a reader
+    #: should be able to tell the two apart.
+    linked: bool = True
 
 
 def parse_ranked_table(
@@ -73,7 +91,12 @@ def parse_ranked_table(
              # these, a run whose every winner came from the ambiguous
              # fallback looked identical to one where every winner was bold.
              "winner_from_fallback": 0,
-             "rank_beyond_declared_length": 0}
+             "rank_beyond_declared_length": 0,
+             # An unlinked position used to vanish without trace. Both halves
+             # are counted: the ones recovered, and the ones whose cell did
+             # not look like a name and stay dropped.
+             "unlinked_positions_recovered": 0,
+             "unlinked_positions_rejected": 0}
 
     for block in body.split("\n|-"):
         stats["blocks"] += 1
@@ -111,6 +134,22 @@ def parse_ranked_table(
                 continue
             seen_ranks.add(rank)
             entries.append(RankedEntry(year, rank, name.strip(), False))
+            stats["runner_up_positions"] += 1
+
+        # Second pass for positions the source wrote without a link. Ranks
+        # already filled by a linked entry are left alone, so a link always
+        # wins over plain text for the same position.
+        for rank_s, raw in ORDINAL_UNLINKED.findall(block):
+            rank = int(rank_s)
+            if rank > list_length or rank in seen_ranks:
+                continue
+            candidate = raw.strip()
+            if not _LOOKS_LIKE_A_NAME.match(candidate):
+                stats["unlinked_positions_rejected"] += 1
+                continue
+            seen_ranks.add(rank)
+            entries.append(RankedEntry(year, rank, candidate, False, linked=False))
+            stats["unlinked_positions_recovered"] += 1
             stats["runner_up_positions"] += 1
 
     return entries, stats

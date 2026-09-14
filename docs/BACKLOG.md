@@ -224,17 +224,27 @@ fired on a downstream number. Neither would have surfaced on its own.
   winners is in the cohort or the partner universe. Four `ListEdition` records
   were added for the recovered years.
 
-- **Unlinked winners are still dropped, and one is a real person.** Maxim's
-  2006 row names `Eva Longoria` in plain text with no wiki-link, so it is
-  counted as `skipped_no_link`. The existing reasoning holds in general -- a
-  plain-text cell is usually a note, and inventing a person from one is the
-  quiet wrong answer this project exists to avoid. But `to_records` only emits
-  an observation for a winner already in `name_to_person`, so matching plain
-  cell text against the KNOWN roster names would invent nothing: either it is
-  an exact match for a person we already track, or it is dropped as now.
-  Not done tonight because it changes a shared parser and yields zero
-  observations today -- neither Longoria nor the other unlinked row (an
-  infant, correctly unlinked) is in any roster. **Difficulty: easy.**
+- ~~Unlinked winners are still dropped, and one is a real person.~~
+  **Fixed 2026-09-14, and the ranked parser had the same hole.** Maxim names
+  its 2006 winner, Eva Longoria, in plain text with no wiki-link, and the row
+  was counted as a no-link skip. Looking for the same shape elsewhere found
+  FHM's 2012 list writing rank 4 as `* <small>4th: Rosie Jones</small>`: that
+  position vanished entirely, the year came out with nine entries instead of
+  ten, and no statistic said so.
+
+  Both parsers now read a plain-text cell when it looks like a name, and count
+  it separately from a linked one. The strictness is the point -- a
+  capitalised sentence, a single word, a cell still holding markup and a
+  lowercase cell are all refused and stay COUNTED -- because a fabricated
+  person in the corpus costs far more than a drop somebody can see. Emitting
+  costs nothing either way: `to_records` and `ranked_to_records` only produce
+  an observation for a name already in `name_to_person`.
+
+  Every source table now reports zero skips. Three rows were recovered: Eva
+  Longoria (Maxim 2006), Rani Hudson Fujikawa (People's Most Beautiful 2020,
+  who also needed the rowspan fix to get a date at all) and Rosie Jones (FHM
+  2012, rank 4). **The corpus did not change** -- the same 41 observation ids
+  -- because none of the three is in the cohort or the partner universe.
 
 ## Measurement (added late 2026-09-14)
 

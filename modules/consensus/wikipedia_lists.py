@@ -45,6 +45,12 @@ _REF = re.compile(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>", re.S)
 #: ``rowspan="3"`` on a date cell: the table itself declaring how many rows
 #: share that date. Read, never guessed.
 _ROWSPAN = re.compile(r'rowspan\s*=\s*"?(\d+)"?', re.I)
+#: What an unlinked winner cell has to look like before it is read as a name.
+#: Deliberately strict, and shared in spirit with the ranked parser: a
+#: plain-text cell is usually a note, and a fabricated person in the corpus
+#: costs far more than a row that stays dropped AND COUNTED.
+_LOOKS_LIKE_A_NAME = re.compile(
+    r"^[A-Z][A-Za-z.'\u2019\-]*(?: [A-Z][A-Za-z.'\u2019\-]*){1,4}$")
 #: "November 13, 2024" -- People switched the Sexiest Man Alive table to plain
 #: English dates in 2024, and the {{dts}}-only parser dropped every row that
 #: used them.
@@ -63,6 +69,10 @@ class TableStats:
     parsed: int
     skipped_no_date: int
     skipped_no_link: int
+    #: Winners the source named in plain text rather than a wiki-link, now
+    #: parsed instead of dropped. Reported separately so a reader can see how
+    #: many rows rest on a name that carried no link.
+    unlinked_recovered: int = 0
 
     @property
     def skipped(self) -> int:
@@ -76,6 +86,10 @@ class AwardRow:
     date_precision: Precision
     winner: str
     raw_cell: str
+    #: False when the source named the winner in plain text rather than a
+    #: wiki-link. Such a row only becomes an observation if the name matches a
+    #: roster member exactly, so it invents nobody.
+    linked: bool = True
 
 
 def fetch_section_wikitext(page: str, section: int) -> tuple[str, str]:
@@ -110,6 +124,7 @@ def parse_award_table_with_stats(wikitext: str) -> tuple[list[AwardRow], TableSt
     """
     rows: list[AwardRow] = []
     no_date = no_link = 0
+    unlinked_recovered = 0
     carried = 0          # rows still covered by the last rowspan
     carry: tuple[str, Precision, str] | None = None
     body = _REF.sub("", wikitext)
@@ -140,6 +155,17 @@ def parse_award_table_with_stats(wikitext: str) -> tuple[list[AwardRow], TableSt
             continue
         link = _LINK.search(winner_cell)
         if not link:
+            # Maxim names its 2006 winner, Eva Longoria, in plain text. The
+            # row was counted as a no-link skip and dropped, which is right
+            # for a note and wrong for a name. Emitting it costs nothing:
+            # `to_records` only produces an observation for a winner already
+            # in `name_to_person`.
+            bare = _strip_markup(winner_cell)
+            if _LOOKS_LIKE_A_NAME.match(bare):
+                rows.append(AwardRow(int(y), value, prec, bare,
+                                     winner_cell[:120], linked=False))
+                unlinked_recovered += 1
+                continue
             no_link += 1
             continue
         rows.append(AwardRow(int(y), value, prec, link.group(1).strip(),
@@ -147,7 +173,22 @@ def parse_award_table_with_stats(wikitext: str) -> tuple[list[AwardRow], TableSt
     return rows, TableStats(
         row_blocks=max(0, len(blocks) - 1), parsed=len(rows),
         skipped_no_date=no_date, skipped_no_link=no_link,
+        unlinked_recovered=unlinked_recovered,
     )
+
+
+def _strip_markup(cell: str) -> str:
+    """The plain text of a table cell, or "" if anything but text is left.
+
+    Cell attributes, a trailing "(2)" repeat marker and an &nbsp; are removed
+    because they are formatting. Anything still carrying markup returns empty
+    and the row stays a counted skip.
+    """
+    text = cell.split("|")[-1] if "|" in cell else cell
+    text = text.replace("&nbsp;", " ")
+    text = re.sub(r"\s*\(\d+\)\s*$", "", text)
+    text = re.sub(r"<[^>]+>", "", text)
+    return "" if ("[" in text or "{" in text) else text.strip()
 
 
 def _parse_date_cell(cell: str) -> tuple[str, Precision, str] | None:

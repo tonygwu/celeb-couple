@@ -125,3 +125,56 @@ def test_ranks_beyond_the_declared_length_are_counted_not_just_dropped():
     entries, stats = parse_ranked_table(wikitext, list_length=10)
     assert stats["rank_beyond_declared_length"] == 1
     assert all(e.rank <= 10 for e in entries)
+
+
+# ---------------------------------------------------------------------------
+# Unlinked positions
+#
+# FHM's 2012 list writes rank 4 as "* <small>4th: Rosie Jones</small>", with no
+# wiki-link. The position vanished: the year came out with nine entries instead
+# of ten and no statistic said so. A silent drop is the defect; the name is
+# only ever used if it matches a roster member exactly.
+# ---------------------------------------------------------------------------
+
+def test_an_unlinked_position_is_recovered_and_marked():
+    entries, stats = parse_ranked_table(
+        "\n|-\n! 2012\n| '''[[Tulisa]]'''\n"
+        "* <small>4th: Rosie Jones</small>\n", list_length=100)
+    got = [(e.rank, e.name, e.linked) for e in entries]
+    assert (4, "Rosie Jones", False) in got
+    assert stats["unlinked_positions_recovered"] == 1
+
+
+def test_a_linked_position_still_wins_over_plain_text_at_the_same_rank():
+    """A link is the better evidence, whichever order they appear in."""
+    entries, _ = parse_ranked_table(
+        "\n|-\n! 2012\n| '''[[Tulisa]]'''\n"
+        "* <small>4th: [[Rosie Jones]]</small>\n"
+        "* <small>4th: Somebody Else</small>\n", list_length=100)
+    fourth = [e for e in entries if e.rank == 4]
+    assert len(fourth) == 1 and fourth[0].linked is True
+
+
+def test_an_unlinked_position_beyond_the_declared_length_is_still_skipped():
+    entries, stats = parse_ranked_table(
+        "\n|-\n! 2012\n| '''[[Tulisa]]'''\n"
+        "* <small>104th: Rosie Jones</small>\n", list_length=100)
+    assert [e.rank for e in entries] == [1]
+
+
+def test_a_note_at_a_position_is_not_read_as_a_person():
+    entries, stats = parse_ranked_table(
+        "\n|-\n! 2012\n| '''[[Tulisa]]'''\n"
+        "* <small>4th: not awarded that year</small>\n", list_length=100)
+    assert [e.rank for e in entries] == [1]
+    assert stats["unlinked_positions_rejected"] == 1
+    assert stats["unlinked_positions_recovered"] == 0
+
+
+def test_the_winner_is_unaffected_by_the_unlinked_pass():
+    entries, _ = parse_ranked_table(
+        "\n|-\n! 2012\n| {{Sort|Tulisa|[[File:T.jpg|80px]]<br />'''[[Tulisa]]'''}}\n"
+        "* <small>2nd: [[Cheryl (entertainer)|Cheryl Cole]]</small>\n",
+        list_length=100)
+    winner = [e for e in entries if e.is_winner]
+    assert [e.name for e in winner] == ["Tulisa"]

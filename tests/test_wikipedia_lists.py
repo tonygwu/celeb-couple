@@ -162,17 +162,22 @@ def test_a_row_with_no_rowspan_does_not_carry():
     assert stats.skipped_no_date == 1
 
 
-def test_an_unlinked_continuation_row_is_still_skipped_for_the_link():
-    """People listed a one-year-old with no article. She gets a date and no link.
+def test_an_unlinked_continuation_row_carries_the_rowspan_date():
+    """People listed a one-year-old with no article, in a continuation row.
 
-    The row moves from skipped_no_date to skipped_no_link, which is the honest
-    reason: she is datable and simply is not a linked person.
+    Both fixes have to hold at once for this row: the rowspan carries the date
+    to it, and the unlinked-name pass reads the name. It was originally
+    asserted here as `skipped_no_link`, which was true when written and stopped
+    being true once a plain-text name stopped meaning "not a person". She still
+    produces no observation, because she is in no roster.
     """
     rows, stats = parse_award_table_with_stats(
         '\n|-\n| rowspan="2" |{{dts|2020|5|4}}\n| [[Goldie Hawn]]\n| 74'
         "\n|-\n| Rani Hudson Fujikawa\n| 1\n")
-    assert [r.winner for r in rows] == ["Goldie Hawn"]
-    assert stats.skipped_no_date == 0 and stats.skipped_no_link == 1
+    assert [(r.winner, r.linked) for r in rows] == [
+        ("Goldie Hawn", True), ("Rani Hudson Fujikawa", False)]
+    assert {r.date_value for r in rows} == {"2020-05-04"}
+    assert stats.skipped_no_date == 0 and stats.skipped_no_link == 0
 
 
 # ---------------------------------------------------------------------------
@@ -212,3 +217,60 @@ def test_a_day_out_of_a_plain_date_is_kept_verbatim():
     rows, _ = parse_award_table_with_stats(
         "\n|-\n|March 5, 2024\n|[[A]]\n")
     assert rows[0].date_value == "2024-03-05"
+
+
+# ---------------------------------------------------------------------------
+# Unlinked winners
+#
+# Maxim names its 2006 winner, Eva Longoria, in plain text with no wiki-link,
+# and the row was counted as a no-link skip and dropped. That is right for a
+# note and wrong for a name. Emitting it costs nothing, because to_records only
+# produces an observation for a winner already in name_to_person -- so the
+# strictness below is about not putting a fabricated PERSON in the record, and
+# the rejected count is what keeps a real drop visible.
+# ---------------------------------------------------------------------------
+
+def test_an_unlinked_name_is_parsed_and_marked_unlinked():
+    rows, stats = parse_award_table_with_stats(
+        "\n|-\n| 2006\n| Eva Longoria\n| &nbsp; 31\n")
+    assert [(r.winner, r.linked) for r in rows] == [("Eva Longoria", False)]
+    assert stats.unlinked_recovered == 1 and stats.skipped_no_link == 0
+
+
+def test_a_linked_winner_is_still_marked_linked():
+    rows, stats = parse_award_table_with_stats(
+        "\n|-\n| 2006\n| [[Eva Longoria]]\n")
+    assert rows[0].linked is True and stats.unlinked_recovered == 0
+
+
+def test_a_prose_note_is_not_read_as_a_person():
+    """The reason the old code dropped these. A sentence is not a name."""
+    rows, stats = parse_award_table_with_stats(
+        "\n|-\n| 2006\n| First and only woman to win twice in a row.\n")
+    assert rows == [] and stats.skipped_no_link == 1
+    assert stats.unlinked_recovered == 0
+
+
+def test_a_lowercase_cell_is_not_a_name():
+    rows, stats = parse_award_table_with_stats("\n|-\n| 2006\n| not awarded\n")
+    assert rows == [] and stats.skipped_no_link == 1
+
+
+def test_a_cell_that_still_holds_markup_is_not_a_name():
+    """A template or a leftover link means the cell was not understood."""
+    _, stats = parse_award_table_with_stats(
+        "\n|-\n| 2006\n| {{sortname|Eva|Longoria}}\n")
+    assert stats.unlinked_recovered == 0 and stats.skipped_no_link == 1
+
+
+def test_a_repeat_marker_is_stripped_from_an_unlinked_name():
+    """People writes "(2)" after a second-time winner."""
+    rows, _ = parse_award_table_with_stats("\n|-\n| 2020\n| Kate Hudson (2)\n")
+    assert rows[0].winner == "Kate Hudson"
+
+
+def test_a_single_word_cell_is_not_accepted():
+    """One capitalised word is far more often a note than a full name, and a
+    wrong person is worse than a counted drop."""
+    _, stats = parse_award_table_with_stats("\n|-\n| 2006\n| Unknown\n")
+    assert stats.unlinked_recovered == 0 and stats.skipped_no_link == 1
