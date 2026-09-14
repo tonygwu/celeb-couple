@@ -140,7 +140,10 @@ def _check_ordered_rank(o: Observation) -> None:
             "establishes the order as a ranking"
         )
     rank = obs.get("rank")
-    if not isinstance(rank, int) or rank < 1:
+    # A bool IS an int in Python, and True >= 1, so `"rank": true` used to
+    # validate and become rank 1 -- the top of the list, and the most
+    # consequential value it could have taken.
+    if isinstance(rank, bool) or not isinstance(rank, int) or rank < 1:
         raise SchemaError(f"{o.observation_id}: rank must be a positive integer")
     if "list_length" not in obs:
         raise SchemaError(
@@ -153,7 +156,7 @@ def _check_ordered_rank(o: Observation) -> None:
         # plausible depth would invent the very fact that decides how selective
         # the placement was, so it stays unknown.
         return
-    if not isinstance(length, int) or length < rank:
+    if isinstance(length, bool) or not isinstance(length, int) or length < rank:
         raise SchemaError(
             f"{o.observation_id}: list_length must be an integer >= rank, or None"
         )
@@ -173,7 +176,7 @@ def _check_unordered_inclusion(o: Observation) -> None:
     length = o.observed["list_length"]
     if length is None:
         return                      # "size not stated" is a legitimate value
-    if not isinstance(length, int) or length < 1:
+    if isinstance(length, bool) or not isinstance(length, int) or length < 1:
         raise SchemaError(
             f"{o.observation_id}: list_length {length!r} is not a real size. A "
             "list of zero people is not a thing, and rendering it told the judge "

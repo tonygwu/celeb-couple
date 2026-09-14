@@ -273,3 +273,36 @@ def test_a_rank_without_a_stated_depth_keeps_the_depth_unknown():
         _obs(EvidenceType.ORDERED_RANK, {
             "rank": 50, "list_length": 10, "order_is_ranking": True,
             "order_basis": "x"})
+
+
+# -- booleans are not integers, whatever isinstance says ---------------------
+
+def _ranked(rank, length):
+    return _obs(EvidenceType.ORDERED_RANK,
+                {"rank": rank, "list_length": length, "order_is_ranking": True,
+                 "order_basis": "the page reads 'The Results, counting down'"})
+
+
+def test_a_boolean_rank_is_refused():
+    """`isinstance(True, int)` is True and `True >= 1` is True, so a bare
+    `"rank": true` validated and became rank 1 -- the TOP of the list, and the
+    most consequential value it could have taken."""
+    with pytest.raises(SchemaError, match="positive integer"):
+        _ranked(True, 50)
+
+
+def test_a_boolean_list_length_is_refused_for_a_ranked_observation():
+    """`True < rank` is False when rank is 1, so "ranked 1 of true" validated
+    and would render as "Ranked 1 of 1"."""
+    with pytest.raises(SchemaError, match="integer"):
+        _ranked(1, True)
+
+
+def test_a_boolean_list_length_is_refused_for_an_unordered_inclusion():
+    with pytest.raises(SchemaError, match="real size"):
+        _obs(EvidenceType.UNORDERED_INCLUSION, {"list_length": True})
+
+
+def test_ordinary_integers_still_validate():
+    _ranked(12, 50)
+    _obs(EvidenceType.UNORDERED_INCLUSION, {"list_length": 15})

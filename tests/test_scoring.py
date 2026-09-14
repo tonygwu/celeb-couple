@@ -233,3 +233,36 @@ def test_an_empty_dossier_costs_no_model_call(tmp_path):
     assert est.estimate is None
     assert est.reducer == "short_circuit"
     assert est.missingness_reason.value == "no_observations"
+
+
+def test_a_boolean_is_not_accepted_as_an_estimate():
+    """`isinstance(True, int)` is True in Python, and `0 <= True <= 100` is
+    also True, so `"estimate": true` passed the range check and became the
+    value 1 downstream -- a score of 1 out of 100, indistinguishable in the
+    artifact from a judge that really meant it.
+
+    The module checks `scored` with an explicit `isinstance(bool)` two lines
+    above, so the distinction was known; the estimate check just inherited
+    Python's default.
+    """
+    import pytest
+    from modules.consensus.score import JudgeError, parse_verdict
+    d = _dossier()
+    for bad in (True, False):
+        with pytest.raises(JudgeError, match="not an integer"):
+            parse_verdict(_reply(estimate=bad), d, "fable", {}, "raw")
+
+
+def test_a_float_is_still_not_an_estimate():
+    """The rubric's scale is integer. A float means the judge did something
+    other than what it was asked."""
+    import pytest
+    from modules.consensus.score import JudgeError, parse_verdict
+    with pytest.raises(JudgeError, match="not an integer"):
+        parse_verdict(_reply(estimate=78.5), _dossier(), "fable", {}, "raw")
+
+
+def test_an_ordinary_integer_estimate_is_accepted():
+    from modules.consensus.score import parse_verdict
+    v = parse_verdict(_reply(estimate=78), _dossier(), "fable", {}, "raw")
+    assert v.estimate == 78

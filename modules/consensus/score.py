@@ -92,7 +92,13 @@ def parse_verdict(text: str, dossier: Dossier, judge: str, telemetry: dict,
     rationale = (obj.get("rationale") or "").strip()
 
     if scored:
-        if not isinstance(est, int) or not 0 <= est <= 100:
+        # `isinstance(True, int)` is True in Python and `0 <= True <= 100` is
+        # too, so a bare `"estimate": true` passed this check and became the
+        # value 1 downstream: a score of 1 out of 100, indistinguishable in the
+        # artifact from a judge that meant it. `scored` is checked with an
+        # explicit isinstance(bool) a few lines up, so the distinction was
+        # known here; this one inherited Python's default.
+        if isinstance(est, bool) or not isinstance(est, int) or not 0 <= est <= 100:
             raise JudgeError(E_SCHEMA, f"{judge}: estimate {est!r} is not an integer 0-100")
         unknown = [c for c in cited if c not in dossier.observation_ids]
         if unknown:
