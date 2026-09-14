@@ -16,8 +16,8 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 
-__all__ = ["RomanceVerdict", "fetch_plot", "build_prompt", "parse_verdict",
-           "QUALIFYING", "PlotUnavailable", "title_for_qid"]
+__all__ = ["RomanceVerdict", "fetch_plot", "fetch_cast", "build_prompt",
+           "parse_verdict", "QUALIFYING", "PlotUnavailable", "title_for_qid"]
 
 API = "https://en.wikipedia.org/w/api.php"
 USER_AGENT = (
@@ -30,6 +30,11 @@ QUALIFYING = "reciprocal_romance"
 _REF = re.compile(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>", re.S)
 _MARKUP = re.compile(r"\[\[(?:[^\]|]*\|)?([^\]]+)\]\]|'''|''|\{\{[^}]*\}\}")
 _JSON = re.compile(r"\{.*\}", re.S)
+#: "* [[Ben Affleck]] as Matt Murdock / Daredevil"
+_CAST_LINE = re.compile(
+    r"^\*+\s*\[\[(?!File:|Image:)([^\]|]+?)(?:\|[^\]]*)?\]\]"
+    r"[^a-zA-Z]*as\s+(.+)$",
+    re.M)
 
 
 class PlotUnavailable(RuntimeError):
@@ -128,13 +133,68 @@ def fetch_plot(page: str, timeout: int = 45) -> tuple[str, str]:
     return text, hashlib.sha256(raw2).hexdigest()
 
 
-def build_prompt(rubric: str, schema: str, work: str, a: str, b: str, plot: str) -> str:
+def fetch_cast(page: str, timeout: int = 45) -> dict[str, str]:
+    """Map actor -> character from the article's Cast section.
+
+    WHY THIS IS NEEDED
+    ------------------
+    Measured 2026-09-14: fifteen of twenty candidates came back cannot_tell, and
+    every reason was the same. A Wikipedia plot summary describes CHARACTERS and
+    never names actors, so a classifier handed two actor names genuinely cannot
+    tell which characters they are. The model was right to refuse; the prompt was
+    wrong to ask.
+    """
+    url = API + "?" + urllib.parse.urlencode({
+        "action": "parse", "page": page, "prop": "sections",
+        "format": "json", "formatversion": "2"})
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=timeout) as fh:
+        sections = json.load(fh).get("parse", {}).get("sections", [])
+    idx = next((s["index"] for s in sections
+                if s["line"].strip().lower() in ("cast", "cast and characters",
+                                                 "casting", "voice cast")), None)
+    if idx is None:
+        return {}
+    url = API + "?" + urllib.parse.urlencode({
+        "action": "parse", "page": page, "prop": "wikitext",
+        "section": str(idx), "format": "json", "formatversion": "2"})
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=timeout) as fh:
+        wikitext = json.load(fh)["parse"]["wikitext"]
+    body = _REF.sub("", wikitext)
+    out: dict[str, str] = {}
+    for actor, role in _CAST_LINE.findall(body):
+        character = _MARKUP.sub(lambda m: m.group(1) or "", role).strip()
+        character = re.split(r"\s+[-\u2013]\s+|,|\s+\(", character)[0]
+        character = character.strip().strip("'\"* ")
+        if character:
+            out[actor.strip()] = character
+    return out
+
+
+def build_prompt(rubric: str, schema: str, work: str, a: str, b: str, plot: str,
+                 cast: dict[str, str] | None = None) -> str:
+    cast = cast or {}
+    a_role, b_role = cast.get(a), cast.get(b)
+    if a_role and b_role:
+        who = ("ACTOR A: %s, who plays **%s**\n"
+               "ACTOR B: %s, who plays **%s**\n\n"
+               "The plot below names characters, not actors. Judge the "
+               "relationship between %s and %s." % (a, a_role, b, b_role,
+                                                    a_role, b_role))
+    else:
+        missing = a if not a_role else b
+        who = ("ACTOR A: %s\nACTOR B: %s\n\n"
+               "The article's cast list does not say which character %s plays, "
+               "and the plot names characters rather than actors. If you cannot "
+               "establish the mapping from the text, return cannot_tell."
+               % (a, b, missing))
     return (
-        f"{rubric}\n\n---\n\nYour output must validate against this schema:\n\n"
-        f"{schema}\n\n---\n\nFILM: {work}\n"
-        f"ACTOR A: {a}\nACTOR B: {b}\n\n"
-        f"PLOT SUMMARY (this is the only source you may use):\n\n{plot}\n\n"
+        "%s\n\n---\n\nYour output must validate against this schema:\n\n"
+        "%s\n\n---\n\nFILM: %s\n%s\n\n"
+        "PLOT SUMMARY (this is the only source you may use):\n\n%s\n\n"
         "---\n\nReturn the JSON object and nothing else."
+        % (rubric, schema, work, who, plot)
     )
 
 

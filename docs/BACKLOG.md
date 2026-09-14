@@ -6,13 +6,16 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 
 ## Correctness and method
 
-- **Deep-water miss in the romance classifier.** *Deep Water* (2022) came back
-  `cannot_tell` for Affleck and de Armas, who play a married couple in it. The
-  classifier is conservative by design, but 15 of 20 `cannot_tell` is a high
-  rate and some are misses rather than genuine ambiguity. Worth sampling the
-  plot texts to see whether the plot sections are too short or the rubric is too
-  strict. **Difficulty: medium.**
-- **`What Lies Beneath` classified `coerced_or_assault`.** Correct to exclude,
+- ~~Deep Water miss in the romance classifier.~~ **Fixed 2026-09-14.** Root
+  cause was mine, not the model's: Wikipedia plot summaries describe CHARACTERS
+  and never name actors, and the prompt supplied two ACTOR names. Every one of
+  the fifteen `cannot_tell` reasons said so explicitly. The classifier now
+  fetches the article's Cast section and tells the judge which characters the
+  two actors play. `cannot_tell` fell 15 to 7, verified romances rose 3 to 8,
+  and Deep Water classifies correctly. Joint coverage did not move, which is
+  the trap holding.
+- **`What Lies Beneath` was classified `coerced_or_assault`** in the pre-cast
+  run. Correct to exclude,
   but the pair are also a married couple for most of the film. The taxonomy has
   no way to say "a relationship that the plot later turns into an assault", and
   flattening it to one label loses information. **Difficulty: medium.**

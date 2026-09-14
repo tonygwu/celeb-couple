@@ -11,7 +11,8 @@ from packages.llmkit.contract import load_contract                    # noqa: E4
 from packages.llmkit.judges import ClaudeJudge, JudgeError            # noqa: E402
 from packages.llmkit.manifest import RunManifest                      # noqa: E402
 from modules.records.romance import (                                 # noqa: E402
-    PlotUnavailable, build_prompt, fetch_plot, parse_verdict, title_for_qid,
+    PlotUnavailable, build_prompt, fetch_cast, fetch_plot, parse_verdict,
+    title_for_qid,
 )
 
 RUBRIC = REPO / "rubrics/romance/ROMANCE.md"
@@ -60,7 +61,12 @@ def main() -> int:
             print(f"  FAIL  {label[:60]:60} {exc}")
             continue
 
-        prompt = build_prompt(rubric, schema, c["title"], c["male"], c["female"], plot)
+        try:
+            cast = fetch_cast(page)
+        except Exception:
+            cast = {}
+        prompt = build_prompt(rubric, schema, c["title"], c["male"], c["female"],
+                              plot, cast)
         try:
             budget.spend_call(label)
         except BudgetExhausted as exc:
@@ -85,15 +91,19 @@ def main() -> int:
             print(f"  FAIL  {label[:60]:60} parse: {exc}")
             continue
         stage.succeeded += 1
-        results.append({**c, "wikipedia_page": page, **v.as_dict()})
+        results.append({**c, "wikipedia_page": page,
+                        "cast_mapped": bool(cast.get(c["male"]) and cast.get(c["female"])),
+                        **v.as_dict()})
         mark = "ROMANCE" if v.qualifies else v.classification
-        print(f"  {mark:22} {label[:56]:56} grounded={v.grounded}")
+        mapped = "cast+" if cast.get(c["male"]) and cast.get(c["female"]) else "cast?"
+        print(f"  {mark:22} {label[:52]:52} {mapped} grounded={v.grounded}")
         time.sleep(0.3)
 
     qualifying = [r for r in results if r.get("qualifies")]
     stage.notes = {
         "candidates": len(cands), "classified": stage.succeeded,
         "qualifying_romances": len(qualifying),
+        "cast_mapped": sum(1 for r in results if r.get("cast_mapped")),
         "by_classification": {
             k: sum(1 for r in results if r.get("classification") == k)
             for k in sorted({r.get("classification") for r in results if r.get("classification")})

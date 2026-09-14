@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `abe72984a4a1`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `80236ab85f19`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: regenerating it over unchanged artifacts produces an identical file, so a diff means the numbers moved.
 
@@ -213,9 +213,9 @@ This reframes what "more sources" has to mean. A source that adds a hundred new 
 
 The corpus grew from 13 observations to 35 and joint coverage did not move. This is why.
 
-- Pairings considered (romance-verified films plus scorable episodes): **30**
-- With evidence on BOTH sides at any distance: **9**
-- Missing evidence on one side entirely: **21**
+- Pairings considered (romance-verified films plus scorable episodes): **35**
+- With evidence on BOTH sides at any distance: **12**
+- Missing evidence on one side entirely: **23**
 
 Joint coverage if the nearby-period bound were widened:
 
@@ -223,13 +223,13 @@ Joint coverage if the nearby-period bound were widened:
 |---|---|
 | ±0 | 1 |
 | ±1 | 2 ← current |
-| ±2 | 3 |
-| ±3 | 4 |
-| ±4 | 5 |
-| ±5 | 5 |
-| ±6 | 5 |
-| ±7 | 5 |
-| ±8 | 6 |
+| ±2 | 4 |
+| ±3 | 5 |
+| ±4 | 6 |
+| ±5 | 6 |
+| ±6 | 6 |
+| ±7 | 7 |
+| ±8 | 8 |
 
 Two things follow. Widening the bound from ±1 to ±2 would triple joint coverage, from 1 to 3. And it would not matter much beyond that: the count saturates at 6, because **22 of 30 pairings have no evidence on one side at all**. The bound is a real cost but absence is the bigger one.
 
@@ -273,14 +273,14 @@ A pairing needs both sides. The partners missing evidence are two different popu
 
 ## 6a. On-screen romance verification
 
-Co-appearance in a cast list is not a pairing. All 20 candidates were classified from the Wikipedia plot section alone; 19 were classifiable and **3** are confirmed reciprocal romances.
+Co-appearance in a cast list is not a pairing. All 20 candidates were classified from the Wikipedia plot section alone; 19 were classifiable and **8** are confirmed reciprocal romances.
 
 | Classification | Count |
 |---|---|
-| `cannot_tell` | 15 |
-| `reciprocal_romance` | 3 |
-| `co_appearance_only` | 1 |
-| `coerced_or_assault` | 1 |
+| `reciprocal_romance` | 8 |
+| `cannot_tell` | 7 |
+| `co_appearance_only` | 3 |
+| `family_or_platonic` | 2 |
 
 Three results worth naming. *Being John Malkovich* came back `cannot_tell` for Brad Pitt and Michelle Pfeiffer, who both appear as themselves; before this filter existed the coverage count treated them as a couple. *Pearl Harbor* separated correctly: the romance is Affleck and Beckinsale, not Affleck and Garner. *What Lies Beneath* was classified `coerced_or_assault` and is therefore excluded rather than scored.
 
