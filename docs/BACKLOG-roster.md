@@ -33,10 +33,26 @@ board mixing pools without saying so would be comparing different populations.
 
 ## Source hunt, ranked by what it would actually buy
 
-Measured 2026-09-14: award-shaped evidence cannot discriminate. Twelve
-editorial-award person-periods scored exactly 92.0; the single ranked
-observation scored 86.5. **Only ordered, depth-carrying lists change the
-product.** More award sources add coverage and change nothing about the board.
+**Revised late on 2026-09-14 after three further measurements.** The earlier
+version of this section said only ordered lists change the product. That was
+half right, and the half it missed matters more.
+
+- **Density, not just shape.** Every real dossier carried exactly one
+  observation, which is why the corpus produced two distinct values while the
+  synthetic one produced ten. Adding prose mentions took the real corpus to six
+  distinct values, and the single person-period carrying two publishers is the
+  only one that scored above the award ceiling.
+- **Shape confounds the gap.** Evidence type alone explains 42% of the
+  estimate. Three of four jointly covered pairings pit an award against a list
+  placement, so their gaps are substantially about publication format.
+- **The reachable ceiling is lower than the pairing count suggests.** Of 22
+  partners, 7 are people the plan forbids rating at all.
+
+So the requirement is sharper than "find ordered lists". It is: **find sources
+that put a SECOND observation, of the SAME shape as the first, on a person-year
+that already has one.** A source adding a hundred new people at one observation
+each raises coverage and changes nothing. A source adding awards to people who
+already have awards makes the confound worse, not better.
 
 1. **Ordered lists with US/Hollywood depth.** FHM gave 206 ranked positions and
    exactly one cohort member, because its pool is British TV and modelling.

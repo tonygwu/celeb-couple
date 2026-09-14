@@ -37,6 +37,27 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
   Alive, 2 in Most Beautiful. They carry no date cell, so they are dropped
   rather than mis-dated. None was a cohort member. **Difficulty: easy.**
 
+## Measurement (added late 2026-09-14)
+
+- **The one comparable gap is 0.0 against an LSD of 1.2.** Daredevil 2003,
+  Affleck and Garner, both judged by an editorial award. Everything larger is
+  shape-mismatched. **Difficulty: blocked on evidence.**
+- **Shape confound is unmitigated.** 42% of the estimate is evidence type.
+  Options not yet explored: restricting the board to same-shape pairings as the
+  primary view rather than a scenario, or a within-shape calibration that would
+  have to be disclosed as a modelling convention. **Difficulty: hard, and it is
+  a methodology decision rather than a coding one.**
+- **Rater noise rests on one judge and two dossiers.** Codex hit 0% quota
+  mid-run. Re-run with both families when it resets in ~5 days.
+  **Difficulty: easy, blocked on quota.**
+- **Nearby-period bound costs 2 pairings.** Widening +/-1 to +/-2 would take
+  joint coverage from 2 to 3 distinct pairings, saturating at 6. Not done,
+  because a wider bound reuses an estimate further from the period it describes.
+  **Difficulty: a decision, not a task.**
+- **Partner gender is `unknown` for the whole partner universe**, since it was
+  built from episode records rather than sourced. Fine for observations, not
+  fine for a gendered view. **Difficulty: easy.**
+
 ## Tooling
 
 - **Smoke tests can clobber production artifacts.** Running
@@ -44,7 +65,7 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
   4-repeat artifact. Scripts that write a default `--out` should refuse to
   overwrite a richer existing artifact, or smoke tests should always pass
   `--out`. **Difficulty: easy.**
-- **No CI.** The suite is offline and deterministic and runs in well under a
-  second, so there is no reason it could not gate. **Difficulty: easy.**
+- ~~No CI.~~ Added 2026-09-14: `.github/workflows/tests.yml`, treating any
+  non-zero exit as failure including pytest's 5.
 - **No page-weight or export tooling**, because there is no site yet.
   **Difficulty: deferred until there is a board worth rendering.**
