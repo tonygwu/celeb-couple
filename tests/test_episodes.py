@@ -126,3 +126,28 @@ def test_a_leap_day_birth_date_does_not_crash_the_eighteenth_birthday():
         iv, _pd("1970-01-01", Precision.DAY), _pd("1992-02-29", Precision.DAY)
     )
     assert clipped.first_day().isoformat() == "2010-03-01"
+
+
+# -- why the merged episode takes the LAST stage's end -----------------------
+
+def test_an_ongoing_stage_can_never_be_joined_from():
+    """`merge_progressions` sets the merged end to `last.end`, where `last` is
+    the final stage BY START DATE. That is only right if ends are
+    non-decreasing along a run.
+
+    They are, for two reasons worth writing down so nobody 'fixes' this into
+    max() and changes the ids:
+
+      - The join requires `prev.end is not None`, so a stage with no end is
+        always last in its run. An ongoing episode therefore takes the ongoing
+        stage's open end, never an earlier closed one.
+      - The join window is JOIN_SLACK_DAYS = 1, so a later stage can begin at
+        most one day before the previous ended. For its end to precede the
+        previous end it would have to span less than a day.
+    """
+    from modules.records.episodes import JOIN_SLACK_DAYS
+    assert JOIN_SLACK_DAYS == 1, (
+        "widening this makes `last.end` unsafe: a stage could then start well "
+        "before the previous ended and finish earlier, and the merged episode "
+        "would end before one of its own stages. Use max() if you widen it."
+    )

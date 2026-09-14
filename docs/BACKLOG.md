@@ -4,6 +4,39 @@ Filed by the overnight run of 2026-09-14. Difficulty tags are estimates.
 
 See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 
+## The defect class this codebase keeps producing
+
+Filed 2026-09-14 after a systematic read of every module. Seven of the night's
+findings were the same shape, and naming it is more useful than listing them:
+
+> **A fix that DEGRADES to the behaviour it replaced, silently.**
+
+The fix works. Then its input is unavailable, and instead of refusing it falls
+back — to an empty value, a default, a guess — and that fallback is exactly the
+broken state the fix was written to eliminate. The system then looks like it is
+working on worse data rather than failing on a fixable error, which is the
+hardest kind of problem to diagnose because nothing is red.
+
+Instances found, all now refusing or reporting:
+
+| Fix | Fallback | What it restored |
+|---|---|---|
+| `fetch_cast` (so plots naming CHARACTERS match ACTOR names) | `except: cast = {}` | the 15-of-20 `cannot_tell` rate |
+| `title_for_qid` (resolve the article by Wikidata sitelink) | `or c["title"]` | fetching by title; 13 of 20 wrong articles |
+| prose-mention merge (density 2 → 12 distinct values) | re-running the fetch alone | a corpus 8 observations thinner |
+| per-shape LSD | pooling shapes | a noise floor half its real size |
+| `EstimateSpec` per estimate | missing spec → unperturbed value | a zero-width interval reading as certainty |
+| manifest reconciliation | temp file created before the check | a zero-byte file as the only alarm |
+| label lookup | `except: continue` | "no label" indistinguishable from "network died" |
+
+**The rule that catches them:** when an input a fix depends on is missing, the
+fix must REFUSE or RECORD, never substitute. A substituted value is a guess
+wearing the shape of a measurement. Every one of these was invisible in the
+artifacts until something else failed nearby.
+
+Two of them were caught only because a guard built earlier the same night
+fired on a downstream number. Neither would have surfaced on its own.
+
 ## Correctness and method
 
 - ~~Deep Water miss in the romance classifier.~~ **Fixed 2026-09-14.** Root
