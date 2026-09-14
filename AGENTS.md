@@ -97,6 +97,7 @@ read-only against Wikidata and Wikipedia. The last three spend model quota.
 |---|---|---|
 | `scripts/fetch_records.py` | relationship candidates + birth dates for the cohort | no |
 | `scripts/build_episodes.py` | merges progressions, flags defects, applies the adult window | no |
+| `scripts/build_partner_universe.py` | derives the outside-roster partners from scorable episodes | no |
 | `scripts/fetch_observations.py` | list/award observations from Wikipedia tables, for cohort **and** partners | no |
 | `scripts/merge_prose_mentions.py` | folds prose mentions in, deduping on person+year+publisher | no |
 | `scripts/joint_coverage.py` | are BOTH sides scorable in the same period, and is the pairing comparable | no |
@@ -116,7 +117,8 @@ read-only against Wikidata and Wikipedia. The last three spend model quota.
 
 The quota-spending scripts take `CELEB_JUDGES` (default `fable,astra`) and
 `CELEB_MAX_CALLS`, or equivalent flags. Run the whole chain in this order after
-changing any source: `fetch_observations` → `merge_prose_mentions` (once per
+changing any source: `fetch_records` → `build_episodes` → `build_partner_universe` →
+`fetch_observations` → `merge_prose_mentions` (once per
 mentions file) → `score_evidenced` → `joint_coverage` → `evidence_density` →
 `alignment_gap` → `shape_confound` → `grounding_audit` → `offset_diagnostic` →
 `write_m0_report`.

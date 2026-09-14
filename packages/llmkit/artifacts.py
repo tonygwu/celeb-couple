@@ -25,7 +25,7 @@ PRODUCERS = {
     "data/pilot/records/episodes.json": "scripts/build_episodes.py",
     "data/pilot/records/onscreen_candidates.json": "scripts/fetch_records.py (then the on-screen query)",
     "data/pilot/records/romance.json": "scripts/classify_romance.py  [spends quota]",
-    "data/pilot/records/partner_universe.json": "scripts/build_episodes.py, then the partner-universe step",
+    "data/pilot/records/partner_universe.json": "scripts/build_partner_universe.py",
     "data/pilot/records/partner_eligibility.json": "scripts/partner_eligibility.py",
     "data/pilot/observations/observations.json": "scripts/fetch_observations.py",
     "data/pilot/observations/prose_mentions.json": "scripts/extract_prose_mentions.py  [spends quota]",
