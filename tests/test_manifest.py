@@ -194,3 +194,57 @@ def test_an_unclassified_failure_can_be_recorded_in_a_manifest():
     s.attempted += 1
     s.record_failure("unclassified_failure")
     s.reconcile()
+
+
+# ---------------------------------------------------------------------------
+# The fetch budget, which never existed
+# ---------------------------------------------------------------------------
+
+def test_a_budget_with_no_fetch_cap_reports_no_fetch_numbers():
+    """max_fetches defaulted to 10**9 and every caller left it there.
+
+    spend_fetch was called by nothing, so fetches_made was structurally zero,
+    and report() wrote both into every run artifact. A cap of one billion
+    beside a count of zero reads as "fetches were counted and stayed under a
+    limit", and neither half was true.
+    """
+    from packages.llmkit.budget import Budget
+    r = Budget(max_calls=10).report()
+    assert "max_fetches" not in r
+    assert "fetches_made" not in r
+    assert r["max_calls"] == 10
+
+
+def test_a_budget_with_a_fetch_cap_reports_both():
+    from packages.llmkit.budget import Budget
+    r = Budget(max_calls=10, max_fetches=200).report()
+    assert r["max_fetches"] == 200 and r["fetches_made"] == 0
+
+
+def test_a_spent_fetch_is_reported_even_with_no_cap():
+    """So a caller wiring it in gets telemetry before anyone picks a number."""
+    from packages.llmkit.budget import Budget
+    b = Budget(max_calls=10)
+    b.spend_fetch("https://example.invalid/1")
+    r = b.report()
+    assert r["fetches_made"] == 1 and "max_fetches" not in r
+
+
+def test_an_uncapped_budget_never_halts_on_fetches():
+    from packages.llmkit.budget import Budget
+    b = Budget(max_calls=1)
+    for i in range(50):
+        b.spend_fetch(f"https://example.invalid/{i}")
+    assert b.halted is False and b.fetches_made == 50
+
+
+def test_a_fetch_cap_halts_and_names_what_it_stopped_before():
+    from packages.llmkit.budget import Budget, BudgetExhausted
+    b = Budget(max_calls=10, max_fetches=2)
+    b.spend_fetch("a")
+    b.spend_fetch("b")
+    with pytest.raises(BudgetExhausted) as e:
+        b.spend_fetch("https://example.invalid/third")
+    assert "https://example.invalid/third" in str(e.value)
+    assert b.halted is True and b.fetches_made == 2, (
+        "the refused fetch must not be counted as made")

@@ -246,6 +246,38 @@ fired on a downstream number. Neither would have surfaced on its own.
   2012, rank 4). **The corpus did not change** -- the same 41 observation ids
   -- because none of the three is in the cohort or the partner universe.
 
+- **The plan's "HTTP fetches <= 200, paced, breaker armed" is enforced
+  nowhere.** Found 2026-09-14 by looking for functions with no caller, the
+  class `refuse_mixed_contracts` belonged to. `Budget.spend_fetch` is called by
+  nothing, and every `Budget` in the repository is built with `max_calls`
+  alone.
+
+  The reporting half is fixed: `max_fetches` defaulted to `10**9` and
+  `report()` wrote it into every run artifact beside a `fetches_made` that was
+  structurally zero, which reads as "fetches were counted and stayed under a
+  limit". Neither half was true. The report is now silent about fetches until a
+  budget exists or a fetch is spent, and `spend_fetch` counts even with no cap
+  so telemetry arrives before anyone has to choose a number.
+
+  The enforcement half is NOT done. Wiring a cap into the retrieval path would
+  halt `run_chain.sh free` part-way through whenever the cap is low, and the
+  right number is a judgement about how much of Wikipedia this project should
+  pull in one run. The pieces are ready: pass `max_fetches` to a `Budget` and
+  call `spend_fetch` in `packages/wiki/fetch.request` and
+  `modules/records/wikidata._query`, which are now the only two places that
+  reach the network. **Difficulty: easy to wire, but the number is a decision.**
+
+- **Five plan-specified functions are implemented, tested, and called by
+  nothing**: `count_like_diagnostic` and `with_baseline` / `cohort_median_partner`
+  (plan section 4's Partner_WAR baseline and its count-like diagnostic),
+  `gap_years` (the exact-arithmetic metric from example E), and
+  `same_shape_view` (the same-shape board view). Mostly this is correct --
+  M0 publishes no board, so a baseline it would be measured against is not due
+  until the metric release -- but "tested" is quietly reassuring in a way that
+  "runs" is not, and a later reader may assume they are wired up. Recorded so
+  the next agent knows which capabilities exist only on paper.
+  **Difficulty: not a task; a note.**
+
 ## Measurement (added late 2026-09-14)
 
 - **The one comparable gap is 0.0 against a rank-shaped LSD of 2.56.** Daredevil 2003,
