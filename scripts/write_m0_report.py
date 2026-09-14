@@ -152,9 +152,16 @@ def spend_rows(repo: Path) -> tuple[list[dict], list[str]]:
 
     merged: dict[str, dict] = {}
     for r in rows:
-        cur = merged.setdefault(r["stage"], dict(r, runs=0))
+        # Seed with ZEROES. `dict(r, runs=0)` seeded with the first row's own
+        # values and then the loop added that row again, so every stage came
+        # out inflated by exactly its first run -- 14 attempts reported as 28.
+        # It also aliased r["errors"], doubling the taxonomy counts too.
+        cur = merged.setdefault(r["stage"], {
+            "stage": r["stage"], "runs": 0, "attempted": 0, "succeeded": 0,
+            "failed": 0, "cached": 0, "excluded": 0, "errors": {},
+        })
         for k in ("runs", "attempted", "succeeded", "failed", "cached", "excluded"):
-            cur[k] = cur.get(k, 0) + r[k] if k != "stage" else cur[k]
+            cur[k] += r[k]
         for kind, n in r["errors"].items():
             cur["errors"][kind] = cur["errors"].get(kind, 0) + n
     return sorted(merged.values(), key=lambda r: r["stage"]), []

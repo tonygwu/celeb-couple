@@ -382,13 +382,13 @@ Stages that write a run manifest, with the reconciliation each records. `attempt
 
 | Stage | Runs | Attempted | Succeeded | Cached | Excluded | Failed | Errors |
 |---|---|---|---|---|---|---|---|
-| `prose-mentions` | 1 | 28 | 28 | 0 | 0 | 0 | — |
-| `rater-noise` | 5 | 74 | 58 | 0 | 0 | 16 | auth_or_quota=16 |
-| `romance` | 3 | 80 | 52 | 0 | 28 | 0 | — |
+| `prose-mentions` | 1 | 14 | 14 | 0 | 0 | 0 | — |
+| `rater-noise` | 5 | 58 | 50 | 0 | 0 | 8 | auth_or_quota=8 |
+| `romance` | 3 | 60 | 45 | 0 | 15 | 0 | — |
 
 Repeated runs of a stage are summed. A superseded run spent quota too, and this section answers what the pilot cost rather than how many calls stand behind the final artifacts.
 
-**Model calls: 66 from the budgeted stages, plus 182 attempts recorded across the manifested stages — 248 in total, against a cap of 300.**
+**Model calls: 66 from the budgeted stages, plus 132 attempts recorded across the manifested stages — 198 in total, against a cap of 300.**
 
 - Subscription quota only. API billing was asserted off at start-up.
 - Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and inventing a figure for the other arm would be a fabricated number.

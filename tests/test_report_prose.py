@@ -236,3 +236,78 @@ def test_the_report_says_the_award_floor_is_unmeasured():
         pytest.skip("report not generated in this clone")
     assert "repeat variance is **unmeasured**" in text
     assert "upper bound" in text
+
+
+# --------------------------------------------------------------------------
+# Per-stage spend aggregation
+# --------------------------------------------------------------------------
+
+def test_a_single_run_is_not_counted_twice(tmp_path):
+    """`merged.setdefault(stage, dict(r, runs=0))` seeded the accumulator with
+    the FIRST row's values and then added that row again. Every stage came out
+    inflated by exactly its first run:
+
+        prose-mentions  manifest 14  ->  report 28
+        rater-noise     manifest 58  ->  report 74
+        romance         manifest 60  ->  report 80
+
+    I introduced this while fixing a cost section that UNDER-reported spend.
+    Replacing an undercount with an overcount is not a fix, and the headline
+    "248 model calls against a cap of 300" was wrong in the other direction.
+    """
+    import json
+    gen = _gen()
+    d = tmp_path / "data/pilot/manifests"
+    d.mkdir(parents=True)
+    (d / "r1.json").write_text(json.dumps({
+        "stage_name": "extract",
+        "summaries": [{"attempted": 14, "succeeded": 14, "cached": 0,
+                       "excluded": 0, "failed": 0, "error_taxonomy": {}}]}))
+    rows, _ = gen.spend_rows(tmp_path)
+    assert len(rows) == 1
+    assert rows[0]["attempted"] == 14, rows[0]
+    assert rows[0]["runs"] == 1
+
+
+def test_repeated_runs_of_a_stage_are_summed_once_each(tmp_path):
+    import json
+    gen = _gen()
+    d = tmp_path / "data/pilot/manifests"
+    d.mkdir(parents=True)
+    for i, n in enumerate((16, 8, 2)):
+        (d / f"r{i}.json").write_text(json.dumps({
+            "stage_name": "repeat-score",
+            "summaries": [{"attempted": n, "succeeded": n, "cached": 0,
+                           "excluded": 0, "failed": 0, "error_taxonomy": {}}]}))
+    rows, _ = gen.spend_rows(tmp_path)
+    assert rows[0]["runs"] == 3
+    assert rows[0]["attempted"] == 26
+
+
+def test_error_taxonomies_are_merged_without_doubling(tmp_path):
+    import json
+    gen = _gen()
+    d = tmp_path / "data/pilot/manifests"
+    d.mkdir(parents=True)
+    (d / "r1.json").write_text(json.dumps({
+        "stage_name": "repeat-score",
+        "summaries": [{"attempted": 8, "succeeded": 0, "cached": 0,
+                       "excluded": 0, "failed": 8,
+                       "error_taxonomy": {"auth_or_quota": 8}}]}))
+    rows, _ = gen.spend_rows(tmp_path)
+    assert rows[0]["errors"] == {"auth_or_quota": 8}
+
+
+def test_a_half_written_manifest_is_not_counted_as_spend(tmp_path):
+    """A .tmp or truncated file is a failed write, not a run."""
+    import json
+    gen = _gen()
+    d = tmp_path / "data/pilot/manifests"
+    d.mkdir(parents=True)
+    (d / "good.json").write_text(json.dumps({
+        "stage_name": "extract",
+        "summaries": [{"attempted": 3, "succeeded": 3, "cached": 0,
+                       "excluded": 0, "failed": 0, "error_taxonomy": {}}]}))
+    (d / "broken.json").write_text("")
+    rows, _ = gen.spend_rows(tmp_path)
+    assert len(rows) == 1 and rows[0]["attempted"] == 3
