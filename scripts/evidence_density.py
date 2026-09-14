@@ -28,6 +28,8 @@ from collections import Counter
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+from packages.llmkit.artifacts import require  # noqa: E402
 
 
 def main() -> int:
@@ -38,7 +40,7 @@ def main() -> int:
     ap.add_argument("--out", default="data/pilot/run/evidence_density.json")
     args = ap.parse_args()
 
-    obs = json.loads((REPO / args.observations).read_text())
+    obs = require(REPO, args.observations)
     editions = {e["list_edition_id"]: e for e in obs["editions"]}
 
     per_pp: dict[tuple[str, str], list[dict]] = {}
@@ -64,7 +66,7 @@ def main() -> int:
 
     real_spread = None
     if (REPO / args.scores).exists():
-        sc = json.loads((REPO / args.scores).read_text())
+        sc = require(REPO, args.scores)
         vals = [r["estimate"] for r in sc["person_periods"] if r["estimate"] is not None]
         if vals:
             real_spread = {"n": len(vals), "min": min(vals), "max": max(vals),
@@ -74,7 +76,7 @@ def main() -> int:
 
     synthetic_spread = None
     if (REPO / args.stress).exists():
-        st = json.loads((REPO / args.stress).read_text())
+        st = require(REPO, args.stress)
         vals = [r["estimate"] for r in st["results"] if r["scored"]]
         if vals:
             synthetic_spread = {"n": len(vals), "min": min(vals), "max": max(vals),

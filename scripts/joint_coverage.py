@@ -16,6 +16,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from packages.llmkit.artifacts import require  # noqa: E402
 from modules.analytics.comparability import classify_pairing            # noqa: E402
 from modules.consensus.nearby import NEARBY_BOUND_YEARS, resolve_period  # noqa: E402
 
@@ -26,9 +27,9 @@ def main() -> int:
     ap.add_argument("--out", default="data/pilot/run/joint_with_nearby.json")
     args = ap.parse_args()
 
-    obs = json.loads((REPO / "data/pilot/observations/observations.json").read_text())
-    eps = json.loads((REPO / "data/pilot/records/episodes.json").read_text())
-    films = json.loads((REPO / "data/pilot/records/onscreen_candidates.json").read_text())
+    obs = require(REPO, "data/pilot/observations/observations.json")
+    eps = require(REPO, "data/pilot/records/episodes.json")
+    films = require(REPO, "data/pilot/records/onscreen_candidates.json")
     romance_path = REPO / "data/pilot/records/romance.json"
     romance = (json.loads(romance_path.read_text()) if romance_path.exists() else None)
     cohort = json.loads((REPO / "docs/pilot-cohort.json").read_text())

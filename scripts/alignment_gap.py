@@ -21,6 +21,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from packages.llmkit.artifacts import require  # noqa: E402
 
 
 def main() -> int:
@@ -29,10 +30,10 @@ def main() -> int:
     ap.add_argument("--out", default="data/pilot/run/alignment_gap.json")
     args = ap.parse_args()
 
-    obs = json.loads((REPO / "data/pilot/observations/observations.json").read_text())
-    eps = json.loads((REPO / "data/pilot/records/episodes.json").read_text())
-    films = json.loads((REPO / "data/pilot/records/onscreen_candidates.json").read_text())
-    rom = json.loads((REPO / "data/pilot/records/romance.json").read_text())
+    obs = require(REPO, "data/pilot/observations/observations.json")
+    eps = require(REPO, "data/pilot/records/episodes.json")
+    films = require(REPO, "data/pilot/records/onscreen_candidates.json")
+    rom = require(REPO, "data/pilot/records/romance.json")
     cohort = json.loads((REPO / "docs/pilot-cohort.json").read_text())
     names = {p["wikidata_qid"]: p["display_name"] for p in cohort["people"]}
 

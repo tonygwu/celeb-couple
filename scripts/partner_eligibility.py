@@ -18,6 +18,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from packages.llmkit.artifacts import require  # noqa: E402
 from modules.records.wikidata import _query, _val                    # noqa: E402
 
 #: Occupations that put someone in front of an audience on their appearance,
@@ -44,9 +45,8 @@ def main() -> int:
     ap.add_argument("--out", default="data/pilot/records/partner_eligibility.json")
     args = ap.parse_args()
 
-    universe = json.loads(
-        (REPO / "data/pilot/records/partner_universe.json").read_text())["people"]
-    obs = json.loads((REPO / "data/pilot/observations/observations.json").read_text())
+    universe = require(REPO, "data/pilot/records/partner_universe.json")["people"]
+    obs = require(REPO, "data/pilot/observations/observations.json")
     have = {o["person_id"] for o in obs["observations"]}
     qids = [p["wikidata_qid"] for p in universe]
 

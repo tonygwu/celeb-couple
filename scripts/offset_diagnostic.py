@@ -24,6 +24,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from packages.llmkit.artifacts import require  # noqa: E402
 from modules.analytics.metrics import (                              # noqa: E402
     Pairing, PeriodExposure, apply_cross_gender_offset, as_estimate,
     paw_rate, paw_total, scored_exposure,
@@ -38,7 +39,7 @@ def main() -> int:
     ap.add_argument("--out", default="data/pilot/run/offset_diagnostic.json")
     args = ap.parse_args()
 
-    blob = json.loads((REPO / args.scores).read_text())
+    blob = require(REPO, args.scores)
     pairings = blob.get("scored_pairings", [])
     if not pairings:
         print("no scored pairings; nothing to diagnose")

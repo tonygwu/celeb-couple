@@ -23,6 +23,8 @@ from collections import defaultdict
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+from packages.llmkit.artifacts import require  # noqa: E402
 
 
 def main() -> int:
@@ -30,9 +32,9 @@ def main() -> int:
     ap.add_argument("--out", default="data/pilot/run/shape_confound.json")
     args = ap.parse_args()
 
-    obs = json.loads((REPO / "data/pilot/observations/observations.json").read_text())
-    scores = json.loads((REPO / "data/pilot/run/evidenced_scores.json").read_text())
-    joint = json.loads((REPO / "data/pilot/run/joint_with_nearby.json").read_text())
+    obs = require(REPO, "data/pilot/observations/observations.json")
+    scores = require(REPO, "data/pilot/run/evidenced_scores.json")
+    joint = require(REPO, "data/pilot/run/joint_with_nearby.json")
 
     shape_of: dict[tuple[str, str], set[str]] = defaultdict(set)
     for o in obs["observations"]:

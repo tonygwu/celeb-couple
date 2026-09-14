@@ -1,0 +1,50 @@
+"""Load a pipeline artifact, or say clearly what to run to produce it.
+
+A fresh clone has no data/ -- it is gitignored, because the corpus lives in a
+separate private repository. Every analysis script therefore fails in a fresh
+clone, which is correct. What is NOT correct is failing with a bare
+FileNotFoundError traceback, because the next agent then has to read the script
+to work out which command produces the missing file.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+__all__ = ["MissingArtifact", "require", "PRODUCERS"]
+
+
+class MissingArtifact(SystemExit):
+    """Exits with a message naming the command that produces the file."""
+
+
+#: Which command produces which artifact. Keep in step with AGENTS.md.
+PRODUCERS = {
+    "data/pilot/records/relationship_candidates.json": "scripts/fetch_records.py",
+    "data/pilot/records/episodes.json": "scripts/build_episodes.py",
+    "data/pilot/records/onscreen_candidates.json": "scripts/fetch_records.py (then the on-screen query)",
+    "data/pilot/records/romance.json": "scripts/classify_romance.py  [spends quota]",
+    "data/pilot/records/partner_universe.json": "scripts/build_episodes.py, then the partner-universe step",
+    "data/pilot/records/partner_eligibility.json": "scripts/partner_eligibility.py",
+    "data/pilot/observations/observations.json": "scripts/fetch_observations.py",
+    "data/pilot/observations/prose_mentions.json": "scripts/extract_prose_mentions.py  [spends quota]",
+    "data/pilot/run/evidenced_scores.json": "scripts/score_evidenced.py  [spends quota]",
+    "data/pilot/run/joint_with_nearby.json": "scripts/joint_coverage.py",
+    "data/pilot/run/rater_noise.json": "scripts/measure_rater_noise.py  [spends quota]",
+    "data/pilot/stress/stress_report.json": "scripts/run_stress.py  [spends quota]",
+}
+
+
+def require(repo: Path, relative: str) -> dict:
+    """Read a JSON artifact, or exit with the command that creates it."""
+    path = repo / relative
+    if path.exists():
+        return json.loads(path.read_text())
+    producer = PRODUCERS.get(relative, "the pipeline stage that writes it")
+    raise MissingArtifact(
+        f"\nMissing artifact: {relative}\n"
+        f"  Produce it with: {producer}\n"
+        f"  data/ is gitignored, so a fresh clone has none of it. "
+        f"See AGENTS.md for the full chain order.\n"
+    )

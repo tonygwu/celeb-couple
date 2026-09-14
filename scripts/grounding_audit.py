@@ -12,6 +12,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from packages.llmkit.artifacts import require  # noqa: E402
 from modules.consensus.grounding import AUTOMATED_CHECKS, check_rationale  # noqa: E402
 
 
@@ -23,8 +24,8 @@ def main() -> int:
     ap.add_argument("--out-md", default="docs/GROUNDING-AUDIT.md")
     args = ap.parse_args()
 
-    scores = json.loads((REPO / args.scores).read_text())
-    obs_blob = json.loads((REPO / args.observations).read_text())
+    scores = require(REPO, args.scores)
+    obs_blob = require(REPO, args.observations)
     editions = {e["list_edition_id"]: e for e in obs_blob["editions"]}
     by_pp: dict[tuple[str, str], list[dict]] = {}
     for o in obs_blob["observations"]:

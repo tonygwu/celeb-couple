@@ -15,6 +15,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from packages.llmkit.artifacts import require  # noqa: E402
 from packages.ids.keys import stable_id                              # noqa: E402
 
 _NOISE = re.compile(r"[^a-z0-9]+")
@@ -36,8 +37,8 @@ def main() -> int:
     ap.add_argument("--out", default="data/pilot/observations/observations.json")
     args = ap.parse_args()
 
-    obs = json.loads((REPO / args.observations).read_text())
-    mentions = json.loads((REPO / args.mentions).read_text())["mentions"]
+    obs = require(REPO, args.observations)
+    mentions = require(REPO, args.mentions)["mentions"]
     editions = {e["list_edition_id"]: e for e in obs["editions"]}
 
     # Dedup key deliberately IGNORES the list name: same person, same year, same

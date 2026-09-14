@@ -12,6 +12,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from packages.llmkit.artifacts import require  # noqa: E402
 
 from packages.temporal.dates import Precision, PreciseDate           # noqa: E402
 from modules.records.episodes import adult_window, merge_progressions  # noqa: E402
@@ -32,8 +33,8 @@ def main() -> int:
     ap.add_argument("--out", default="data/pilot/records/episodes.json")
     args = ap.parse_args()
 
-    blob = json.loads((REPO / args.records).read_text())
-    cohort = json.loads((REPO / args.cohort).read_text())
+    blob = require(REPO, args.records)
+    cohort = require(REPO, args.cohort)
     names = {p["wikidata_qid"]: p["display_name"] for p in cohort["people"]}
     births = {q: _pd(d, f"wikidata:{q}:P569") for q, d in blob["birth_dates"].items()}
 
