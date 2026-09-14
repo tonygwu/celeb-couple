@@ -48,6 +48,9 @@ if [[ "$MODE" == "free" || "$MODE" == "all" ]]; then
   # After the merge, so it sees the corpus the reports will actually read.
   # This is the only stage that checks the observations against the live pages
   # they were extracted from; everything downstream takes them on trust.
+  # First of the three verifiers, because a wrong Q-id makes every fact
+  # fetched under it wrong, and the fetchers above have already used them.
+  run scripts/verify_identities.py
   run scripts/verify_observations.py
   # Needs episodes.json. Feeds the review sheet in the reports pass, so it has
   # to run before it rather than beside it.

@@ -68,7 +68,18 @@ fired on a downstream number. Neither would have surfaced on its own.
   **Difficulty: medium.**
 - ~~Two partners resolved to bare Q-ids.~~ **Fixed 2026-09-14**, and the cause
   was not the label SERVICE. Q13909 and Q2023710 have no English label in
-  Wikidata at all, despite labels in dozens of other languages. Both carry
+  Wikidata at all, despite labels in dozens of other languages.
+
+  **The scope was much wider than two.** Measured 2026-09-14 by
+  `scripts/verify_identities.py`: **11 of the 100 roster members** have no
+  English label -- Tom Cruise, Denzel Washington, Chris Hemsworth, Chris Evans,
+  Chris Pratt, Angelina Jolie, Scarlett Johansson, Anne Hathaway, Mila Kunis,
+  Emma Stone and Zendaya -- and 2 of the 14 pilot cohort. Any code that reads a
+  label without falling back to the English Wikipedia sitelink is wrong about
+  11% of the roster, and the two that surfaced were only the two whose names
+  reached a printed report. Every one of the 114 ids is nonetheless the right
+  person: 113 exact, and Chris Evans exact once the enwiki disambiguator
+  "(actor)" is allowed for. Both carry
   English Wikipedia sitelinks naming them Angelina Jolie and Tom Holland, which
   is a sourced name rather than a guess, so that is the fallback. A person with
   neither stays unresolved and their episode stays excluded.
