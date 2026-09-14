@@ -187,6 +187,15 @@ RULES: tuple[Rule, ...] = (
         why="how many cohort members carry any evidence",
     ),
     Rule(
+        name="cross_run_moved",
+        artifact="data/pilot/run/cross_run_stability.json",
+        extract=lambda d: d["comparable_person_periods"] - d["unchanged"],
+        render=str,
+        # Will change at the next re-score, and it appears in three documents.
+        pattern=r"(\d+) of \d+ (?:identical dossiers moved|estimates by)",
+        why="how many identical dossiers scored differently across two runs",
+    ),
+    Rule(
         name="mismatched_pairings",
         artifact="data/pilot/run/shape_confound.json",
         extract=lambda d: d["pairings_with_mismatched_shapes"],

@@ -58,7 +58,7 @@ The measurement works. The evidence does not support the product as specified.
   over four dossiers repeated four times each. All four moved. The two award
   dossiers returned the same number eight times out of eight, which is still a
   sample too small to call zero, so no figure is quoted for that shape. Scoring
-  the same dossier in two separate runs moved two of three estimates by 2.0
+  the same dossier in two separate runs moved 2 of 3 estimates by 2.0
   points, which is what this noise floor predicts.
 - Evidence **density** was the first bottleneck: every dossier once held exactly
   one observation, so the corpus produced 2 distinct values across a 5.5-point

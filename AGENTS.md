@@ -129,7 +129,7 @@ A re-score does not destroy the previous estimates any more: `score_evidenced.py
 archives both score artifacts under `data/pilot/run/history/` before overwriting,
 content-addressed so an unchanged re-run does not pile up copies. To compare two
 runs of the same corpus, point `cross_run_stability.py --b-scores` at a history
-file. Run-to-run variance is real — two of three identical dossiers moved by
+file. Run-to-run variance is real — 2 of 3 identical dossiers moved by
 2.0 points — so both runs have to survive for it to be measurable.
 | `scripts/audit_doc_numbers.py` | cross-checks measured numbers typed into any tracked Markdown against the artifacts; exits 1 on a stale one | no |
 | `scripts/run_stress.py --out data/pilot/stress` | the eight measurement stress cases | **yes** |
