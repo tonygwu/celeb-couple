@@ -101,6 +101,8 @@ def test_every_rule_matches_the_text_it_claims_to_match():
         "real_distinct_values": "It now produces 99 across a range of 30.0",
         "ranked_lsd": "against an LSD of 99.9",
         "partners_total": "Of 99 partners, 7 are people the plan forbids rating",
+        "pilot_person_periods": "of 99 person-periods, 18 rest on an award",
+        "cohort_coverage": "covering 99 of 14 cohort people",
         "roster_observations": "Corpus: 99 observations over 49 of 100 roster people",
         "roster_people_with_evidence": "131 observations over 99 of 100 roster people",
         "scorable_episodes": "and 99 scorable relationship episodes",
@@ -176,3 +178,35 @@ def test_a_rule_whose_artifact_key_vanished_fails_loudly():
     rule = _rule(mod, "coverage_saturation")
     with _pytest.raises(KeyError):
         rule.extract({"not_the_ladder": []})
+
+
+def test_the_corrections_record_is_not_audited():
+    """docs/CORRECTIONS.md exists to quote superseded values — "this used to
+    read 14 of 14 and is now 10 of 14". Auditing it against current artifacts
+    flags the record for being a record, and it did: adding a cohort-coverage
+    rule immediately fired on that sentence.
+
+    Separate from GENERATED because the remedy differs. A generated document is
+    re-run; a historical one is left alone.
+    """
+    mod = _mod()
+    assert "docs/CORRECTIONS.md" in mod.HISTORICAL
+    assert "docs/CORRECTIONS.md" not in mod.tracked_markdown(REPO)
+
+
+def test_a_generated_document_is_also_skipped():
+    """Their remedy is to re-run the generator, not to edit prose, so flagging
+    them sends the reader to the wrong place."""
+    mod = _mod()
+    tracked = mod.tracked_markdown(REPO)
+    for doc in mod.GENERATED:
+        assert doc not in tracked, doc
+
+
+def test_the_hand_written_documents_are_still_audited():
+    """The exemptions must not quietly swallow the documents that matter."""
+    mod = _mod()
+    tracked = set(mod.tracked_markdown(REPO))
+    for doc in ("README.md", "AGENTS.md", "docs/THE-TRAP.md",
+                "docs/BACKLOG.md", "docs/SOURCE-HUNT.md"):
+        assert doc in tracked, f"{doc} is no longer audited"

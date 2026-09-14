@@ -38,7 +38,17 @@ REPO = Path(__file__).resolve().parent.parent
 
 #: Documents written by a generator. Editing them by hand is the bug; the fix
 #: is to re-run the generator, so a mismatch here is not actionable prose.
-GENERATED = {"docs/M0-REPORT.md", "docs/GROUNDING-AUDIT.md"}
+GENERATED = {"docs/M0-REPORT.md", "docs/GROUNDING-AUDIT.md",
+             "docs/RELATIONSHIP-REVIEW.md", "docs/SCALING.md"}
+
+#: Documents whose PURPOSE is to quote superseded values. Auditing them against
+#: current artifacts is categorically wrong: docs/CORRECTIONS.md exists to say
+#: "this used to read 14 of 14 and is now 10 of 14", and a guard that flags
+#: that sentence is flagging the record for being a record.
+#:
+#: Separate from GENERATED on purpose. The remedy differs: a generated file is
+#: re-run, a historical one is left alone.
+HISTORICAL = {"docs/CORRECTIONS.md"}
 
 
 #: Documents measuring the 100-name roster corpus, not the 14-person pilot.
@@ -160,6 +170,23 @@ RULES: tuple[Rule, ...] = (
         why="how much rank-shaped evidence the pilot corpus holds",
     ),
     Rule(
+        name="pilot_person_periods",
+        artifact="data/pilot/run/evidence_density.json",
+        extract=lambda d: d["person_periods"],
+        render=str,
+        pattern=r"(\d+) person-periods",
+        why="the size of the scored pilot corpus",
+        skip=frozenset(ROSTER_SCALE),
+    ),
+    Rule(
+        name="cohort_coverage",
+        artifact="data/pilot/observations/observations.json",
+        extract=lambda d: d["coverage"]["cohort_people_with_any_observation"],
+        render=str,
+        pattern=r"(\d+) of \d+ cohort people",
+        why="how many cohort members carry any evidence",
+    ),
+    Rule(
         name="partners_total",
         artifact="data/pilot/records/partner_eligibility.json",
         extract=lambda d: d["partners"],
@@ -222,7 +249,8 @@ def find_mismatches(rule: "Rule", expected: str,
 def tracked_markdown(repo: Path) -> list[str]:
     out = subprocess.run(["git", "ls-files", "*.md"], cwd=repo,
                          capture_output=True, text=True, check=True).stdout
-    return [p for p in out.split() if p not in GENERATED]
+    return [p for p in out.split()
+            if p not in GENERATED and p not in HISTORICAL]
 
 
 def audit(repo: Path) -> tuple[list[dict], list[str]]:
