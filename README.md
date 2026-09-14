@@ -31,7 +31,7 @@ The measurement works. The evidence does not support the product as specified.
 - Two model families agree closely on the SYNTHETIC stress corpus. On the real
   dossiers only one family ran — codex reached 0% of its quota window mid-run —
   so cross-family agreement there is unmeasured. Repeat-scoring puts the
-  least significant difference at about 2.22 points for rank-shaped estimates,
+  least significant difference at about 2.56 points for rank-shaped estimates,
   over four dossiers repeated four times each. All four moved. The two award
   dossiers returned the same number eight times out of eight, which is still a
   sample too small to call zero, so no figure is quoted for that shape. Scoring

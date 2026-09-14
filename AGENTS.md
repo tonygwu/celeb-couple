@@ -216,7 +216,7 @@ anything. The findings that should shape any next step:
    jointly covered pairings pit one against the other, so their gaps are
    substantially about publication format.
 4. **The one comparable gap is 0.0**, against a least significant difference of
-   about 2.22 points for rank-shaped estimates, measured on four dossiers
+   about 2.56 points for rank-shaped estimates, measured on four dossiers
    repeated four times each. There is no leaderboard here yet, and adding more
    award-shaped sources will not create one. The LSD is quoted PER SHAPE:
    pooling the award dossiers' zero measured variance with the ranked ones'
@@ -226,7 +226,7 @@ anything. The findings that should shape any next step:
 
 5. **The shape effect is confirmed under controlled conditions.** Stress case
    S2 renders ONE substantive judgment as an award, as a ranked placement and
-   as prose. The estimates spread 4 points — above the 2.22 floor — so format
+   as prose. The estimates spread 4 points — above the 2.56 floor — so format
    moves the number with the substance held identical by construction. That is
    an independent route to finding 3, and it is the strongest form of the
    argument because nothing about the person varies.

@@ -84,7 +84,7 @@ fired on a downstream number. Neither would have surfaced on its own.
 
 ## Measurement (added late 2026-09-14)
 
-- **The one comparable gap is 0.0 against a rank-shaped LSD of 2.22.** Daredevil 2003,
+- **The one comparable gap is 0.0 against a rank-shaped LSD of 2.56.** Daredevil 2003,
   Affleck and Garner, both judged by an editorial award. Everything larger is
   shape-mismatched. **Difficulty: blocked on evidence.**
 - **Shape confound is unmitigated.** 31% of the estimate is evidence type
@@ -127,7 +127,7 @@ fired on a downstream number. Neither would have surfaced on its own.
 
 - **`ADJUDICATION_GAP = 10.0` is still the plan's provisional value.** The plan
   set it "provisionally 10 points, set from M0's own spread", and M0 has now
-  measured a spread: the rank-shaped least significant difference is 2.22
+  measured a spread: the rank-shaped least significant difference is 2.56
   points. Ten is more than four times that, so a real cross-family disagreement
   could sit well inside it and never be flagged.
 

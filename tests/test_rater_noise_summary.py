@@ -149,3 +149,34 @@ def test_the_committed_artifact_records_its_total_runs():
     assert "total_runs" in blob, "re-run measure_rater_noise.py --recompute"
     judges = {j for t in blob["targets"] for j in t["runs"]}
     assert blob["total_runs"] == len(blob["targets"]) * blob["repeats"] * len(judges)
+
+
+def test_the_sd_is_the_sample_standard_deviation():
+    """`pstdev` treats the four runs as the whole population of the rating
+    process. They are a SAMPLE of it, and the population formula underestimates
+    the population SD by sqrt((n-1)/n) — about 13% at n = 4.
+
+    The rank-shaped LSD went 1.2 (pooled across shapes) -> 2.22 (per shape,
+    pstdev) -> 2.56 (per shape, sample SD). Every conclusion in the report held
+    at all three, which is the reassuring part; the number being right is the
+    point.
+    """
+    import statistics
+    runs = [86.0, 86.0, 88.0, 88.0]
+    assert statistics.pstdev(runs) == 1.0
+    assert round(statistics.stdev(runs), 3) == 1.155
+    src = (REPO / "scripts/measure_rater_noise.py").read_text()
+    assert "statistics.pstdev" not in src, (
+        "the population SD underestimates a sampled process"
+    )
+
+
+def test_recompute_rebuilds_the_sds_from_the_runs():
+    """`--recompute` reused the STORED per_judge_sd, so a corrected estimator
+    could not be applied by replay. "Reproducibility comes from replaying
+    stored responses" has to mean recomputing from them."""
+    src = (REPO / "scripts/measure_rater_noise.py").read_text()
+    recompute = src[src.index("if args.recompute"):]
+    assert 'row["per_judge_sd"]' in recompute, (
+        "the replay path must recompute the SDs from the stored runs"
+    )

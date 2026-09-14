@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `ed27dec4193b`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `5a7f117418f3`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -91,13 +91,13 @@ On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in 
 | Case | Question | Result |
 |---|---|---|
 | S1 single vs multi | Does publication count impose the ordering? | strong single-source **92** vs weak multi-source **63** — the stronger substantive judgment scored higher |
-| S2 format | Award vs rank vs prose | {"as_award": 92, "as_rank": 92, "as_prose": 88}, spread **4**, ABOVE the measured floor of 2.22 — format moved the estimate on identical substance, which is the evidence-shape confound showing up under controlled conditions |
-| S3 corroboration | Does an extra publisher jump a band? | 69 → 70, spread **1**, within the measured floor of 2.22 — corroboration left the estimate where it was |
+| S2 format | Award vs rank vs prose | {"as_award": 92, "as_rank": 92, "as_prose": 88}, spread **4**, ABOVE the measured floor of 2.56 — format moved the estimate on identical substance, which is the evidence-shape confound showing up under controlled conditions |
+| S3 corroboration | Does an extra publisher jump a band? | 69 → 70, spread **1**, within the measured floor of 2.56 — corroboration left the estimate where it was |
 | S4 contradiction | Does the rationale address the conflict? | estimate [80], names both placements: [True] |
 | S5 empty / off-topic | Unscored, or a low number? | empty unscored: True, off-topic unscored: True |
-| S6 identity | Same evidence, different name | {"named": 82, "anonymised": 82.5, "swapped_name": 82} — spread **0.5**, at or below the measured noise floor of 2.22 — identity did NOT move the score |
-| S7 order | Reordered observations | {"order_a": 84, "order_b": 82}, spread **2**, within the measured floor of 2.22 — observation order did not move the estimate |
-| S8 copy volume | One copy vs five | {"one_copy": 72, "five_copies": 72}, spread **0**, within the measured floor of 2.22 — copy volume changed nothing |
+| S6 identity | Same evidence, different name | {"named": 82, "anonymised": 82.5, "swapped_name": 82} — spread **0.5**, at or below the measured noise floor of 2.56 — identity did NOT move the score |
+| S7 order | Reordered observations | {"order_a": 84, "order_b": 82}, spread **2**, within the measured floor of 2.56 — observation order did not move the estimate |
+| S8 copy volume | One copy vs five | {"one_copy": 72, "five_copies": 72}, spread **0**, within the measured floor of 2.56 — copy volume changed nothing |
 
 Every spread above is judged against the MEASURED noise floor rather than against a stored sentence, because a difference in estimate points only means something next to the amount those points are known to wobble by.
 
@@ -332,16 +332,16 @@ Co-appearance in a cast list is not a pairing. All 20 candidates were classified
 4 repeats of each unchanged dossier.
 
 - `award`: SD **0.0** over 2 dossier(s). No LSD quoted -- every repeat returned the same value; this sample cannot distinguish low variance from none, so no LSD is quoted.
-- `ranked`: SD **0.802**, least significant difference at 95% about **2.22** points (2.77 x SD).
+- `ranked`: SD **0.926**, least significant difference at 95% about **2.56** points (2.77 x SD).
 
-The POOLED figure is SD 0.535 and LSD 1.48. It is reported only for continuity with earlier documents. Pooling averages a shape with measured variance against one with none, which halves the number and understates the noise floor for exactly the rank-shaped estimates the LSD gets applied to.
+The POOLED figure is SD 0.617 and LSD 1.71. It is reported only for continuity with earlier documents. Pooling averages a shape with measured variance against one with none, which halves the number and understates the noise floor for exactly the rank-shaped estimates the LSD gets applied to.
 
 | Dossier | Shape | Runs | SD |
 |---|---|---|---|
-| Angelina Jolie 2006 (fable) | ranked | 94, 93, 95, 94 | 0.707 |
-| Michelle Pfeiffer 1995 (fable) | ranked | 86, 86, 88, 88 | 1.000 |
-| Jennifer Aniston 1996 (fable) | ranked | 84, 84, 86, 86 | 1.000 |
-| Jennifer Aniston 1997 (fable) | ranked | 91, 90, 91, 90 | 0.500 |
+| Angelina Jolie 2006 (fable) | ranked | 94, 93, 95, 94 | 0.816 |
+| Michelle Pfeiffer 1995 (fable) | ranked | 86, 86, 88, 88 | 1.155 |
+| Jennifer Aniston 1996 (fable) | ranked | 84, 84, 86, 86 | 1.155 |
+| Jennifer Aniston 1997 (fable) | ranked | 91, 90, 91, 90 | 0.577 |
 | Denzel Washington 1996 (fable) | award | 92, 92, 92, 92 | 0.000 |
 | Harrison Ford 1998 (fable) | award | 92, 92, 92, 92 | 0.000 |
 
@@ -386,7 +386,7 @@ This is independent of section 6b and agrees with it. The repeats there were del
 Of 4 jointly covered pairing-periods, **1** compares two people judged by the same kind of evidence. The rest compare an award against a list placement, where format explains much of the gap.
 
 - **Daredevil (2003)**: gap **+0.0**
-  - Both sides are `editorial_award`-shaped, and that shape's repeat variance is **unmeasured**: every repeat returned the same value, which cannot tell low variance from none. The largest measured floor is `ranked`'s **2.22** points. Against that upper bound the gap is **not distinguishable from zero**.
+  - Both sides are `editorial_award`-shaped, and that shape's repeat variance is **unmeasured**: every repeat returned the same value, which cannot tell low variance from none. The largest measured floor is `ranked`'s **2.56** points. Against that upper bound the gap is **not distinguishable from zero**.
 
 So the project can now produce a signed, exactly mirrored, evidence-backed gap for a real couple. It cannot yet produce one that is both comparable and larger than its own measurement noise. That is a much better place than this run started, and it is not a leaderboard.
 

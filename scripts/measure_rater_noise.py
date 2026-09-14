@@ -178,6 +178,21 @@ def main() -> int:
         f = REPO / args.recompute
         blob = json.loads(f.read_text())
         targets = blob["targets"]
+        # Rebuild the per-judge SDs from the stored RUNS. The runs are the raw
+        # data; per_judge_sd is derived from them. Reusing the stored figure
+        # meant a corrected SD estimator could not be applied by replay, which
+        # defeats the point of a replay -- "reproducibility comes from
+        # replaying stored responses" has to mean recomputing from them.
+        for row in targets:
+            row["per_judge_sd"] = {
+                j: (statistics.stdev(v) if len(v) > 1 else None)
+                for j, v in row["runs"].items()}
+            row["per_judge_mean"] = {
+                j: (statistics.mean(v) if v else None)
+                for j, v in row["runs"].items()}
+            row["per_judge_range"] = {
+                j: (max(v) - min(v) if v else None)
+                for j, v in row["runs"].items()}
         requested = sorted({j for row in targets for j in row["runs"]})
         blob["headline"] = summarise(targets, requested)
         blob["headline"]["recomputed_from_stored_runs"] = True
@@ -284,7 +299,12 @@ def main() -> int:
                         stage.excluded += 1
         row = {"person": names.get(person, person), "period": period, "shape": shape,
                "runs": runs,
-               "per_judge_sd": {j: (statistics.pstdev(v) if len(v) > 1 else None)
+               # statistics.stdev (n-1), not pstdev (n). These four runs are a
+               # SAMPLE of the rating process, not the whole population of it,
+               # and pstdev underestimates the population SD by sqrt((n-1)/n) --
+               # 13% at n=4. The published rank-shaped LSD of 2.22 was low by
+               # about 15% for that reason; the sample SD gives 2.56.
+               "per_judge_sd": {j: (statistics.stdev(v) if len(v) > 1 else None)
                                 for j, v in runs.items()},
                "per_judge_mean": {j: (statistics.mean(v) if v else None)
                                   for j, v in runs.items()},

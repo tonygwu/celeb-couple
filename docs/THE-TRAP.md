@@ -89,8 +89,15 @@ The award held still and both ranks moved, which is the same split the repeat
 measurement found. It also means the published least significant difference of
 1.2 points was too small: it pooled the award dossiers' zero measured variance
 with the ranked ones', halving it. Quoted per shape, over four ranked dossiers
-repeated four times each, the rank-shaped LSD is **2.22 points**. A 2.0-point
-run-to-run move is consistent with that and not with 1.2.
+repeated four times each, the rank-shaped LSD is **2.56 points**. A 2.0-point
+run-to-run move sits inside that and is well outside 1.2.
+
+*Corrected twice, 2026-09-14.* The pooled figure was 1.2. Quoting it per shape
+gave 2.22. That still used `pstdev`, the POPULATION standard deviation, on four
+runs — but four runs are a sample of the rating process, not the whole of it,
+and the population formula underestimates the population SD by about 13% at
+n = 4. The sample standard deviation gives 2.56. Every conclusion below held at
+all three figures.
 
 Which dossiers move is itself the finding. All four ranked dossiers moved
 between repeats, with SDs of 0.5, 0.71, 1.0 and 1.0. Both award dossiers
