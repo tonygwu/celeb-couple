@@ -112,5 +112,14 @@ def test_a_dry_run_does_not_need_an_account():
         [str(repo / ".venv/bin/python"), str(repo / "scripts/measure_rater_noise.py"),
          "--dry-run", "--judges", "fable"],
         capture_output=True, text=True, cwd=repo, env=env, timeout=60)
-    assert r.returncode == 0, r.stdout + r.stderr
-    assert "nothing spent" in r.stdout
+    # Assert the PROPERTY, not a clean exit. A fresh clone has no data/ -- it is
+    # gitignored -- so the dry run there fails on a missing artifact instead.
+    # That is a different and acceptable failure. Asserting returncode == 0
+    # passed in every working checkout and failed in a truly empty clone, which
+    # is the exact portability trap this repo has already paid for once.
+    assert "No account chosen" not in (r.stdout + r.stderr), (
+        "a dry run spends nothing and must never demand an account:\n"
+        + r.stdout + r.stderr)
+    if "observations.json" not in r.stderr:
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert "nothing spent" in r.stdout
