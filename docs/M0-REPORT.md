@@ -101,7 +101,11 @@ On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in 
 
 Every spread above is judged against the MEASURED noise floor rather than against a stored sentence, because a difference in estimate points only means something next to the amount those points are known to wobble by.
 
-**S2 is the one that did not pass, and it matters.** The same substantive judgment, rendered as an award, as a ranked placement and as prose, moved 4 points — above the floor. That is the evidence-shape confound measured under CONTROLLED conditions, where the substance is held identical by construction. The observational estimate of the same effect appears later in this report, and the two are independent routes to the same conclusion: how a judgment is published changes the number it receives.
+**S2 did not pass, and what it measures is narrower than it looks.** The same substantive judgment, rendered as an award, as a ranked placement and as prose, moved 4 points — above the floor.
+
+It cannot be read as independent evidence that format moves perception. The prose arm uses the VERBATIM text of the rubric's calibration Example 3, which the rubric anchors at 88, and the award arm has the shape of Example 1, anchored at 92. The observed arms were 92, 92 and 88. So S2 shows the judge following its calibration anchors — which is what anchors are for, and is worth knowing — and it does not show that the same substance is perceived differently in different formats, because the rubric told the judge those two formats sit four points apart.
+
+The observational shape-confound figure later in this report is measured on real dossiers and stands on its own. Redesigning S2 with prose that is NOT a calibration example is filed in `docs/BACKLOG.md`; until then it tests anchor-following, not format equivalence.
 
 ## 5. Coverage, the two numbers that matter
 

@@ -138,6 +138,19 @@ fired on a downstream number. Neither would have surfaced on its own.
   two-family re-score, not from the single-family repeat noise, which measures
   a different thing. **Difficulty: a decision, blocked on the re-score.**
 
+- **Stress case S2 tests anchor-following, not format equivalence.** Its prose
+  arm is the VERBATIM text of the rubric's calibration Example 3, anchored at
+  88, and its award arm has the shape of Example 1, anchored at 92. The judge
+  returned 92, 92, 88 — the anchored values. So the 4-point "format effect" is
+  the rubric telling the judge where those formats sit, not a measurement that
+  the same substance is perceived differently when published differently.
+
+  Rebuild the arms from a judgment that appears in NO calibration example, and
+  keep the three renderings substantively identical to each other. Until then
+  the case is still worth running — a judge that stopped following its anchors
+  would be a real finding — but it must not be quoted as evidence about format.
+  **Difficulty: easy, but it costs a stress re-run (~27 calls).**
+
 ## Tooling
 
 - ~~Smoke tests can clobber production artifacts.~~ **Fixed 2026-09-14.**

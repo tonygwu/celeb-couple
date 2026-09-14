@@ -560,14 +560,26 @@ def main() -> int:
     w("")
     _s2_spread = (f.get("S2_format_equivalence") or {}).get("spread")
     if _floor is not None and _s2_spread is not None and _s2_spread > _floor:
-        w(f"**S2 is the one that did not pass, and it matters.** The same "
-          f"substantive judgment, rendered as an award, as a ranked placement "
-          f"and as prose, moved {_s2_spread} points — above the floor. That is "
-          f"the evidence-shape confound measured under CONTROLLED conditions, "
-          f"where the substance is held identical by construction. The "
-          f"observational estimate of the same effect appears later in this "
-          f"report, and the two are independent routes to the same conclusion: "
-          f"how a judgment is published changes the number it receives.")
+        w(f"**S2 did not pass, and what it measures is narrower than it "
+          f"looks.** The same substantive judgment, rendered as an award, as a "
+          f"ranked placement and as prose, moved {_s2_spread} points — above "
+          f"the floor.")
+        w("")
+        w("It cannot be read as independent evidence that format moves "
+          "perception. The prose arm uses the VERBATIM text of the rubric's "
+          "calibration Example 3, which the rubric anchors at 88, and the "
+          "award arm has the shape of Example 1, anchored at 92. The observed "
+          "arms were 92, 92 and 88. So S2 shows the judge following its "
+          "calibration anchors — which is what anchors are for, and is worth "
+          "knowing — and it does not show that the same substance is perceived "
+          "differently in different formats, because the rubric told the judge "
+          "those two formats sit four points apart.")
+        w("")
+        w("The observational shape-confound figure later in this report is "
+          "measured on real dossiers and stands on its own. Redesigning S2 with "
+          "prose that is NOT a calibration example is filed in "
+          "`docs/BACKLOG.md`; until then it tests anchor-following, not format "
+          "equivalence.")
         w("")
 
     # ---------- coverage ----------

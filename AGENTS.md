@@ -224,12 +224,15 @@ anything. The findings that should shape any next step:
    ranked dossiers moved between repeats; both award dossiers returned the
    same number eight times out of eight.
 
-5. **The shape effect is confirmed under controlled conditions.** Stress case
-   S2 renders ONE substantive judgment as an award, as a ranked placement and
-   as prose. The estimates spread 4 points — above the 2.56 floor — so format
-   moves the number with the substance held identical by construction. That is
-   an independent route to finding 3, and it is the strongest form of the
-   argument because nothing about the person varies.
+5. **S2 does NOT confirm the shape effect — it tests anchor-following.**
+   Stress case S2 renders one judgment as an award, a rank and prose, and the
+   estimates spread 4 points. Do not quote that as controlled evidence about
+   format: the prose arm is the VERBATIM text of the rubric's calibration
+   Example 3, anchored at 88, and the award arm has the shape of Example 1,
+   anchored at 92. The judge returned 92, 92, 88 — the anchored values. The
+   case is worth running, because a judge that stopped following its anchors
+   would be a real finding, but finding 3 rests on the observational corpus
+   alone. Redesign is filed in `docs/BACKLOG.md`.
 6. **Every real estimate came from ONE judge family.** The plan decided J = 2
    so a one-family idiosyncrasy could be told from a property of the rubric.
    Codex reached 0% of its 7-day window mid-run, so all 39 person-periods were

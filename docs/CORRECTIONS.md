@@ -69,16 +69,29 @@ distinct names — the ceiling is **25 of 239**, and it still saturates at 100
 names a year, now because the roster is exhausted at that depth. The
 requirement is unchanged and the saturation is real.
 
-### Stress case S2 was reported as a pass
+### Stress case S2 was reported as a pass, and then over-read
 
 The format-equivalence case renders one substantive judgment as an award, as a
-ranked placement, and as prose. It spreads 4 points, which is above the
-measured floor, and was recorded as "formats scored comparably" against a
-threshold of 10 typed before anything had been measured.
+ranked placement, and as prose. It spreads 4 points, above the measured floor,
+and was recorded as "formats scored comparably" against a threshold of 10 typed
+before anything had been measured. That much was a straightforward correction.
 
-It is the evidence-shape confound under controlled conditions, with the
-substance held identical by construction — independent corroboration of the
-observational figure above, by a different route.
+It was then described in this report — by me, earlier the same night — as the
+evidence-shape confound "measured under controlled conditions" and
+"independent corroboration" of the observational figure above. **That was
+wrong, and the evidence was in the rubric all along.**
+
+S2's prose arm uses the VERBATIM text of the rubric's calibration Example 3,
+which the rubric anchors at 88. Its award arm has the shape of Example 1,
+anchored at 92. The observed arms were 92, 92 and 88 — the anchored values.
+
+So S2 shows the judge following its calibration anchors, which is what anchors
+are for and is worth knowing. It does not show that identical substance is
+perceived differently in different formats, because the rubric told the judge
+those two formats sit four points apart. Redesigning the case is filed in
+[`docs/BACKLOG.md`](BACKLOG.md).
+
+The observational shape figure is measured on real dossiers and is unaffected.
 
 ### Stress case S6 was reported as a failure
 

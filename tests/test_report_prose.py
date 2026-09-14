@@ -698,3 +698,42 @@ def test_the_report_carries_no_stale_section_cross_references():
     bad = [f"section {n}{suffix}" for n, suffix in refs
            if suffix or int(n) not in headings]
     assert not bad, f"cross-references that do not resolve: {bad}"
+
+
+def test_s2_is_not_described_as_independent_evidence_about_format():
+    """S2's prose arm is the VERBATIM text of the rubric's calibration
+    Example 3, anchored at 88, and its award arm has the shape of Example 1,
+    anchored at 92. The judge returned 92, 92, 88 — the anchored values.
+
+    So the case shows anchor-following, not that identical substance is
+    perceived differently in different formats. I described it as "independent
+    corroboration" of the shape confound earlier the same night; the evidence
+    against that was sitting in the rubric.
+    """
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "S2" not in text:
+        pytest.skip("report not generated in this clone")
+    assert "independent routes to the same conclusion" not in text
+    assert "calibration Example 3" in text, (
+        "the report must say why S2 cannot be read as a format measurement"
+    )
+
+
+def test_the_stress_prose_arm_still_matches_the_rubric_example():
+    """If someone rebuilds S2 with independent prose, this test should start
+    failing — that is the signal to update the report text, which currently
+    explains the overlap."""
+    rubric = (REPO / "rubrics/standing/RUBRIC.md").read_text()
+    stress = (REPO / "modules/consensus/stress.py").read_text()
+    phrase = "the most beautiful face in the room"
+    in_both = phrase in rubric and phrase in stress
+    report = (REPO / "docs/M0-REPORT.md")
+    if not report.exists():
+        pytest.skip("report not generated")
+    if in_both:
+        assert "calibration Example 3" in report.read_text()
+    else:
+        assert "calibration Example 3" not in report.read_text(), (
+            "S2 no longer reuses the calibration example; the report's "
+            "explanation of the overlap is now stale"
+        )
