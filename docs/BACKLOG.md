@@ -72,31 +72,75 @@ fired on a downstream number. Neither would have surfaced on its own.
   English Wikipedia sitelinks naming them Angelina Jolie and Tom Holland, which
   is a sourced name rather than a guess, so that is the fallback. A person with
   neither stays unresolved and their episode stays excluded.
-- **The same relationship enters the episode list twice, once from each
-  side, and two episodes SHARE an id.** Found 2026-09-14 by
+- ~~The same relationship enters the episode list twice, once from each side,
+  and two episodes SHARE an id.~~ **Fixed 2026-09-14.** Found by
   `corroborate_relationships.py`, whose output keyed by `episode_id` silently
   lost a row and reported "22 of 30" over 31 episodes.
 
-  Both people being in the cohort means Wikidata's symmetric statement is read
-  from both items. Ben Affleck + Ana de Armas produces two rows with identical
-  dates and therefore the IDENTICAL id `ep_6241261f5c07`; Ben Affleck +
-  Jennifer Garner produces two rows with different ids because the two items
-  disagree about the start (`2004-10` on Garner's, `2005-06-29` on Affleck's,
-  and only Garner's side carries the unmarried_partner stage).
+  The cause was simpler than the first diagnosis in this file, which claimed
+  the two Wikidata items disagreed about the Affleck/Garner start date. They do
+  not. When both halves of a couple are in the cohort, the fetcher reads the
+  same statement off BOTH items and produces two candidates that agree on
+  everything. `merge_progressions` groups by pair key but then saw two spans
+  covering the same dates rather than two abutting ones, so it made two runs.
+  Affleck + de Armas produced two rows with identical dates and therefore the
+  identical `stable_id`.
 
-  `packages/ids/keys.py` states the rule this breaks: a pair key is
-  order-independent "or the same couple enters the corpus twice and the
-  mirrored-gap invariant breaks".
+  Exact duplicates now collapse before runs are formed -- same relation, same
+  start, same end, with precision -- and the count is reported rather than
+  swallowed. Two collapsed. 31 episodes became 29, and Affleck/Garner now
+  merges correctly into one progression 2004-10 to 2018-10 instead of splitting
+  into a dating span and a marriage. Statements that differ anywhere stay
+  separate, because choosing between two disagreeing sources is the defect
+  detector's business and not the merger's.
 
-  **No published number is affected today.** `jointly_covered` and
-  `scored_pairings` carry no duplicates, because neither pairing is jointly
-  covered. What IS wrong is the episode count, which says 31 for 29 distinct
-  relationships, and any consumer keyed by `episode_id`.
+  **No conclusion moved**: jointly covered pairing-periods 4, distinct
+  pairings 2, comparability 1 comparable and 3 shape-mismatched, all unchanged.
+  The denominators did: `episodes_examined` 31 to 29, `candidate_pairings` 51
+  to 49. `audit_doc_numbers.py` was not watching either, so a stale "of 51" sat
+  in this file; both are rules now.
 
-  The fix is to keep one episode per pair key and record the other direction
-  rather than discard it, because the Affleck/Garner disagreement is a real
-  disagreement between two sources and hiding it would be worse than the
-  duplicate. **Difficulty: medium.**
+- ~~The doc audit counted rules that matched nothing as quantities checked.~~
+  **Fixed 2026-09-14**, found while adding the two rules above. The summary
+  printed `len(RULES)`, so a rule with no subject counted exactly as if it had
+  verified something. Two rules had been dormant for some time --
+  `coverage_saturation` and `cohort_coverage`, whose numbers now appear only in
+  generated or historical documents, which are exempt -- so "16 quantities
+  checked" meant 14. The rules are correct and worth keeping: each is proven
+  against a sample phrase by `tests/test_doc_numbers.py`, and each will catch
+  the number if it is ever typed into a hand-written document. What was wrong
+  was the claim. The audit now names them and reports "15 of 18 quantities
+  found and checked".
+
+- **A dating-to-marriage progression only merges when the two spans abut
+  within one day, and 7 in the roster corpus do not.** Found 2026-09-14 while
+  fixing the mirrored duplicates above. `modules/records/episodes.py` opens by
+  saying a progression "is ONE episode, not two scoring opportunities", and
+  `JOIN_SLACK_DAYS = 1` delivers that only when Wikidata abuts the statements
+  exactly. These seven do not, so each is two episodes:
+
+  | Pair | dating | marriage |
+  |---|---|---|
+  | Mila Kunis + Ashton Kutcher | 2012– | 2015– |
+  | Jennifer Lopez + Ojani Noa | 1996–1997 | 1997-02–1998-01 |
+  | Jennifer Lopez + Marc Anthony | 2004-02–2004-03 | 2004-06-05–2014-06 |
+  | Megan Fox + Brian Austin Green | 2004–2015-08-19 | 2010-06-24–2021-10-15 |
+  | Scarlett Johansson + Colin Jost | 2017–2020 | 2020– |
+  | Jennifer Lopez + Ben Affleck | 2021–2004 (sic) | 2022-07-16–2024 |
+  | Jennifer Lopez + Cris Judd | 2001-09–2002-05 | 2001-09-29–2003-01 |
+
+  Two of them overlap rather than abut, which a slack window cannot express at
+  all: Megan Fox's dating span runs past the start of the marriage span, and so
+  does Cris Judd's. The Ben Affleck row has an end before its start, the defect
+  class already filed below, and it is the 2002-2004 relationship rather than
+  the 2021 one.
+
+  **Not widened here.** Raising `JOIN_SLACK_DAYS` changes which relationships
+  are one scoring opportunity and which are two, which is a methodology
+  decision with a published effect, not a parser tweak. The shapes above are
+  also not all the same problem: a gap wants a slack window, an overlap wants a
+  containment rule, and a reversed date wants the defect flag it already gets.
+  **Difficulty: a decision, not a task.**
 
 - **One Wikidata episode has an end date before its start date.** Flagged,
   excluded, left exactly as sourced. Worth reporting upstream.
@@ -104,7 +148,7 @@ fired on a downstream number. Neither would have surfaced on its own.
 
 ## Coverage
 
-- **Joint pairing coverage is 4 pairing-periods of 51 candidate pairings**,
+- **Joint pairing coverage is 4 pairing-periods of 49 candidate pairings**,
   and only 1 of those 4 is shape-comparable. Person-period availability is no
   longer the binding constraint: the corpus now holds 41 observations over 9 of
   14 people. The constraint is that BOTH sides must be scorable over the SAME

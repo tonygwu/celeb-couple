@@ -193,7 +193,7 @@ changing any source: `fetch_records` → `build_episodes` → `build_partner_uni
 `fetch_observations` → `merge_prose_mentions` (once per
 mentions file) → `verify_observations` → `corroborate_relationships` → `score_evidenced` → `joint_coverage` → `evidence_density` →
 `alignment_gap` → `shape_confound` → `grounding_audit` → `offset_diagnostic` →
-`relationship_review` → `conclusion_robustness` → `verify_trap` →
+`reachable_products` → `relationship_review` → `conclusion_robustness` → `verify_trap` →
 `cross_run_stability` →
 `write_m0_report` → `audit_doc_numbers`.
 

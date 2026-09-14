@@ -4,7 +4,7 @@ Generated from the artifacts by `scripts/scaling_report.py`. The pilot ran 14 pe
 
 ## The answer
 
-**Coverage does not scale with roster size. A 7-fold larger roster produced 3.2x the observations and 8.5x the episodes, and the number of COMPARABLE jointly covered pairings went from 1 to 1.**
+**Coverage does not scale with roster size. A 7-fold larger roster produced 3.2x the observations and 9.2x the episodes, and the number of COMPARABLE jointly covered pairings went from 1 to 1.**
 
 Joint coverage is a conjunction of independently rare conditions: both people judged, near the same year, by the same kind of evidence. Each is uncommon, so the conjunction is rarer than any of them, and growing the roster multiplies the numerator and the denominator together.
 
@@ -13,7 +13,7 @@ Joint coverage is a conjunction of independently rare conditions: both people ju
 | Metric | Pilot (14) | Roster (100) |
 |---|---|---|
 | Roster size | 14 | 100 |
-| Relationship episodes (scorable) | 28 | 239 |
+| Relationship episodes (scorable) | 26 | 239 |
 | Observations | 41 | 131 |
 | People with any observation (incl. partners) | 14 | 61 |
 | ...of those, on the roster itself | 10 | 49 |

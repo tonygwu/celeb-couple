@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `8cd5206ad388`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `3a382e37ef3e`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -22,7 +22,7 @@ Both model families ran on the STRESS corpus and agreed on the calibration ancho
 
 But across the 14-person cohort, the permitted sources yielded **41 attractiveness observations total**, covering 10 of 14 cohort people; 4 have none at all. A further 4 people outside the cohort carry observations — partners, whose evidence is what makes a pairing jointly covered.
 
-Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **4** pairings are jointly covered.
+Across all 29 relationship episodes and 20 co-starring films — **49 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **4** pairings are jointly covered.
 
 **The decisive measurement**: of 39 scored person-periods, 18 rest on a one-winner editorial award and 16 on an ordered rank. The award-shaped ones cluster at mean 91.28 with sd **3.263**; the rank-shaped ones sit lower, at mean 84.56, and spread more than twice as wide, sd **6.727**. A one-winner award is superlative by construction, so it concentrates: 15 of 18 award-shaped estimates are exactly 92. Ranked evidence carries a degree, so it can tell people apart.
 
@@ -75,11 +75,11 @@ This is an engineering access assessment from published directives and terms. It
 
 - 34 relationship candidates for 14 subjects, 27 carrying a source reference.
 - **16 of 32 start dates are year-precision only.** They are stored as years, not as 1 January.
-- Merged into 31 episodes, joining 3 dating-to-marriage progressions that Wikidata stores as two abutting statements.
+- Merged into 29 episodes, joining 3 dating-to-marriage progressions that Wikidata stores as two abutting statements.
 - 3 episodes carry defects and are unscorable:
   - `no_start_date`: 2
   - `end_before_start`: 1
-- 28 episodes eligible after the adult window.
+- 26 episodes eligible after the adult window.
 - Scoring every year of every eligible episode would need **633 person-period estimates** (span 1964–2026), against an M0 cap of 50. The pilot samples at most three periods per pairing.
 
 On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in a cast list proves only that both were in the film. A qualifying on-screen pairing needs an established reciprocal romance between their CHARACTERS, which scripts/classify_romance.py decides. Most co-starring pairs are not romances; the current count is in data/pilot/records/romance.json.
@@ -113,7 +113,7 @@ The observational shape-confound figure later in this report is measured on real
 
 Joint pairing coverage: **0 of 8** (0/4 real-life, 0/4 on-screen).
 
-**Exhaustive check.** Across all 31 episodes and 20 films, zero pairings had both sides evidenced in a shared year.
+**Exhaustive check.** Across all 29 episodes and 20 films, zero pairings had both sides evidenced in a shared year.
 
 **3 near-misses** — one side evidenced, the other not, within the bound:
 
@@ -237,9 +237,9 @@ This reframes what "more sources" has to mean. A source that adds a hundred new 
 
 The corpus grew from 13 observations to 41 and joint coverage did not move. This is why.
 
-- Pairings considered (romance-verified films plus scorable episodes): **36**
-- With evidence on BOTH sides at any distance: **13**
-- Missing evidence on one side entirely: **23**
+- Pairings considered (romance-verified films plus scorable episodes): **34**
+- With evidence on BOTH sides at any distance: **12**
+- Missing evidence on one side entirely: **22**
 
 Joint coverage if the nearby-period bound were widened:
 
@@ -248,18 +248,18 @@ Joint coverage if the nearby-period bound were widened:
 | ±0 | 1 |
 | ±1 | 2 ← current |
 | ±2 | 4 |
-| ±3 | 5 |
-| ±4 | 6 |
-| ±5 | 7 |
-| ±6 | 7 |
-| ±7 | 8 |
-| ±8 | 9 |
-| ±9 | 9 |
-| ±10 | 9 |
-| ±11 | 9 |
-| ±12 | 9 |
+| ±3 | 4 |
+| ±4 | 5 |
+| ±5 | 6 |
+| ±6 | 6 |
+| ±7 | 7 |
+| ±8 | 8 |
+| ±9 | 8 |
+| ±10 | 8 |
+| ±11 | 8 |
+| ±12 | 8 |
 
-Two things follow. Widening the bound from ±1 to ±2 would take joint coverage from 2 to 4. And it stops helping: the count reaches 9 at ±8 and goes no higher over the range measured, because **23 of 36 pairings have no evidence on one side at all**. The bound is a real cost but absence is the bigger one.
+Two things follow. Widening the bound from ±1 to ±2 would take joint coverage from 2 to 4. And it stops helping: the count reaches 8 at ±8 and goes no higher over the range measured, because **22 of 34 pairings have no evidence on one side at all**. The bound is a real cost but absence is the bigger one.
 
 *This measures what the bound costs. It is NOT an argument for widening it: a wider bound reuses an estimate further from the period it is supposed to describe, which is the manufactured precision the bound exists to prevent.*
 
@@ -410,10 +410,10 @@ The ±1 nearby-period bound, the romance filter on co-starring films and the enf
 | ±1 | False | 6 | 3 | **0** | 3 | 3 |
 | ±2 | True | 8 | 3 | **0** | 5 | 5 |
 | ±2 | False | 11 | 6 | **0** | 5 | 5 |
-| ±3 | True | 11 | 6 | **0** | 5 | 5 |
-| ±3 | False | 15 | 10 | **0** | 5 | 5 |
-| ±4 | True | 15 | 9 | **0** | 6 | 6 |
-| ±4 | False | 20 | 14 | **1** | 7 | 6 |
+| ±3 | True | 10 | 5 | **0** | 5 | 5 |
+| ±3 | False | 14 | 9 | **0** | 5 | 5 |
+| ±4 | True | 13 | 7 | **0** | 6 | 6 |
+| ±4 | False | 18 | 12 | **1** | 7 | 6 |
 
 The claim that a shape-comparable pairing has a gap of exactly zero holds at **9 of 10** settings. It fails at bound 4, romance_filter False.
 

@@ -15,7 +15,8 @@ sys.path.insert(0, str(REPO))
 from packages.llmkit.artifacts import require  # noqa: E402
 
 from packages.temporal.dates import Precision, PreciseDate           # noqa: E402
-from modules.records.episodes import adult_window, merge_progressions  # noqa: E402
+from modules.records.episodes import (  # noqa: E402
+    adult_window, merge_progressions_with_stats)
 from modules.records.wikidata import RelationshipCandidate           # noqa: E402
 
 
@@ -53,7 +54,10 @@ def main() -> int:
     cohort_qids = set(names)
     cands = [c for c in cands if c.subject_qid in cohort_qids]
 
-    episodes = merge_progressions(cands)
+    # The count is reported, not swallowed. Both halves of a couple being
+    # in the cohort means Wikidata's symmetric statement arrives twice, and
+    # silently collapsing it is how the duplicate hid for as long as it did.
+    episodes, mirrored_collapsed = merge_progressions_with_stats(cands)
     as_of = PreciseDate(args.as_of, Precision.DAY, "run:as_of")
 
     rows, defect_counts, exclusions = [], Counter(), Counter()
@@ -92,6 +96,7 @@ def main() -> int:
         ),
         "counts": {
             "candidates_in": len(cands),
+            "mirrored_duplicates_collapsed": mirrored_collapsed,
             "episodes_after_merge": len(episodes),
             "merged_progressions": sum(1 for r in rows if len(r["merged_from"]) > 1),
             "with_defects": sum(1 for r in rows if r["defects"]),

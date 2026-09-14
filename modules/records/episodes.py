@@ -14,13 +14,14 @@ turned a data error into a plausible-looking episode.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, timedelta
 
 from packages.ids.keys import stable_id
 from packages.temporal.dates import Censoring, Interval, PreciseDate
 
-__all__ = ["Episode", "Defect", "merge_progressions", "adult_window", "DEFECT_KINDS"]
+__all__ = ["Episode", "Defect", "merge_progressions",
+           "merge_progressions_with_stats", "adult_window", "DEFECT_KINDS"]
 
 DEFECT_KINDS = (
     "end_before_start",
@@ -105,14 +106,75 @@ def _detect(cands: list, partner_label: str) -> list[Defect]:
     return out
 
 
+def _dedupe_mirrored(group: list) -> tuple[list, int]:
+    """Collapse one Wikidata statement read off BOTH people's items.
+
+    When both halves of a couple are in the cohort, the fetcher reads the same
+    spouse or unmarried_partner statement twice, once per item, and produces
+    two candidates that agree on everything. They are not two relationships and
+    not two stages of one: they are one fact, counted twice.
+
+    Left alone they became two episodes, because the run-joining below sees two
+    spans covering the same dates rather than two abutting ones. Ben Affleck
+    and Ana de Armas produced two rows with the same dates and therefore the
+    SAME stable_id, so anything keyed by episode_id silently lost one.
+
+    Only an EXACT match collapses -- same relation, same start, same end, with
+    precision. Two statements that differ anywhere are two candidates, and the
+    defect detector downstream decides what that means. Guessing which of two
+    disagreeing dates is right is not this function's job.
+
+    A reference on either copy survives, because "Wikidata cites a source for
+    this" is a property of the statement rather than of which item it was read
+    from.
+    """
+    seen: dict[tuple, object] = {}
+    refs: set[tuple] = set()
+    collapsed = 0
+    # Sorted so the surviving copy is the same on every run, whatever order the
+    # cohort was iterated in.
+    for c in sorted(group, key=lambda c: (
+            c.relation,
+            c.start.value if c.start else "",
+            c.end.value if c.end else "",
+            c.subject_qid)):
+        key = (c.relation,
+               (c.start.value, c.start.precision) if c.start else None,
+               (c.end.value, c.end.precision) if c.end else None)
+        if c.has_reference:
+            refs.add(key)
+        if key in seen:
+            collapsed += 1
+            continue
+        seen[key] = c
+    kept = []
+    for key, c in seen.items():
+        if key in refs and not c.has_reference:
+            c = replace(c, has_reference=True)
+        kept.append(c)
+    return kept, collapsed
+
+
 def merge_progressions(candidates: list) -> list[Episode]:
     """Group candidates by unordered pair and join abutting stages."""
+    return merge_progressions_with_stats(candidates)[0]
+
+
+def merge_progressions_with_stats(candidates: list) -> tuple[list[Episode], int]:
+    """As ``merge_progressions``, plus how many mirrored duplicates collapsed.
+
+    The count is returned rather than logged, because a silent collapse is how
+    this bug hid in the first place.
+    """
     by_pair: dict[str, list] = {}
     for c in candidates:
         by_pair.setdefault(c.pair_key, []).append(c)
 
     episodes: list[Episode] = []
+    collapsed_total = 0
     for pk, group in sorted(by_pair.items()):
+        group, collapsed = _dedupe_mirrored(group)
+        collapsed_total += collapsed
         group = sorted(group, key=lambda c: (c.start.earliest() if c.start else date.max))
         runs: list[list] = []
         for c in group:
@@ -147,7 +209,7 @@ def merge_progressions(candidates: list) -> list[Episode]:
                 merged_from=tuple(c.episode_id for c in run),
             )
             episodes.append(ep)
-    return episodes
+    return episodes, collapsed_total
 
 
 def adult_window(

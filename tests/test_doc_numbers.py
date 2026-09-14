@@ -111,6 +111,8 @@ def test_every_rule_matches_the_text_it_claims_to_match():
         "coverage_saturation": "is about 99 of 239 episodes",
         "pilot_ordered_rank_observations":
             "has 99 `ordered_rank` observations for the pilot",
+        "candidate_pairings": "4 pairing-periods of 99 candidate pairings",
+        "episodes_examined": "99 episodes, of which 1 feeds a covered pairing",
     }
     assert set(samples) == {r.name for r in mod.RULES}, (
         "a new rule was added without a sample proving its pattern matches"
@@ -212,3 +214,48 @@ def test_the_hand_written_documents_are_still_audited():
     for doc in ("README.md", "AGENTS.md", "docs/THE-TRAP.md",
                 "docs/BACKLOG.md", "docs/SOURCE-HUNT.md"):
         assert doc in tracked, f"{doc} is no longer audited"
+
+
+def test_a_rule_that_matches_nothing_is_reported_as_checking_nothing():
+    """A rule with no subject is not a passing check.
+
+    The summary counted every rule toward "N quantities checked" whether or not
+    it had matched any text. Two rules had quietly been matching nothing --
+    their numbers now live only in generated or historical documents, which are
+    exempt -- so "16 quantities checked" meant 14. That is the same shape as a
+    test asserting nothing and a guard with no caller, both of which this
+    repository has already produced.
+    """
+    mod = _mod()
+    rule = mod.RULES[0]
+    assert mod.count_occurrences(rule, {"docs/x.md": "nothing relevant here"}) == 0
+
+
+def test_a_rule_that_matches_is_counted_even_when_the_number_agrees():
+    """Agreement is a check that ran. Only absence means nothing was verified."""
+    mod = _mod()
+    by_name = {r.name: r for r in mod.RULES}
+    rule = by_name["candidate_pairings"]
+    docs = {"docs/x.md": "4 pairing-periods of 49 candidate pairings"}
+    assert mod.count_occurrences(rule, docs) == 1
+    assert mod.find_mismatches(rule, "49", docs) == [], "49 agrees, so no mismatch"
+
+
+def test_a_skipped_document_does_not_count_as_a_match():
+    """Otherwise a rule looks alive on the strength of a file it never reads."""
+    mod = _mod()
+    by_name = {r.name: r for r in mod.RULES}
+    rule = by_name["total_observations"]
+    doc = {p: "41 observations over 10 of 14 people" for p in rule.skip}
+    if not doc:
+        pytest.skip("this rule skips nothing")
+    assert mod.count_occurrences(rule, doc) == 0
+
+
+def test_audit_reports_which_rules_matched_nothing():
+    mod = _mod()
+    if not (REPO / "data/pilot/run/shape_confound.json").exists():
+        pytest.skip("data/ is gitignored; nothing to audit in a fresh clone")
+    mismatches, missing, unmatched = mod.audit(REPO)
+    assert isinstance(unmatched, list)
+    assert set(unmatched) <= {r.name for r in mod.RULES}

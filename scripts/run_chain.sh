@@ -70,6 +70,10 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   # which it did, leaving a table reading 35 observations against a corpus of
   # 41 while the roster column stayed right.
   [ -f data/roster100/run/joint_real_life.json ] && run scripts/scaling_report.py
+  # Same gate, same reason. docs/REACHABLE-PRODUCTS.md went stale the moment
+  # mirrored episode duplicates were collapsed -- it read 239 scorable roster
+  # episodes against a corpus that now said 228 -- because nothing re-ran it.
+  [ -f data/roster100/run/joint_real_life.json ] && run scripts/reachable_products.py
   run scripts/relationship_review.py
   run scripts/conclusion_robustness.py
   run scripts/verify_trap.py

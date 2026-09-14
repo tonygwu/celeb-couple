@@ -123,6 +123,25 @@ RULES: tuple[Rule, ...] = (
         pattern=r"[Ww]omen hold (\d+)",
         why="one half of the ranked-observation imbalance",
     ),
+    Rule(
+        name="candidate_pairings",
+        artifact="data/pilot/run/joint_with_nearby.json",
+        extract=lambda d: d["denominators"]["candidate_pairings"],
+        render=str,
+        # Went stale the moment mirrored episode duplicates were collapsed:
+        # 31 episodes became 29 and this fell 51 to 49, in a sentence no rule
+        # was watching.
+        pattern=r"of (\d+) candidate pairings",
+        why="the denominator every coverage claim is measured against",
+    ),
+    Rule(
+        name="episodes_examined",
+        artifact="data/pilot/run/joint_with_nearby.json",
+        extract=lambda d: d["denominators"]["episodes_examined"],
+        render=str,
+        pattern=r"(\d+) episodes, of which",
+        why="how many relationships the pilot actually examined",
+    ),
     # --- roster-scale quantities -------------------------------------------
     # These read a different corpus than the pilot rules above. Their patterns
     # all name "roster", "scorable relationship" or "of 239", so they cannot
@@ -240,6 +259,19 @@ RULES: tuple[Rule, ...] = (
 )
 
 
+def count_occurrences(rule: "Rule", docs: dict[str, str]) -> int:
+    """How many places state this quantity at all, right or wrong.
+
+    A rule that matches NOTHING is not a passing check. It is a check with no
+    subject, and the summary line used to count it toward "N quantities
+    checked" exactly as if it had verified something -- the same shape as a
+    test that asserts nothing and a guard with no caller, both of which this
+    repository has already produced. Reported so the number means what it says.
+    """
+    return sum(len(re.findall(flex(rule.pattern), text))
+               for path, text in docs.items() if path not in rule.skip)
+
+
 def find_mismatches(rule: "Rule", expected: str,
                     docs: dict[str, str]) -> list[dict]:
     """Every place `docs` states this quantity as something other than `expected`.
@@ -272,11 +304,12 @@ def tracked_markdown(repo: Path) -> list[str]:
             if p not in GENERATED and p not in HISTORICAL]
 
 
-def audit(repo: Path) -> tuple[list[dict], list[str]]:
-    """Return (mismatches, missing_artifacts)."""
+def audit(repo: Path) -> tuple[list[dict], list[str], list[str]]:
+    """Return (mismatches, missing_artifacts, rules_that_matched_nothing)."""
     docs = {p: (repo / p).read_text() for p in tracked_markdown(repo)}
     mismatches: list[dict] = []
     missing: list[str] = []
+    unmatched: list[str] = []
 
     for rule in RULES:
         f = repo / rule.artifact
@@ -284,8 +317,10 @@ def audit(repo: Path) -> tuple[list[dict], list[str]]:
             missing.append(f"{rule.name}: {rule.artifact}")
             continue
         expected = rule.render(rule.extract(json.loads(f.read_text())))
+        if count_occurrences(rule, docs) == 0:
+            unmatched.append(rule.name)
         mismatches.extend(find_mismatches(rule, expected, docs))
-    return mismatches, missing
+    return mismatches, missing, unmatched
 
 
 def main() -> int:
@@ -295,11 +330,12 @@ def main() -> int:
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     args = ap.parse_args()
 
-    mismatches, missing = audit(REPO)
+    mismatches, missing, unmatched = audit(REPO)
 
     if args.json:
         print(json.dumps({"mismatches": mismatches, "missing_artifacts": missing,
-                          "rules_checked": len(RULES)}, indent=2))
+                          "rules_total": len(RULES),
+                          "rules_matching_nothing": unmatched}, indent=2))
     else:
         for w in missing:
             print(f"MISSING ARTIFACT  {w}")
@@ -307,8 +343,14 @@ def main() -> int:
             print(f"STALE  {m['file']}:{m['line']}  \"{m['excerpt']}\"")
             print(f"       {m['source']} says {m['artifact_says']} "
                   f"-- {m['quantity']}")
+        if unmatched:
+            print(f"NOT STATED ANYWHERE  {', '.join(unmatched)}")
+            print("       These rules matched no text, so they verified "
+                  "nothing. Not a failure -- the number may simply not be "
+                  "written down yet -- but they are not checks either.")
         if not mismatches and not missing:
-            print(f"{len(RULES)} quantities checked across "
+            print(f"{len(RULES) - len(unmatched)} of {len(RULES)} quantities "
+                  f"found and checked across "
                   f"{len(tracked_markdown(REPO))} tracked documents; "
                   f"every occurrence agrees with its artifact.")
 

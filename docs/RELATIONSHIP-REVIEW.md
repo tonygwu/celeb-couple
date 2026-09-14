@@ -2,9 +2,9 @@
 
 Every relationship in this project is a Wikidata CANDIDATE. The plan keeps full human review of real-life factual claims, and this is the sheet for it. Nothing here decides anything: each claim sits beside what Wikidata actually states, so a person can confirm or reject it.
 
-`data_as_of` 2026-09-14. 31 episodes, of which **1** feeds a jointly covered pairing and carries a published gap. **6** carry no reference on the Wikidata statement at all — those are the ones most likely to be wrong, and they are marked.
+`data_as_of` 2026-09-14. 29 episodes, of which **1** feeds a jointly covered pairing and carries a published gap. **6** carry no reference on the Wikidata statement at all — those are the ones most likely to be wrong, and they are marked.
 
-Each claim also carries what the English Wikipedia articles say about it, pulled from both people's articles. **23 of 31** are corroborated by prose naming a year this project stored. **2** are mentioned in neither article. Wikidata statements and article prose are edited by different people, so agreement is worth something — but the excerpt is evidence for you, not a verdict.
+Each claim also carries what the English Wikipedia articles say about it, pulled from both people's articles. **21 of 29** are corroborated by prose naming a year this project stored. **2** are mentioned in neither article. Wikidata statements and article prose are edited by different people, so agreement is worth something — but the excerpt is evidence for you, not a verdict.
 
 **Read the first 1 first.** Everything the report says about real-life pairings rests on it.
 
@@ -108,36 +108,6 @@ Aniston met Brad Pitt in 1998, and their relationship was highly publicized.
 
 ---
 
-## Ana de Armas + Ben Affleck
-
-- Wikidata: [Ana de Armas (Q698173)](https://www.wikidata.org/wiki/Q698173) · [Ben Affleck (Q483118)](https://www.wikidata.org/wiki/Q483118)
-- stages: unmarried_partner
-- start: 2020-03 (month)   end: 2021-01 (month)
-- Wikidata reference on the statement: **yes**
-- scorable: True
-
-**What Wikipedia says** (`prose_confirms_a_stored_year`; prose years [2019, 2020, 2021, 2022]):
-> She and Ben Affleck play a couple in an open marriage.
->
-> — *Ana de Armas*, matched on full name
-
-> After meeting on the set of erotic psychological thriller film Deep Water in late 2019, de Armas dated American actor Ben Affleck from March 2020 to January 2021.
->
-> — *Ana de Armas*, matched on full name
-
-> In 2022, Affleck and Ana de Armas starred in Adrian Lyne's thriller Deep Water, an adaptation of Patricia Highsmith's novel.
->
-> — *Ben Affleck*, matched on full name
-
-> Affleck dated Cuban actress Ana de Armas, whom he met on the set of Deep Water in the fall of 2019, from early 2020 to early 2021.
->
-> — *Ben Affleck*, matched on full name
-
-
-**Did this relationship happen, over these dates?**  [ ] yes  [ ] no  [ ] dates wrong — notes:
-
----
-
 ## Ben Affleck + Gwyneth Paltrow
 
 - Wikidata: [Ben Affleck (Q483118)](https://www.wikidata.org/wiki/Q483118) · [Gwyneth Paltrow (Q34460)](https://www.wikidata.org/wiki/Q34460)
@@ -163,37 +133,6 @@ Later in 1998, Affleck had a supporting role as an arrogant English actor in the
 > Paltrow began dating actor Ben Affleck in October 1997 after meeting at a Miramax dinner, and they worked together on Shakespeare in Love (1998).
 >
 > — *Gwyneth Paltrow*, matched on full name
-
-
-**Did this relationship happen, over these dates?**  [ ] yes  [ ] no  [ ] dates wrong — notes:
-
----
-
-## Ben Affleck + Jennifer Garner
-
-- Wikidata: [Ben Affleck (Q483118)](https://www.wikidata.org/wiki/Q483118) · [Jennifer Garner (Q172044)](https://www.wikidata.org/wiki/Q172044)
-- stages: spouse
-- start: 2005-06-29 (day)   end: 2018-10 (month)
-- Wikidata reference on the statement: **yes**
-- scorable: True
-
-**What Wikipedia says** (`prose_confirms_a_stored_year`; prose years [2001, 2003, 2004, 2005, 2018]):
-> == Personal life ==
-
-
-=== Relationship with Jennifer Garner ===
-
-Affleck was married to actress Jennifer Garner from 2005 to 2018.
->
-> — *Ben Affleck*, matched on full name
-
-> Garner's first co-starring film role was in the action superhero film Daredevil (2003), in which she played Elektra to Ben Affleck's Daredevil.
->
-> — *Jennifer Garner*, matched on full name
-
-> Garner began dating Ben Affleck in August 2004, having established a friendship on the sets of Pearl Harbor (2001) and Daredevil (2003).
->
-> — *Jennifer Garner*, matched on full name
 
 
 **Did this relationship happen, over these dates?**  [ ] yes  [ ] no  [ ] dates wrong — notes:
