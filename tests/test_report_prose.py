@@ -467,3 +467,46 @@ def test_the_scores_section_says_how_many_judges_produced_them():
     if "Scored person-periods" not in text:
         pytest.skip("report not generated in this clone")
     assert "rests on ONE judge" in text or "judge gap" not in text
+
+
+def test_the_bound_paragraph_agrees_with_the_bound_table():
+    """Every number in that paragraph was typed, and each contradicted the
+    table directly above it: "from 1 to 3" against a table reading 2 then 4,
+    "saturates at 6" against a table reaching 9, and "22 of 30" against a
+    bullet saying 23 of 36."""
+    import re
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "Pairings jointly covered" not in text:
+        pytest.skip("report not generated in this clone")
+
+    table = dict((int(b), int(v)) for b, v in
+                 re.findall(r"\| ±(\d+) \| (\d+)", text))
+    m = re.search(r"from ±(\d+) to ±(\d+) would take joint coverage from "
+                  r"(\d+) to (\d+)", text)
+    assert m, "the widening sentence must be derived"
+    cur, nxt, now, then = (int(g) for g in m.groups())
+    assert table[cur] == now and table[nxt] == then
+
+    m2 = re.search(r"reaches (\d+) at ±(\d+)", text)
+    assert m2, "the plateau sentence must be derived"
+    peak, at = int(m2.group(1)), int(m2.group(2))
+    assert max(table.values()) == peak
+    assert table[at] == peak
+
+
+def test_the_bound_table_is_not_truncated_before_the_plateau():
+    """It was cut at [:9], ending at ±8 -- exactly where the count plateaus --
+    so the saturation the paragraph relies on was invisible in the table about
+    saturation."""
+    import re
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "Pairings jointly covered" not in text:
+        pytest.skip("report not generated in this clone")
+    table = dict((int(b), int(v)) for b, v in
+                 re.findall(r"\| ±(\d+) \| (\d+)", text))
+    peak = max(table.values())
+    at_peak = [b for b, v in table.items() if v == peak]
+    assert len(at_peak) > 1, (
+        "the table must extend past the first bound reaching the maximum, or "
+        "the reader cannot see that it is a plateau rather than a trend"
+    )

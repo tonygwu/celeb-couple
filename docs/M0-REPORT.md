@@ -250,8 +250,12 @@ Joint coverage if the nearby-period bound were widened:
 | ±6 | 7 |
 | ±7 | 8 |
 | ±8 | 9 |
+| ±9 | 9 |
+| ±10 | 9 |
+| ±11 | 9 |
+| ±12 | 9 |
 
-Two things follow. Widening the bound from ±1 to ±2 would triple joint coverage, from 1 to 3. And it would not matter much beyond that: the count saturates at 6, because **22 of 30 pairings have no evidence on one side at all**. The bound is a real cost but absence is the bigger one.
+Two things follow. Widening the bound from ±1 to ±2 would take joint coverage from 2 to 4. And it stops helping: the count reaches 9 at ±8 and goes no higher over the range measured, because **23 of 36 pairings have no evidence on one side at all**. The bound is a real cost but absence is the bigger one.
 
 *This measures what the bound costs. It is NOT an argument for widening it: a wider bound reuses an estimate further from the period it is supposed to describe, which is the manufactured precision the bound exists to prevent.*
 

@@ -759,15 +759,32 @@ def main() -> int:
         w("")
         w("| Bound | Pairings jointly covered |")
         w("|---|---|")
-        for b in sorted(align["jointly_covered_at_bound"], key=int)[:9]:
+        # Was [:9], which cut the table at ±8 -- exactly where the count
+        # plateaus, so the plateau the paragraph below relies on was invisible
+        # to the reader. A silent truncation in a table about saturation hides
+        # the saturation.
+        for b in sorted(align["jointly_covered_at_bound"], key=int):
             mark = " ← current" if int(b) == align["current_bound"] else ""
             w(f"| ±{b} | {align['jointly_covered_at_bound'][b]}{mark} |")
         w("")
-        w("Two things follow. Widening the bound from ±1 to ±2 would triple joint "
-          "coverage, from 1 to 3. And it would not matter much beyond that: the "
-          "count saturates at 6, because **22 of 30 pairings have no evidence on "
-          "one side at all**. The bound is a real cost but absence is the bigger "
-          "one.")
+        # Every number here was typed and every one contradicted the table
+        # directly above it: "from 1 to 3" against a table reading 2 then 4,
+        # "saturates at 6" against a table reaching 9, and "22 of 30" against
+        # a bullet saying 23 of 36.
+        _at = align["jointly_covered_at_bound"]
+        _cur = align["current_bound"]
+        _now = _at.get(str(_cur))
+        _next = _at.get(str(_cur + 1))
+        _max = max(_at.values())
+        _plateau = min(int(b) for b, v in _at.items() if v == _max)
+        _missing = align["pairings_with_no_evidence_on_one_or_both_sides"]
+        _total = align["pairings_considered"]
+        w(f"Two things follow. Widening the bound from ±{_cur} to ±{_cur + 1} "
+          f"would take joint coverage from {_now} to {_next}. And it stops "
+          f"helping: the count reaches {_max} at ±{_plateau} and goes no higher "
+          f"over the range measured, because **{_missing} of {_total} pairings "
+          f"have no evidence on one side at all**. The bound is a real cost but "
+          f"absence is the bigger one.")
         w("")
         w(f"*{align['caveat']}*")
         w("")
