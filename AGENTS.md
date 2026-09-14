@@ -121,6 +121,7 @@ read-only against Wikidata and Wikipedia. The last three spend model quota.
 | `scripts/grounding_audit.py` | automated grounding checks + the human review sheet | no |
 | `scripts/write_m0_report.py` | renders `docs/M0-REPORT.md` from the JSON artifacts | no |
 | `scripts/relationship_review.py` | the human review sheet for relationship claims, load-bearing ones first | no |
+| `scripts/conclusion_robustness.py` | do the capstone's claims survive other settings of the bound and the romance filter | no |
 | `scripts/verify_trap.py` | re-derive THE-TRAP.md's three structural claims; exits 1 if any stopped holding | no |
 | `scripts/cross_run_stability.py` | do two separate runs score an identical dossier the same | no |
 
@@ -145,7 +146,8 @@ changing any source: `fetch_records` → `build_episodes` → `build_partner_uni
 `fetch_observations` → `merge_prose_mentions` (once per
 mentions file) → `score_evidenced` → `joint_coverage` → `evidence_density` →
 `alignment_gap` → `shape_confound` → `grounding_audit` → `offset_diagnostic` →
-`relationship_review` → `verify_trap` → `cross_run_stability` →
+`relationship_review` → `conclusion_robustness` → `verify_trap` →
+`cross_run_stability` →
 `write_m0_report` → `audit_doc_numbers`.
 
 Run the free stages and the reports with the chain script, which encodes the

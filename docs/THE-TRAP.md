@@ -148,6 +148,32 @@ corpus grew: the three exceptions are 78, 91 and 94. An award-versus-award
 pairing CAN produce a non-zero gap. It is rare, and it does not rescue the
 design, but the argument does not need the absolute and should not make it.
 
+## Does any of this depend on the choices that were made?
+
+Three of these conclusions rest on methodological choices that could
+defensibly have gone the other way: the ±1 nearby-period bound, the romance
+filter on co-starring films, and enforcing shape comparability rather than
+labelling it. Each was argued in the plan. None had been tested for whether the
+conclusion needs it.
+
+`scripts/conclusion_robustness.py` re-derives the two structural claims at every
+setting of the bound from 0 to 4, with and without the romance filter — ten
+settings in all, reusing the same estimates throughout.
+
+**The claims hold at nine of the ten.** The one failure is at bound 4 with the
+romance filter OFF, and its single counterexample is *Thor: Love and Thunder*
+2022 with a gap of +3 — a film co-appearance that was never established as a
+romance, scored from estimates four years away from the year in question.
+
+That is the setting this project argues against on both dials at once, and it
+takes both to produce one counterexample worth three points. The conclusions
+are a property of the evidence, not of the dials.
+
+*What this does not test:* every setting reuses the SAME estimates. It shows the
+conclusions do not depend on the three choices. It says nothing about whether
+they survive different evidence, which is what a men's ranked list would
+provide and what `docs/SOURCE-HUNT.md` concluded is unreachable.
+
 ## What this changes about the source requirement
 
 `docs/SOURCE-HUNT.md` concluded the project needs a source of roughly a hundred

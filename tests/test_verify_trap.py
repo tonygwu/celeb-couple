@@ -172,3 +172,60 @@ def test_an_unrecognised_score_artifact_raises_rather_than_returning_empty():
     mod = _xrun()
     with pytest.raises(ValueError, match="unrecognised"):
         mod.estimates({"something_else": []})
+
+
+# -- robustness of the conclusions to methodological choices -----------------
+
+def _robust():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "conclusion_robustness", REPO / "scripts/conclusion_robustness.py")
+    m = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = m
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_a_tighter_bound_can_only_reduce_joint_coverage():
+    """Monotonicity is the property that makes the sweep meaningful: if a
+    smaller bound admitted MORE pairings, the dial would not be doing what the
+    document says it does."""
+    import json
+    f = REPO / "data/pilot/run/conclusion_robustness.json"
+    if not f.exists():
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+    settings = json.loads(f.read_text())["settings"]
+    for rf in (True, False):
+        series = [s for s in settings if s["romance_filter"] is rf]
+        series.sort(key=lambda s: s["bound"])
+        covered = [s["jointly_covered"] for s in series]
+        assert covered == sorted(covered), (
+            f"joint coverage is not monotonic in the bound at "
+            f"romance_filter={rf}: {covered}")
+
+
+def test_the_romance_filter_only_ever_removes_pairings():
+    import json
+    f = REPO / "data/pilot/run/conclusion_robustness.json"
+    if not f.exists():
+        pytest.skip("data/ is gitignored")
+    settings = {(s["bound"], s["romance_filter"]): s
+                for s in json.loads(f.read_text())["settings"]}
+    for (bound, rf), s in settings.items():
+        if rf:
+            other = settings.get((bound, False))
+            assert other is None or s["jointly_covered"] <= other["jointly_covered"]
+
+
+def test_the_claims_hold_at_the_settings_the_project_actually_uses():
+    """Bound 1 with the romance filter on. If the conclusions failed there, the
+    capstone would be wrong rather than merely dial-dependent."""
+    import json
+    f = REPO / "data/pilot/run/conclusion_robustness.json"
+    if not f.exists():
+        pytest.skip("data/ is gitignored")
+    live = next(s for s in json.loads(f.read_text())["settings"]
+                if s["bound"] == 1 and s["romance_filter"] is True)
+    assert live["comparable_with_a_nonzero_gap"] == 0
+    assert (live["nonzero_gaps_that_are_shape_mismatched"]
+            == live["nonzero_gaps_total"])

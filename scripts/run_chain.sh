@@ -64,6 +64,7 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   # 41 while the roster column stayed right.
   [ -f data/roster100/run/joint_real_life.json ] && run scripts/scaling_report.py
   run scripts/relationship_review.py
+  run scripts/conclusion_robustness.py
   run scripts/verify_trap.py
   run scripts/cross_run_stability.py
   run scripts/write_m0_report.py
