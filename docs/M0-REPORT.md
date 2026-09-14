@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `7eac1d9b1cf9`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `f0805907f922`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 

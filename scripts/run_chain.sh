@@ -34,6 +34,17 @@ if [[ "$MODE" == "free" || "$MODE" == "all" ]]; then
   run scripts/build_partner_universe.py
   run scripts/fetch_onscreen_candidates.py
   run scripts/fetch_observations.py
+  # Immediately after the fetch, because the fetch REWRITES observations.json
+  # from the award/ranked tables alone and drops any prose mentions previously
+  # folded in. Running fetch_observations.py by hand cost this corpus 8 of its
+  # 41 observations, silently -- the count only surfaced because the doc audit
+  # caught "Women hold 17" against a corpus that now said 16.
+  # Merging is idempotent (tests/test_merge_idempotent.py), so a re-run adds
+  # nothing and this is safe to do every time.
+  for m in data/pilot/observations/prose_mentions.json \
+           data/pilot/observations/prose_mentions_partners.json; do
+    [ -f "$m" ] && run scripts/merge_prose_mentions.py --mentions "$m"
+  done
 fi
 
 if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then

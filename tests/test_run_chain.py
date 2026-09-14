@@ -72,3 +72,29 @@ def test_the_script_is_executable_and_runs_from_any_directory():
 def test_it_reports_a_clean_run_distinctly_from_a_failed_one():
     assert "chain finished clean" in CHAIN
     assert "chain finished WITH FAILURES" in CHAIN
+
+
+def test_the_prose_merge_runs_immediately_after_the_fetch():
+    """fetch_observations.py REWRITES observations.json from the award and
+    ranked tables alone, dropping any prose mentions previously folded in.
+
+    Running it by hand cost this corpus 8 of its 41 observations with no error.
+    The loss surfaced only because `audit_doc_numbers.py` caught "Women hold
+    17" against a corpus that had quietly become 16 -- one guard catching the
+    consequence of a different missing guard.
+
+    Merging is idempotent, so the chain can simply always do it.
+    """
+    assert "merge_prose_mentions.py" in CHAIN
+    assert CHAIN.index("fetch_observations.py") < CHAIN.index("merge_prose_mentions.py")
+    assert CHAIN.index("merge_prose_mentions.py") < CHAIN.index("joint_coverage.py"), (
+        "a merge after the analysis stages would leave them reading a thinner "
+        "corpus than the one that gets published"
+    )
+
+
+def test_both_mention_files_are_merged():
+    """Cohort mentions and partner mentions are separate files, and merging
+    only one leaves the partner side of every pairing thinner."""
+    assert "prose_mentions.json" in CHAIN
+    assert "prose_mentions_partners.json" in CHAIN
