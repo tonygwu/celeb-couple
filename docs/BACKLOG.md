@@ -14,11 +14,15 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
   two actors play. `cannot_tell` fell 15 to 7, verified romances rose 3 to 8,
   and Deep Water classifies correctly. Joint coverage did not move, which is
   the trap holding.
-- **`What Lies Beneath` was classified `coerced_or_assault`** in the pre-cast
-  run. Correct to exclude,
-  but the pair are also a married couple for most of the film. The taxonomy has
-  no way to say "a relationship that the plot later turns into an assault", and
-  flattening it to one label loses information. **Difficulty: medium.**
+- ~~`What Lies Beneath` classified `coerced_or_assault`.~~ **Resolved
+  2026-09-14** by the cast fix rather than by a taxonomy change. Once the
+  classifier knew Ford plays Norman and Pfeiffer plays Claire, it classified the
+  film `reciprocal_romance` and said why: the plot establishes them as a married
+  couple, and "although the marriage is strained and Norman ultimately tries to
+  murder Claire, the plot depicts an established reciprocal marital
+  relationship". The earlier label was a symptom of not knowing who played whom.
+  Whether intimate-partner violence should exclude a film outright is a rubric
+  decision, recorded in the night log, not a taxonomy gap.
 - **Ongoing episodes close at the run's as-of date.** That is a cutoff and the
   record says so, but it is not the same as a sourced `last_supported_active`,
   which nothing currently supplies. Six pilot episodes are affected.
