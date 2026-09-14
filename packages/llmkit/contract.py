@@ -17,7 +17,8 @@ from pathlib import Path
 
 from packages.ids.keys import contract_id
 
-__all__ = ["GradingContract", "load_contract", "MixedContractError"]
+__all__ = ["GradingContract", "load_contract", "MixedContractError",
+           "refuse_mixed_contracts"]
 
 
 class MixedContractError(RuntimeError):
@@ -60,10 +61,19 @@ def load_contract(rubric_path: Path, schema_path: Path, rubric_version: str) -> 
 
 
 def refuse_mixed_contracts(records: list[dict]) -> None:
-    """Stop rather than average scores produced under different rubrics."""
-    ids = {r.get("contract_id") for r in records if r.get("contract_id")}
+    """Stop rather than average scores produced under different rubrics.
+
+    A record with NO contract_id counts as its own unknown version rather than
+    being skipped. The filter used to drop them, so a set that was half
+    contract A and half unlabelled passed a check whose entire purpose is
+    knowing which rubric produced a number. Unknown provenance is the thing
+    this refuses, not an exemption from it.
+    """
+    ids = {r.get("contract_id") or "<no contract_id>" for r in records}
     if len(ids) > 1:
         raise MixedContractError(
             f"REFUSING TO POOL: estimates span {len(ids)} contract versions "
-            f"({sorted(ids)}). Scores from different rubrics are not comparable."
+            f"({sorted(ids)}). Scores from different rubrics are not "
+            f"comparable, and a record with no contract_id has unknown "
+            f"provenance rather than a matching one."
         )

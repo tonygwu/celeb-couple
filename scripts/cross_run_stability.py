@@ -112,6 +112,16 @@ def main() -> int:
     # is skipped by name rather than matched by guesswork.
     a_qid = {r["person"]: r["person_id"] for r in a_scores.get("person_periods", [])}
 
+    # A difference between two runs under DIFFERENT contracts is rubric
+    # variance, not run-to-run variance, and this script's whole output is a
+    # claim about the latter. It used to record `same_contract` and carry on.
+    if a_contract != b_contract:
+        print(f"REFUSING: {args.a_name} ran under contract {a_contract!r} and "
+              f"{args.b_name} under {b_contract!r}. A difference between them "
+              f"would be a difference between RUBRICS, which is not what this "
+              f"measures. Compare runs of the same contract.", file=sys.stderr)
+        return 2
+
     A, B = estimates(a_scores), estimates(b_scores)
     shared = sorted(set(A) & set(B))
 

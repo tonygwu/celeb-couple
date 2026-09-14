@@ -311,3 +311,21 @@ def test_a_missing_duration_is_unknown_not_instant():
     assert GeminiJudge._duration_ms({"duration_seconds": 0}) == 0, (
         "a genuinely reported zero is a measurement and must survive"
     )
+
+
+def test_a_record_with_no_contract_id_is_not_treated_as_matching():
+    """The filter dropped records with no contract_id, so a set that was half
+    contract A and half unlabelled passed a check whose entire purpose is
+    knowing which rubric produced a number. Unknown provenance is the thing
+    this refuses, not an exemption from it."""
+    import pytest
+    from packages.llmkit.contract import MixedContractError, refuse_mixed_contracts
+    with pytest.raises(MixedContractError, match="no contract_id"):
+        refuse_mixed_contracts([{"contract_id": "aaa"}, {"estimate": 90}])
+
+
+def test_records_all_lacking_a_contract_id_are_still_one_unknown_version():
+    """Consistently unlabelled is not the same as verified, but it is not
+    MIXED either, and this function only answers the mixing question."""
+    from packages.llmkit.contract import refuse_mixed_contracts
+    refuse_mixed_contracts([{"estimate": 90}, {"estimate": 80}])
