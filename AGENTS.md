@@ -244,6 +244,15 @@ anything. The findings that should shape any next step:
 Do not treat a bigger confounded number as progress over a smaller comparable
 one.
 
+## Changing a rubric or schema
+
+Do not edit anything under `rubrics/` without reading
+[`docs/CONTRACT-BUMP.md`](docs/CONTRACT-BUMP.md). The grading contract is
+`sha256(rubric + schema)`, so a one-line typo fix gives a new `contract_id`,
+and estimates under different ids must not be pooled. A trivial edit therefore
+costs a full re-score. Three filed corrections are waiting to go together for
+exactly that reason.
+
 ## New shared tooling
 
 A new tool is not done until it is committed **and** registered in this file

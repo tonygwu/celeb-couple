@@ -4,6 +4,12 @@ Filed by the overnight run of 2026-09-14. Difficulty tags are estimates.
 
 See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 
+**Three items below are waiting on a single rubric/schema version bump.** Each
+one alone costs a full re-score, so they should go together:
+`estimate.schema.json`'s nullable enums, the `contract_id` boundary ambiguity,
+and the `MENTIONS.md` example that contradicts rule 3. The procedure is in
+[`docs/CONTRACT-BUMP.md`](CONTRACT-BUMP.md).
+
 ## The defect class this codebase keeps producing
 
 Filed 2026-09-14 after a systematic read of every module. Seven of the night's
