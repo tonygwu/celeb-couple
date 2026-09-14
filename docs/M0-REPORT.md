@@ -107,7 +107,13 @@ Every spread above is judged against the MEASURED noise floor rather than agains
 
 Joint pairing coverage: **0 of 8** (0/4 real-life, 0/4 on-screen).
 
-**Exhaustive check.** Across all 31 episodes and 20 films, zero pairings had both sides evidenced in a shared year. The near-misses are the finding: Ben Affleck and Jennifer Garner each have 2002 evidence and four pairings together, every one landing one to three years off.
+**Exhaustive check.** Across all 31 episodes and 20 films, zero pairings had both sides evidenced in a shared year.
+
+**3 near-misses** — one side evidenced, the other not, within the bound:
+
+- Armageddon (1998): Liv Tyler has 1997 evidence; Ben Affleck has none in range
+- What Lies Beneath (2000): Michelle Pfeiffer has 1999 evidence; Harrison Ford has none in range
+- Pearl Harbor (2001): Ben Affleck has 2002 evidence; Kate Beckinsale has none in range
 
 **With the plan's ±1-year bounded reuse**, 4 pairing-periods become jointly covered:
 
@@ -116,7 +122,7 @@ Joint pairing coverage: **0 of 8** (0/4 real-life, 0/4 on-screen).
 - relationship (2000, real_life): Brad Pitt from 2000 (d=0), Jennifer Aniston from 2000 (d=0)
 - relationship (2001, real_life): Brad Pitt from 2000 (d=1), Jennifer Aniston from 2000 (d=1)
 
-Both are reused estimates flagged `nearby_period`. Any simulation must give each source estimate ONE shared draw across every period it serves.
+3 of 4 rest on at least one estimate reused from an adjacent year, flagged `nearby_period`. Any simulation must give each source estimate ONE shared draw across every period it serves, or a single observation reappears as several independent ones.
 
 ## 6. Scored person-periods and pairing contributions
 

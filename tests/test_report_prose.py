@@ -412,3 +412,31 @@ def test_the_floor_comes_from_a_measured_shape_only():
     assert gen.noise_floor({"headline": {"by_shape": {
         "award": {"least_significant_difference_95pct": None}}}}) is None
     assert gen.noise_floor(None) is None
+
+
+def test_the_reuse_sentence_counts_rather_than_saying_both():
+    """It said the literal word "Both", written when there were two jointly
+    covered pairings. There are now four, and one is contemporaneous on both
+    sides, so "Both are reused estimates" was false of half the list."""
+    import re
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "bounded reuse" not in text:
+        pytest.skip("report not generated in this clone")
+    assert "Both are reused estimates" not in text
+    m = re.search(r"(\d+) of (\d+) rest on at least one estimate reused", text)
+    assert m, "the reuse count must be derived and stated"
+    used, total = int(m.group(1)), int(m.group(2))
+    assert used <= total
+
+
+def test_the_near_misses_are_listed_not_narrated():
+    """The section carried a typed sentence naming Affleck and Garner and "four
+    pairings together". Which pairings have exactly one side evidenced is a
+    property of the corpus and moves whenever the corpus does."""
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "near-misses" not in text:
+        pytest.skip("report not generated in this clone")
+    assert "each have 2002 evidence and four pairings together" not in text
+    assert "has none in range" in text, (
+        "each near-miss must name which side is missing"
+    )

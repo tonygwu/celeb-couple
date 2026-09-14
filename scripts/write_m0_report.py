@@ -567,10 +567,24 @@ def main() -> int:
           f"{jp['by_domain']['on_screen']['pairings']} on-screen).")
         w("")
     w(f"**Exhaustive check.** Across all {n_eps} episodes and {n_films} films, zero "
-      f"pairings had both sides evidenced in a shared year. The near-misses are the "
-      f"finding: Ben Affleck and Jennifer Garner each have 2002 evidence and four "
-      f"pairings together, every one landing one to three years off.")
+      f"pairings had both sides evidenced in a shared year.")
     w("")
+    if joint and joint.get("near_misses"):
+        # Was a typed sentence naming Affleck and Garner and "four pairings
+        # together". Derive it: which pairings have exactly one side evidenced
+        # is a property of the corpus and moves whenever the corpus does.
+        w(f"**{len(joint['near_misses'])} near-misses** — one side evidenced, "
+          f"the other not, within the bound:")
+        w("")
+        for n in joint["near_misses"]:
+            have = [x for x in ((n["a"], n.get("a_src")), (n["b"], n.get("b_src")))
+                    if x[1]]
+            lack = [x[0] for x in ((n["a"], n.get("a_src")), (n["b"], n.get("b_src")))
+                    if not x[1]]
+            w(f"- {n.get('work') or 'relationship'} ({n['period']}): "
+              + (f"{have[0][0]} has {have[0][1]} evidence; " if have else "")
+              + (f"{', '.join(lack)} has none in range" if lack else ""))
+        w("")
     if joint:
         w(f"**With the plan's ±1-year bounded reuse**, "
           f"{len(joint['jointly_covered'])} pairing-periods become jointly covered:")
@@ -580,8 +594,18 @@ def main() -> int:
               f"{j['a']} from {j['a_src']} (d={j['a_dist']}), "
               f"{j['b']} from {j['b_src']} (d={j['b_dist']})")
         w("")
-        w("Both are reused estimates flagged `nearby_period`. Any simulation must "
-          "give each source estimate ONE shared draw across every period it serves.")
+        _reused = [j for j in joint["jointly_covered"]
+                   if (j.get("a_dist") or 0) or (j.get("b_dist") or 0)]
+        # Was the literal word "Both", written when there were two. There are
+        # now four, and one of them is contemporaneous on both sides.
+        if _reused:
+            w(f"{len(_reused)} of {len(joint['jointly_covered'])} rest on at "
+              f"least one estimate reused from an adjacent year, flagged "
+              f"`nearby_period`. Any simulation must give each source estimate "
+              f"ONE shared draw across every period it serves, or a single "
+              f"observation reappears as several independent ones.")
+        else:
+            w("None rests on a reused estimate; every side is contemporaneous.")
         w("")
 
     # ---------- scored pairings ----------
