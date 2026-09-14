@@ -423,8 +423,14 @@ def test_coverage_and_people_with_none_must_reconcile():
 
     blob = json.loads(f.read_text())
     cov = blob["coverage"]
+    remedy = ("\nThis clone's observations.json predates the fix that "
+              "recomputes coverage after a merge. Re-run "
+              "`bash scripts/run_chain.sh free` to rebuild it.")
     assert (cov["cohort_people_with_any_observation"] + len(cov["people_with_none"])
-            == cov["cohort_people_total"]), cov
+            == cov["cohort_people_total"]), (
+        f"{cov['cohort_people_with_any_observation']} with evidence + "
+        f"{len(cov['people_with_none'])} with none != "
+        f"{cov['cohort_people_total']} in the cohort." + remedy)
 
     # And nobody on the "none" list may actually carry an observation.
     observed = {o["person_id"] for o in blob["observations"]}
@@ -434,4 +440,4 @@ def test_coverage_and_people_with_none_must_reconcile():
     wrongly_listed = [n for n in cov["people_with_none"]
                       if by_name.get(n) in observed]
     assert not wrongly_listed, (
-        f"listed as having no observations but they do: {wrongly_listed}")
+        f"listed as having no observations but they do: {wrongly_listed}" + remedy)
