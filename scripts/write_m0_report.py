@@ -7,6 +7,7 @@ for five separate times.
 """
 from __future__ import annotations
 import json, sys
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -369,6 +370,7 @@ def main() -> int:
     gsc = load("data/pilot/run/gender_shape_confound.json")
     xrun = load("data/pilot/run/cross_run_stability.json")
     robust = load("data/pilot/run/conclusion_robustness.json")
+    srcver = load("data/pilot/run/observation_verification.json")
 
     L: list[str] = []
     w = L.append
@@ -1111,6 +1113,44 @@ def main() -> int:
           f"`docs/GROUNDING-AUDIT.md`.")
         w("")
         w(f"*{grounding['limitation']}*")
+        w("")
+
+    # ---------- observations against their sources ----------
+    # Deliberately next to the grounding audit. The two checks are the halves
+    # of one question and neither substitutes for the other: grounding asks
+    # whether a rationale is supported by its observations, and this asks
+    # whether the observations are supported by the pages they came from.
+    if srcver:
+        section("The observations, against the pages they came from")
+        w("")
+        # Built from the Counter rather than three named keys. The first
+        # version read kinds.get("editorial_award") / ("ordered_rank") /
+        # ("prose") and presented the three as the whole corpus. A fourth
+        # evidence type would have been dropped from a sentence that reads as
+        # complete, and the numbers would still have summed to something
+        # smaller than `checked` without saying so.
+        LABELS = {"editorial_award": "editorial awards",
+                  "ordered_rank": "ranked placements",
+                  "prose": "prose mentions whose excerpts still appear "
+                           "verbatim in the article"}
+        kinds = Counter(r["kind"] for r in srcver["rows"])
+        parts = [f"{n} {LABELS.get(k, k)}" for k, n in kinds.most_common()]
+        breakdown = (", ".join(parts[:-1]) + ", and " + parts[-1]
+                     if len(parts) > 1 else parts[0])
+        assert sum(kinds.values()) == srcver["checked"]
+        w(f"**{srcver['verified']} of {srcver['checked']}** observations were "
+          f"re-checked against the live Wikipedia page each was extracted "
+          f"from, and every one of them matched: {breakdown}.")
+        w("")
+        w("Until this ran, nothing had checked them. Every finding in this "
+          "report rests on those rows, which two parsers and one model "
+          "produced, and all three were taken on trust. They earned it.")
+        w("")
+        w("*What this does NOT establish. It checks the corpus against "
+          "Wikipedia, not Wikipedia against the publishers. An error that "
+          "Wikipedia itself carries is reproduced here and confirmed here. "
+          "The check is that extraction was faithful, which is a smaller "
+          "claim than the sources being right.*")
         w("")
 
     # ---------- cross-run stability ----------

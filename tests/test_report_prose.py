@@ -900,3 +900,36 @@ def test_an_exclusion_reason_is_not_printed_twice():
         m = re.match(r"\s+- \*(.+?)\* — (.+)$", line)
         if m:
             assert not m.group(2).startswith(m.group(1)), line
+
+
+def test_the_source_verification_breakdown_accounts_for_every_observation():
+    """The breakdown reads as the whole corpus, so it must be the whole corpus.
+
+    The first version named editorial_award, ordered_rank and prose explicitly
+    and presented the three as exhaustive. A fourth evidence type would have
+    vanished from a sentence that reads as complete, and the parts would have
+    summed to less than the stated total without saying so.
+    """
+    import json
+    import re
+
+    art = REPO / "data/pilot/run/observation_verification.json"
+    doc = REPO / "docs/M0-REPORT.md"
+    if not art.exists() or not doc.exists():
+        pytest.skip("data/ is gitignored; run the chain first")
+
+    payload = json.loads(art.read_text())
+    line = next((l for l in doc.read_text().splitlines()
+                 if "re-checked against the live Wikipedia page" in l), None)
+    assert line, "the source-verification section is missing from the report"
+
+    claimed = int(re.search(r"\*\*(\d+) of (\d+)\*\*", line).group(2))
+    assert claimed == payload["checked"]
+
+    breakdown = line.split("matched:", 1)[1]
+    parts = [int(n) for n in re.findall(r"(\d+) ", breakdown)]
+    assert sum(parts) == payload["checked"], (
+        f"the breakdown sums to {sum(parts)} but {payload['checked']} "
+        "observations were checked, so a category is missing from a sentence "
+        "that reads as exhaustive"
+    )
