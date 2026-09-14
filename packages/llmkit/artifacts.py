@@ -27,12 +27,40 @@ PRODUCERS = {
     "data/pilot/records/romance.json": "scripts/classify_romance.py  [spends quota]",
     "data/pilot/records/partner_universe.json": "scripts/build_partner_universe.py",
     "data/pilot/records/partner_eligibility.json": "scripts/partner_eligibility.py",
-    "data/pilot/observations/observations.json": "scripts/fetch_observations.py",
+    # NOT bare fetch_observations.py: it rewrites this file from the award and
+    # ranked tables alone and drops any prose mentions previously merged in,
+    # which cost this corpus 8 of its 41 observations once. The chain runs the
+    # fetch and both merges in order.
+    "data/pilot/observations/observations.json":
+        "bash scripts/run_chain.sh free  (fetch_observations.py alone drops merged prose mentions)",
     "data/pilot/observations/prose_mentions.json": "scripts/extract_prose_mentions.py  [spends quota]",
     "data/pilot/run/evidenced_scores.json": "scripts/score_evidenced.py  [spends quota]",
     "data/pilot/run/joint_with_nearby.json": "scripts/joint_coverage.py",
     "data/pilot/run/rater_noise.json": "scripts/measure_rater_noise.py  [spends quota]",
     "data/pilot/stress/stress_report.json": "scripts/run_stress.py  [spends quota]",
+    "data/pilot/run/shape_confound.json": "scripts/shape_confound.py",
+    "data/pilot/run/gender_shape_confound.json": "scripts/gender_shape_confound.py",
+    "data/pilot/run/evidence_density.json": "scripts/evidence_density.py",
+    "data/pilot/run/cross_run_stability.json": "scripts/cross_run_stability.py",
+    "data/pilot/run/grounding_audit.json": "scripts/grounding_audit.py",
+    "data/pilot/run/offset_diagnostic.json": "scripts/offset_diagnostic.py",
+    "data/pilot/run/alignment_gap.json": "scripts/alignment_gap.py",
+    "docs/pilot-cohort.json": "committed to the repository; nothing produces it",
+    "docs/roster-100.json": "scripts/resolve_roster.py",
+    # The roster-scale corpus uses the same scripts with --cohort/--out paths.
+    # See "Running the roster-scale chain" in AGENTS.md.
+    "data/roster100/records/episodes.json":
+        "scripts/build_episodes.py --cohort docs/roster-100.json  (see AGENTS.md)",
+    "data/roster100/records/partner_universe.json":
+        "scripts/build_partner_universe.py --cohort docs/roster-100.json  (see AGENTS.md)",
+    "data/roster100/observations/observations.json":
+        "scripts/fetch_observations.py --cohort docs/roster-100.json  (see AGENTS.md)",
+    "data/roster100/run/evidence_density.json":
+        "scripts/evidence_density.py --out data/roster100/run/  (see AGENTS.md)",
+    "data/roster100/run/joint_real_life.json":
+        "scripts/scaling_report.py  (see AGENTS.md)",
+    "data/roster100/run/joint_scores.json":
+        "scripts/score_roster_joint.py  [spends quota]",
 }
 
 

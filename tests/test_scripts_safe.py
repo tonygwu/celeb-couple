@@ -51,3 +51,30 @@ def test_every_spender_declares_that_it_spends():
         assert "quota" in blob or "spend" in blob or "model call" in blob, (
             f"{name} spends model quota and its --help does not say so"
         )
+
+
+def test_every_required_artifact_names_the_command_that_makes_it():
+    """PRODUCERS said "Keep in step with AGENTS.md", which is a manual
+    invariant and therefore one that drifts. Seven artifacts had no entry and
+    fell through to the generic "the pipeline stage that writes it", which is
+    exactly the unhelpful message the module exists to replace.
+
+    A fresh clone has no data/. Every one of these paths WILL be missing there,
+    so the error message is the whole user interface for that situation.
+    """
+    import re
+    from pathlib import Path as _P
+    from packages.llmkit.artifacts import PRODUCERS
+
+    repo = _P(__file__).resolve().parent.parent
+    pattern = re.compile(r'require\((?:REPO|repo), "([^"]+)"\)')
+    required = set()
+    for d in ("scripts", "modules", "packages"):
+        for f in (repo / d).rglob("*.py"):
+            required.update(pattern.findall(f.read_text()))
+
+    missing = sorted(required - set(PRODUCERS))
+    assert not missing, (
+        "artifacts required with no entry in PRODUCERS, so a fresh clone is "
+        "told only that 'the pipeline stage that writes it' produces them:\n  "
+        + "\n  ".join(missing))
