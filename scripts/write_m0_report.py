@@ -964,11 +964,25 @@ def main() -> int:
             w("")
 
     # ---------- offset diagnostic ----------
-    if offset:
+    if offset and offset.get("ran") is False:
+        # The diagnostic is a plan deliverable. When it cannot run, saying so
+        # beats omitting the section, which reads as though it was never asked
+        # for.
         section("Cross-gender offset sensitivity")
         w("")
+        w(f"**Did not run.** {offset.get('reason')}. "
+          f"{offset.get('remedy', '')}".strip())
+        w("")
+    elif offset:
+        section("Cross-gender offset sensitivity")
+        w("")
+        _skipped = offset.get("pairings_skipped_no_gap")
         w(f"Deltas {offset['deltas']} applied to the partner side, on "
-          f"{len(offset['people'])} people.")
+          f"{len(offset['people'])} people across "
+          f"{offset.get('pairings_considered', '?')} pairings"
+          + (f", {_skipped} of which carried no computed gap and were excluded"
+             if _skipped else "")
+          + ".")
         w("")
         w(f"- Identity holds: **{offset['identity_holds']}**")
         w(f"- PAW-rate ranks stable under a constant offset: "

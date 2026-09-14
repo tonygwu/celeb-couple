@@ -575,3 +575,29 @@ def test_a_list_valued_artifact_field_is_not_rendered_raw():
     ['Ben Affleck', 'Brad Pitt'] people"."""
     text = (REPO / "docs/M0-REPORT.md").read_text()
     assert "['" not in text, "a Python list leaked into the rendered report"
+
+
+def test_a_diagnostic_that_could_not_run_says_so():
+    """offset_diagnostic.py exited 0 with no artifact when there were no scored
+    pairings, so a stage that did NOTHING looked exactly like one that worked,
+    and the report then omitted the cross-gender section silently. That section
+    is a plan deliverable; its absence reads as though it was never asked for.
+    """
+    import json
+    import subprocess
+    import tempfile
+    gen_src = (REPO / "scripts/write_m0_report.py").read_text()
+    assert 'offset.get("ran") is False' in gen_src, (
+        "the report must handle a recorded no-op, not just a missing file"
+    )
+    assert '**Did not run.**' in gen_src
+
+
+def test_the_offset_section_reports_its_denominator():
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "Cross-gender offset sensitivity" not in text:
+        pytest.skip("report not generated in this clone")
+    assert "pairings" in text.split("Cross-gender offset sensitivity")[1][:400], (
+        "the section said 'on N people' without saying across how many "
+        "pairings, so a pairing dropped for having no gap was invisible"
+    )

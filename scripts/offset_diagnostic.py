@@ -42,12 +42,29 @@ def main() -> int:
     blob = require(REPO, args.scores)
     pairings = blob.get("scored_pairings", [])
     if not pairings:
-        print("no scored pairings; nothing to diagnose")
+        # Exiting 0 with no artifact made a stage that did NOTHING look
+        # identical to one that worked, and the report then omitted the
+        # cross-gender diagnostic silently -- a section the plan requires.
+        # Record the no-op so it is visible downstream.
+        out = REPO / args.out
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps({
+            "ran": False,
+            "reason": "no scored pairings in the scores artifact",
+            "remedy": "score_evidenced.py must produce scored_pairings first",
+        }, indent=2) + "\n")
+        print("no scored pairings; nothing to diagnose (recorded in "
+              f"{args.out})")
         return 0
 
     by_focal: dict[str, list[Pairing]] = {}
+    skipped_no_gap = 0
     for p in pairings:
         if p.get("gap_mens_view") is None:
+            # A pairing with no computed gap cannot enter the diagnostic. The
+            # report says the board has N people; dropping pairings without
+            # counting made N smaller than the corpus implies.
+            skipped_no_gap += 1
             continue
         k = Pairing(
             p["pairing_id"] if "pairing_id" in p else f"{p['domain']}_{p['period']}",
@@ -96,7 +113,10 @@ def main() -> int:
     total_order_changed = any(r["total_order"] != base["total_order"] for r in rows)
     report = {
         "deltas": [float(d) for d in DELTAS],
+        "ran": True,
         "people": sorted(by_focal),
+        "pairings_considered": len(pairings),
+        "pairings_skipped_no_gap": skipped_no_gap,
         "identity_holds": identity_ok,
         "rate_ranks_stable_under_constant_offset": rate_order_stable,
         "cumulative_ranks_changed": total_order_changed,
