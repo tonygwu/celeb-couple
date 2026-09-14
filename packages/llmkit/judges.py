@@ -325,20 +325,20 @@ class CodexJudge:
             raise JudgeError(E_EMPTY, f"{self.name} produced no agent message")
 
         reasoning = usage.get("reasoning_output_tokens")
-        # Measured 2026-09-14: an EMPTY dossier legitimately returns
-        # reasoning_output_tokens == 0, because there is nothing to reason about.
-        # Raising on that discarded two correct "unscored" answers. Zero
-        # reasoning is therefore recorded, not fatal, and only a non-trivial turn
-        # that also reports zero is treated as effort not taking effect.
-        substantial = (usage.get("output_tokens") or 0) > 120
-        effort_took_effect = bool(reasoning) or not substantial
-        if self.effort in ("high", "max") and substantial and not reasoning:
-            raise JudgeError(
-                E_MODEL_MISMATCH,
-                f"{self.name}: effort {self.effort!r} was requested and the turn "
-                f"produced {usage.get('output_tokens')} output tokens, but reports "
-                f"reasoning_output_tokens={reasoning!r}, so it did not take effect",
-            )
+        # reasoning_output_tokens is RECORDED, never fatal.
+        #
+        # Measured 2026-09-14, twice. First an empty dossier reported zero,
+        # because there is nothing to reason about, and raising discarded two
+        # correct "unscored" answers. Then seven substantial turns of 234-257
+        # output tokens also reported zero, while an earlier identical-shaped
+        # probe reported 27. So this field does not reliably distinguish "effort
+        # did not take effect" from "this turn needed little reasoning", and a
+        # threshold on output length does not rescue it.
+        #
+        # Throwing away a valid answer over a telemetry field that cannot be
+        # interpreted confidently is worse than carrying the uncertainty. The
+        # flag travels with the record and the run summary counts it.
+        effort_took_effect = bool(reasoning)
 
         return JudgeResult(
             text=message,

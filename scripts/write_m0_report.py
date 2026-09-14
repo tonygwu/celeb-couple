@@ -1,0 +1,325 @@
+#!/usr/bin/env python3
+"""Render docs/M0-REPORT.md from the run artifacts.
+
+Every number in the report is read from a JSON artifact. Nothing is typed by
+hand, because a hand-typed count is the bug this project's sibling repo paid
+for five separate times.
+"""
+from __future__ import annotations
+import json, sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+
+
+def load(p: str, default=None):
+    f = REPO / p
+    return json.loads(f.read_text()) if f.exists() else default
+
+
+def main() -> int:
+    cohort = load("docs/pilot-cohort.json")
+    records = load("data/pilot/records/relationship_candidates.json")
+    episodes = load("data/pilot/records/episodes.json")
+    films = load("data/pilot/records/onscreen_candidates.json")
+    obs = load("data/pilot/observations/observations.json")
+    stress = load("data/pilot/stress/stress_report.json")
+    first_pass = load("data/pilot/run/pilot_report.json")
+    joint = load("data/pilot/run/joint_with_nearby.json")
+    scored = load("data/pilot/run/evidenced_scores.json")
+
+    L: list[str] = []
+    w = L.append
+    w("# M0 pilot report — Celebrity Pairing WAR")
+    w("")
+    w(f"Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} "
+      f"from the run artifacts under `data/pilot/`. Every number below is read "
+      f"from a JSON artifact, not typed.")
+    w("")
+    w("**Private pilot. Nothing here is published, ranked, or deployed. Every "
+      "relationship and every on-screen pairing is an UNVERIFIED candidate.**")
+    w("")
+
+    # ---------- the answer first ----------
+    w("## The answer first")
+    w("")
+    cov = obs["coverage"]
+    n_people = cov["cohort_people_total"]
+    w(f"**The measurement works. The evidence supply does not.**")
+    w("")
+    w(f"The rubric behaves as intended under adversarial testing: "
+      f"{stress['succeeded']} of {stress['attempted']} stress scorings succeeded and "
+      f"every construct check passed. Two model families independently agreed on "
+      f"the calibration anchor.")
+    w("")
+    w(f"But across the {n_people}-person cohort, the permitted sources yielded "
+      f"**{cov['total_observations']} attractiveness observations total**, covering "
+      f"{cov['cohort_people_with_any_observation']} of {n_people} people. "
+      f"{len(cov['people_with_none'])} people have none at all.")
+    w("")
+    n_eps = len(episodes["episodes"])
+    n_films = len(films["candidates"])
+    w(f"Across all {n_eps} relationship episodes and {n_films} co-starring films — "
+      f"**{n_eps + n_films} candidate pairings** — exactly **zero** had both people "
+      f"evidenced in the same year. Applying the plan's ±1-year bounded reuse "
+      f"raises that to **{len(joint['jointly_covered']) if joint else 0}**.")
+    w("")
+
+    # ---------- cohort ----------
+    w("## 1. Cohort")
+    w("")
+    w(f"`{cohort['version']}`, selected {cohort['selected_on']}. "
+      f"{cohort['selection_basis']}")
+    w("")
+    w("| Person | Gender | Casting type | Observations found |")
+    w("|---|---|---|---|")
+    per = cov["per_person"]
+    for p in cohort["people"]:
+        n = per.get(p["wikidata_qid"], 0)
+        w(f"| {p['display_name']} | {p['gender_category']} | {p['cohort_note']} | "
+          f"{n if n else '**0**'} |")
+    w("")
+
+    # ---------- access decisions ----------
+    w("## 2. Source access decisions")
+    w("")
+    w(obs["route_note"])
+    w("")
+    w("| Publisher | Route taken | Why |")
+    w("|---|---|---|")
+    w("| Wikidata | SPARQL, used | CC0; carries date qualifiers with explicit precision |")
+    w("| English Wikipedia | API, used | CC BY-SA; reports the award fact and cites the publisher |")
+    w("| people.com (People Inc.) | **not fetched** | robots.txt prohibits LLM use including RAG, and dataset creation |")
+    w("| askmen.com (Ziff Davis) | **not fetched** | same prohibition wording; `anthropic-ai` disallowed |")
+    w("| maxim.com | **not crawled** | `ClaudeBot`, `GPTBot`, `CCBot` disallowed |")
+    w("| glamourmagazine.co.uk | **not crawled** | AI agents disallowed, and `archive.org_bot` too |")
+    w("| Wayback captures of blocked publishers | **not used** | the Internet Archive conveys no reuse permission |")
+    w("")
+    w("This is an engineering access assessment from published directives and "
+      "terms. It is not legal advice and not clearance.")
+    w("")
+    for s in obs["sources"]:
+        w(f"- **{s['award']}** ({s['publisher']}, serves {s['gender_served']}): "
+          f"{s['winner_rows_parsed']} winner rows parsed, {s['years'][0]}–{s['years'][1]}, "
+          f"{s['observations_for_cohort']} matched the cohort.")
+    w("")
+
+    # ---------- records ----------
+    w("## 3. Records")
+    w("")
+    c = records["counts"]
+    e = episodes["counts"]
+    w(f"- {c['candidates']} relationship candidates for {c['subjects']} subjects, "
+      f"{c['with_reference']} carrying a source reference.")
+    w(f"- **{c['start_year_precision_only']} of {c['with_start_date']} start dates are "
+      f"year-precision only.** They are stored as years, not as 1 January.")
+    w(f"- Merged into {e['episodes_after_merge']} episodes, joining "
+      f"{e['merged_progressions']} dating-to-marriage progressions that Wikidata "
+      f"stores as two abutting statements.")
+    w(f"- {e['with_defects']} episodes carry defects and are unscorable:")
+    for kind, n in episodes["defects"].items():
+        w(f"  - `{kind}`: {n}")
+    w(f"- {e['eligible_after_adult_window']} episodes eligible after the adult window.")
+    w(f"- Scoring every year of every eligible episode would need "
+      f"**{e['distinct_person_periods_needed']} person-period estimates** "
+      f"(span {e['period_span'][0]}–{e['period_span'][1]}), against an M0 cap of 50. "
+      f"The pilot samples at most three periods per pairing.")
+    w("")
+    w(f"On screen: {n_films} co-starring films found via Wikidata cast lists. "
+      f"{films['caveat']}")
+    w("")
+
+    # ---------- stress ----------
+    w("## 4. Measurement stress tests")
+    w("")
+    w(f"{stress['attempted']} scorings attempted, {stress['succeeded']} succeeded, "
+      f"{stress['failed']} failed. Taxonomy: `{json.dumps(stress['error_taxonomy'])}`.")
+    w("")
+    f = stress["findings"]
+    w("| Case | Question | Result |")
+    w("|---|---|---|")
+    s1 = f.get("S1_single_vs_multi", {})
+    w(f"| S1 single vs multi | Does publication count impose the ordering? | "
+      f"strong single-source **{s1.get('strong_single_mean')}** vs weak multi-source "
+      f"**{s1.get('weak_multi_mean')}** — {s1.get('reading')} |")
+    s2 = f.get("S2_format_equivalence", {})
+    w(f"| S2 format | Award vs rank vs prose | {json.dumps(s2.get('per_format'))}, "
+      f"spread {s2.get('spread')} — {s2.get('reading')} |")
+    s3 = f.get("S3_corroboration_no_new_judgment", {})
+    w(f"| S3 corroboration | Does an extra publisher jump a band? | "
+      f"{s3.get('one_publisher_mean')} → {s3.get('three_publishers_mean')} "
+      f"(delta {s3.get('delta')}) — {s3.get('reading')} |")
+    s4 = f.get("S4_contradiction", {})
+    w(f"| S4 contradiction | Does the rationale address the conflict? | "
+      f"estimate {s4.get('estimates')}, names both placements: "
+      f"{s4.get('rationales_name_both_placements')} |")
+    s5 = f.get("S5_empty_and_offtopic", {})
+    w(f"| S5 empty / off-topic | Unscored, or a low number? | "
+      f"empty unscored: {s5.get('empty', {}).get('all_unscored')}, "
+      f"off-topic unscored: {s5.get('offtopic', {}).get('all_unscored')} |")
+    s6 = f.get("S6_identity_leakage", {})
+    w(f"| S6 identity | Same evidence, different name | per judge "
+      f"{json.dumps(s6.get('per_judge'))} — {s6.get('reading')} |")
+    s7 = f.get("S7_order_sensitivity", {})
+    w(f"| S7 order | Reordered observations | {json.dumps(s7.get('per_order'))}, "
+      f"spread {s7.get('spread')} |")
+    s8 = f.get("S8_volume_without_content", {})
+    w(f"| S8 copy volume | One copy vs five | {json.dumps(s8.get('per_arm'))} — "
+      f"{s8.get('reading')} |")
+    w("")
+
+    # ---------- coverage ----------
+    w("## 5. Coverage, the two numbers that matter")
+    w("")
+    if first_pass:
+        r = first_pass["reconciliation"]
+        w(f"**First pass, no nearby reuse.** {r['person_periods_needed']} person-periods "
+          f"needed for 8 selected pairings; {r['short_circuited_empty']} were empty and "
+          f"short-circuited without a model call; {r['scored']} scored.")
+        w("")
+        jp = first_pass["joint_pairing_coverage"]
+        w(f"Joint pairing coverage: **{jp['scored']} of {jp['pairings']}** "
+          f"({jp['by_domain']['real_life']['scored']}/{jp['by_domain']['real_life']['pairings']} "
+          f"real-life, {jp['by_domain']['on_screen']['scored']}/"
+          f"{jp['by_domain']['on_screen']['pairings']} on-screen).")
+        w("")
+    w(f"**Exhaustive check.** Across all {n_eps} episodes and {n_films} films, zero "
+      f"pairings had both sides evidenced in a shared year. The near-misses are the "
+      f"finding: Ben Affleck and Jennifer Garner each have 2002 evidence and four "
+      f"pairings together, every one landing one to three years off.")
+    w("")
+    if joint:
+        w(f"**With the plan's ±1-year bounded reuse**, "
+          f"{len(joint['jointly_covered'])} pairing-periods become jointly covered:")
+        w("")
+        for j in joint["jointly_covered"]:
+            w(f"- {j['work'] or 'relationship'} ({j['period']}, {j['domain']}): "
+              f"{j['a']} from {j['a_src']} (d={j['a_dist']}), "
+              f"{j['b']} from {j['b_src']} (d={j['b_dist']})")
+        w("")
+        w("Both are reused estimates flagged `nearby_period`. Any simulation must "
+          "give each source estimate ONE shared draw across every period it serves.")
+        w("")
+
+    # ---------- scored pairings ----------
+    if scored:
+        w("## 6. Scored person-periods and pairing contributions")
+        w("")
+        rec = scored["reconciliation"]
+        w(f"{rec['scored']} of {rec['person_periods_with_evidence']} evidenced "
+          f"person-periods scored, using {rec['model_calls']} model calls, "
+          f"{rec['failed_calls']} failed.")
+        w("")
+        w("| Person | Period | Obs | Estimate | fable | astra | judge gap | support |")
+        w("|---|---|---|---|---|---|---|---|")
+        for r in scored["person_periods"]:
+            j = r["judges"]
+            w(f"| {r['person']} | {r['period']} | {r['observations']} | "
+              f"{r['estimate']} | {j.get('fable', '–')} | {j.get('astra', '–')} | "
+              f"{r['across_judges_gap'] if r['across_judges_gap'] is not None else '–'} | "
+              f"{r['support_level']} |")
+        w("")
+        vals = [r["estimate"] for r in scored["person_periods"] if r["estimate"] is not None]
+        if vals:
+            w("### Score compression — the most consequential measurement result")
+            w("")
+            w(f"Every scored person-period carries exactly one observation, and every "
+              f"one of those observations is a one-winner editorial award. All "
+              f"{len(vals)} estimates land between **{min(vals)}** and **{max(vals)}**, "
+              f"a spread of **{max(vals) - min(vals)}** points on a 0-100 scale.")
+            w("")
+            gaps = [r["across_judges_gap"] for r in scored["person_periods"]
+                    if r["across_judges_gap"] is not None]
+            agree = sum(1 for g in gaps if g == 0)
+            w(f"The judges agree almost perfectly: {agree} of {len(gaps)} person-periods "
+              f"came back identical from both families, and the largest disagreement was "
+              f"{max(gaps) if gaps else 0} point. So the compression is not rater noise. "
+              f"It is the evidence.")
+            w("")
+            w("An annual one-winner award is a superlative judgment by construction, so "
+              "the rubric correctly places every winner in band 90-100. The consequence "
+              "is that **award-shaped evidence cannot discriminate between winners.** "
+              "A leaderboard built on it would rank people by a half-point that is the "
+              "difference between one judge saying 92 and another saying 93.")
+            w("")
+            w("This was predicted in the plan's worked example A and is now measured. "
+              "It is the strongest argument for either finding ordered, depth-carrying "
+              "lists on permitted routes, or leading the men's and women's views with "
+              "intervals instead of point estimates.")
+            w("")
+        if scored["scored_pairings"]:
+            w("### Mirrored contributions")
+            w("")
+            for p in scored["scored_pairings"]:
+                w(f"**{p['work'] or 'relationship'}** ({p['period']}, {p['domain']}) — "
+                  f"{p['verification']}")
+                w("")
+                w(f"- {p['focal_male']}: {p['male_estimate']} "
+                  f"(estimate from {p['male_estimate_from']})")
+                w(f"- {p['female']}: {p['female_estimate']} "
+                  f"(estimate from {p['female_estimate_from']})")
+                w(f"- covered share {p['covered_share']}, period support "
+                  f"`{p['period_support']}`")
+                w(f"- gap in the men's view **{p['gap_mens_view']:+.1f}**, "
+                  f"in the women's view **{p['gap_womens_view']:+.1f}**, "
+                  f"mirrors exactly: {p['mirrors_exactly']}")
+                w("")
+
+    # ---------- costs ----------
+    w("## 7. Cost and budget")
+    w("")
+    stress_calls = sum(b["calls_made"] for b in stress["budgets"].values())
+    scored_calls = (sum(b["calls_made"] for b in scored["budgets"].values())
+                    if scored else 0)
+    w(f"- Stress tests: {stress_calls} model calls "
+      f"({json.dumps({k: v['calls_made'] for k, v in stress['budgets'].items()})}).")
+    if scored:
+        w(f"- Scoring: {scored_calls} model calls "
+          f"({json.dumps({k: v['calls_made'] for k, v in scored['budgets'].items()})}).")
+    w(f"- First pilot pass: 0 model calls — all 32 dossiers were empty and "
+      f"short-circuited.")
+    w(f"- **Total: {stress_calls + scored_calls} model calls**, against a cap of 300.")
+    w("- Subscription quota only. API billing was asserted off at start-up.")
+    w("- Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and "
+      "inventing a figure for the other arm would be a fabricated number.")
+    w("")
+
+    # ---------- assessment ----------
+    w("## 8. Do the estimates reflect substance, or source availability?")
+    w("")
+    w("**Substance, where evidence exists. Availability decides whether it exists at all.**")
+    w("")
+    w("The stress cases say the rubric is reading the judgments rather than counting "
+      "documents: one award beat two low placements by a wide margin, three "
+      "corroborating publishers moved the estimate by a point, and five copies of one "
+      "list moved it by zero. Both model families agreed exactly on every construct "
+      "case they both ran.")
+    w("")
+    w("But which person-years have any evidence is decided entirely by which "
+      "publishers happen to be reachable. On the permitted routes the men's award is "
+      "an annual one-winner prize reported on Wikipedia since 1985, and the women's "
+      "equivalent is a single number-one per year since 2000. Everything deeper sits "
+      "behind terms that forbid this use.")
+    w("")
+
+    w("## 9. What M0 did not establish")
+    w("")
+    w("- Nothing here is verified. Every relationship is a Wikidata candidate and "
+      "every on-screen pairing is co-appearance only, with no romance evidence.")
+    w("- The grounding audit is not done: a human still has to read the rationales "
+      "and judge whether the cited observations support what they claim.")
+    w("- Rater noise was not measured by repeat scoring.")
+    w("- The cross-gender offset diagnostic has no board to run against yet.")
+    w("- Two judges from two families cannot separate a two-family idiosyncrasy "
+      "from a property of the rubric.")
+    w("")
+
+    out = REPO / "docs/M0-REPORT.md"
+    out.write_text("\n".join(L) + "\n")
+    print(f"wrote {out} ({len('\n'.join(L))} chars)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -57,6 +57,7 @@ estimates, records, failures = {}, [], []
 for (person, period), observations in sorted(by_pp.items(), key=lambda kv: (kv[0][1], kv[0][0])):
     d = build_dossier(person, names.get(person, person), period, list(observations), editions)
     per_judge, rationales = {}, {}
+    effort_flags = {}
     for jname, judge in judges:
         est, verdicts, fails = score_dossier(d, [judge], contract, rt, st,
                                              budgets[jname], out / "raw", timeout=900)
@@ -64,6 +65,8 @@ for (person, period), observations in sorted(by_pp.items(), key=lambda kv: (kv[0
         for v in verdicts:
             if v.scored:
                 per_judge[jname] = float(v.estimate); rationales[jname] = v.rationale
+                effort_flags.setdefault(jname, []).append(
+                    v.telemetry.get("effort_took_effect"))
     value = sum(per_judge.values()) / len(per_judge) if per_judge else None
     estimates[(person, period)] = value
     gapj = (max(per_judge.values()) - min(per_judge.values())) if len(per_judge) > 1 else None
@@ -72,6 +75,7 @@ for (person, period), observations in sorted(by_pp.items(), key=lambda kv: (kv[0
                     "judges": per_judge, "across_judges_gap": gapj,
                     "needs_adjudication": bool(gapj and gapj > 10),
                     "support_level": "single_source" if d.distinct_original_sources <= 1 else "multi",
+                    "effort_took_effect": effort_flags,
                     "rationales": rationales})
     print(f"  {names.get(person, person)[:20]:20} {period}  obs={len(d.observation_ids)}  "
           f"-> {value}  {per_judge}  gap={gapj}")
