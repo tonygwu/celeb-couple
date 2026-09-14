@@ -32,6 +32,7 @@ def main() -> int:
     noise = load("data/pilot/run/rater_noise.json")
     offset = load("data/pilot/run/offset_diagnostic.json")
     grounding = load("data/pilot/run/grounding_audit.json")
+    density = load("data/pilot/run/evidence_density.json")
 
     L: list[str] = []
     w = L.append
@@ -288,6 +289,36 @@ def main() -> int:
                   f"in the women's view **{p['gap_womens_view']:+.1f}**, "
                   f"mirrors exactly: {p['mirrors_exactly']}")
                 w("")
+
+    # ---------- density ----------
+    if density:
+        w("## 6. Evidence density — the actual bottleneck")
+        w("")
+        d = density
+        w(f"Coverage asks whether a person-year has any evidence. Density asks how "
+          f"much. Mean observations per person-period: **"
+          f"{d['mean_observations_per_person_period']}**. Distribution: "
+          f"`{d['distribution']}`. Person-periods carrying two or more publishers: "
+          f"**{d['person_periods_with_two_or_more_publishers']}**. Person-periods "
+          f"that are a lone one-winner award: "
+          f"**{d['person_periods_that_are_a_lone_award']} of {d['person_periods']}**.")
+        w("")
+        r, syn = d.get("real_estimate_spread"), d.get("synthetic_estimate_spread")
+        if r and syn:
+            w("| Corpus | n | range | distinct values | SD |")
+            w("|---|---|---|---|---|")
+            w(f"| Real | {r['n']} | {r['range']} | **{r['distinct_values']}** | {r['sd']} |")
+            w(f"| Synthetic stress | {syn['n']} | {syn['range']} | "
+              f"{syn['distinct_values']} | {syn['sd']} |")
+            w("")
+        w(d["reading"])
+        w("")
+        w("This reframes what \"more sources\" has to mean. A source that adds a "
+          "hundred new people at one observation each raises coverage and changes "
+          "nothing about the board, because every one of those dossiers still "
+          "lands in a single band. Only a source that puts a SECOND observation "
+          "on a person-year that already has one can widen the distribution.")
+        w("")
 
     # ---------- romance ----------
     if romance:

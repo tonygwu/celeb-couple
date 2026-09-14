@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 08:40 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 08:43 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
 
 **Private pilot. Nothing here is published, ranked, or deployed. Every relationship and every on-screen pairing is an UNVERIFIED candidate.**
 
@@ -156,6 +156,19 @@ This was predicted in the plan's worked example A and is now measured. It is the
 - Jennifer Garner: 92.0 (estimate from 2002)
 - covered share 1, period support `nearby_period`
 - gap in the men's view **+0.0**, in the women's view **+0.0**, mirrors exactly: True
+
+## 6. Evidence density — the actual bottleneck
+
+Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.0**. Distribution: `{'1': 13}`. Person-periods carrying two or more publishers: **0**. Person-periods that are a lone one-winner award: **12 of 13**.
+
+| Corpus | n | range | distinct values | SD |
+|---|---|---|---|---|
+| Real | 13 | 5.5 | **2** | 1.466 |
+| Synthetic stress | 23 | 29 | 10 | 9.183 |
+
+The rubric discriminates; the corpus does not let it. A lone one-winner award is superlative by construction and can only land in one band, so a person-period carrying exactly that produces the same number every time. What the board needs is not more sources covering more people, but sources landing on the SAME person-year as an existing observation.
+
+This reframes what "more sources" has to mean. A source that adds a hundred new people at one observation each raises coverage and changes nothing about the board, because every one of those dossiers still lands in a single band. Only a source that puts a SECOND observation on a person-year that already has one can widen the distribution.
 
 ## 6a. On-screen romance verification
 
