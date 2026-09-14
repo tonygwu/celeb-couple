@@ -37,7 +37,10 @@ def main() -> int:
     ap.add_argument("--out", default="data/pilot/observations/observations.json")
     args = ap.parse_args()
 
-    obs = require(REPO, args.observations)
+    _abs = lambda rel: Path(rel) if Path(rel).is_absolute() else REPO / rel
+    obs = (json.loads(Path(args.observations).read_text())
+           if Path(args.observations).is_absolute()
+           else require(REPO, args.observations))
     mentions = require(REPO, args.mentions)["mentions"]
     editions = {e["list_edition_id"]: e for e in obs["editions"]}
 
@@ -132,14 +135,14 @@ def main() -> int:
     cov["cohort_people_with_any_observation"] = len(per_person)
     cov["recomputed_after_merge"] = True
 
-    (REPO / args.out).write_text(json.dumps(obs, indent=2))
+    _abs(args.out).write_text(json.dumps(obs, indent=2))
     print(f"mentions in: {len(mentions)}  added: {len(added)}  "
           f"dup vs existing: {dup_existing}  dup within mentions: {dup_within}")
     for a in added:
         ed = next(e for e in new_editions if e["list_edition_id"] == a["list_edition_id"])
         print(f"  + {a['person_id']:10} {a['concerns_period']} {ed['publisher'][:18]:18} "
               f"{a['evidence_type']}")
-    print(f"wrote {REPO / args.out}")
+    print(f"wrote {_abs(args.out)}")
     return 0
 
 
