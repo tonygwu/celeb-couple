@@ -43,8 +43,9 @@ The measurement works. The evidence does not support the product as specified.
   The measurement apparatus is no longer the limiting factor.
 - Evidence **shape** explains 39% of the estimate. An award pins near 92 by
   construction; ranked placements spread lower.
-- **Coverage does not scale.** Going from 14 people to 100 gave 3.7x the
-  observations and left the count of comparable pairings at one.
+- **Coverage does not scale.** Going from 14 people to 100 gave 3.2x the
+  observations and 8.5x the episodes, and left the count of comparable pairings
+  at one.
 - The source that would fix it — about a hundred ranked names a year — exists
   and is not reachable on any permitted route.
 

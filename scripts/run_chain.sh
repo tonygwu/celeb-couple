@@ -58,6 +58,11 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   run scripts/gender_shape_confound.py
   run scripts/grounding_audit.py
   run scripts/offset_diagnostic.py
+  # Only if the roster-scale artifacts exist. docs/SCALING.md compares the
+  # pilot against the 100-roster, so it goes stale whenever the PILOT grows --
+  # which it did, leaving a table reading 35 observations against a corpus of
+  # 41 while the roster column stayed right.
+  [ -f data/roster100/run/joint_real_life.json ] && run scripts/scaling_report.py
   run scripts/verify_trap.py
   run scripts/cross_run_stability.py
   run scripts/write_m0_report.py
