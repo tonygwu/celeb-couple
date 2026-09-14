@@ -9,6 +9,28 @@ and stays private. No image analysis, no facial or body analysis, no human
 photo-rating: attractiveness estimates come from what magazines, polls and
 awards actually said, on sources this project is permitted to use.
 
+## If you are picking this up
+
+In order, and the first two are the only ones that need a person:
+
+1. **[`docs/CORRECTIONS.md`](docs/CORRECTIONS.md)** — six published numbers
+   moved during the overnight hardening run. None changed a conclusion, but if
+   you read an earlier report you are holding stale figures.
+2. **Do the two reviews.** [`docs/GROUNDING-AUDIT.md`](docs/GROUNDING-AUDIT.md)
+   and [`docs/RELATIONSHIP-REVIEW.md`](docs/RELATIONSHIP-REVIEW.md). Both lead
+   with the entries that carry a published conclusion — five rationales and one
+   relationship claim — so the load-bearing part is the first part you meet.
+   This is the one M0 deliverable still outstanding.
+3. **Clear the GitHub billing** if you want CI. The workflow exists and has
+   never once run; all 30 attempts were refused before reaching pytest. The
+   suite is green locally and in a simulated CI environment.
+4. **Decide on the contract bump.** Three trivial corrections are waiting
+   because each costs a re-score. See
+   [`docs/CONTRACT-BUMP.md`](docs/CONTRACT-BUMP.md).
+5. **Re-score with both judge families** when codex quota returns, in about
+   five days. Every estimate in the report came from one family, which is the
+   cheapest single thing that would strengthen every conclusion.
+
 ## Read these first
 
 | Document | What it tells you |
