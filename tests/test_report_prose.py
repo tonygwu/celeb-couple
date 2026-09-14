@@ -180,3 +180,59 @@ def test_the_committed_report_has_no_duplicate_or_out_of_order_sections():
     assert nums == sorted(nums), f"sections out of order: {nums}"
     assert len(nums) == len(set(nums)), f"duplicate section numbers: {nums}"
     assert nums == list(range(1, len(nums) + 1)), f"gap in numbering: {nums}"
+
+
+# --------------------------------------------------------------------------
+# Which noise floor applies to a comparable pairing
+# --------------------------------------------------------------------------
+
+SHAPES = {"rows": [
+    {"person": "A", "period": "2003", "estimate": 92.0, "shape": "editorial_award"},
+    {"person": "B", "period": "2003", "estimate": 92.0, "shape": "editorial_award"},
+    {"person": "C", "period": "1999", "estimate": 92.0, "shape": "editorial_award"},
+    {"person": "D", "period": "1999", "estimate": 86.0, "shape": "ordered_rank"},
+]}
+
+
+def test_a_comparable_pairing_reports_its_own_shape():
+    """A comparable pairing has one shape on both sides, so that shape's floor
+    is the one that applies. The code took max() across shapes while its own
+    comment said it used the pairing's shape."""
+    gen = _gen()
+    got = gen.shape_for_pairing(
+        {"a": "A", "b": "B", "period": "2003"}, SHAPES)
+    assert got == "editorial_award"
+
+
+def test_a_mismatched_pairing_has_no_single_shape():
+    gen = _gen()
+    assert gen.shape_for_pairing(
+        {"a": "C", "b": "D", "period": "1999"}, SHAPES) is None
+
+
+def test_a_nearby_reused_estimate_still_resolves_its_shape():
+    gen = _gen()
+    rows = {"rows": [
+        {"person": "A", "period": "2000", "estimate": 92.0, "shape": "editorial_award"},
+        {"person": "B", "period": "2000", "estimate": 92.0, "shape": "editorial_award"}]}
+    got = gen.shape_for_pairing(
+        {"a": "A", "b": "B", "period": "2001", "a_src": "2000", "b_src": "2000"},
+        rows)
+    assert got == "editorial_award", "reuse must not lose the shape"
+
+
+def test_an_unknown_person_yields_no_shape_rather_than_a_wrong_one():
+    gen = _gen()
+    assert gen.shape_for_pairing(
+        {"a": "A", "b": "NOBODY", "period": "2003"}, SHAPES) is None
+
+
+def test_the_report_says_the_award_floor_is_unmeasured():
+    """The one comparable pairing is award+award, and the award shape returned
+    identical values on every repeat. Quoting the ranked floor as though it
+    were this pairing's would overstate what was measured."""
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "The bottom line" not in text:
+        pytest.skip("report not generated in this clone")
+    assert "repeat variance is **unmeasured**" in text
+    assert "upper bound" in text

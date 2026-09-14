@@ -104,6 +104,20 @@ def decisive_measurement(shape_conf: dict, n_scored: int) -> str:
         f"carries a degree, so it can tell people apart.")
 
 
+def shape_for_pairing(pairing: dict, shape_conf: dict) -> str | None:
+    """The single evidence shape a COMPARABLE pairing carries on both sides.
+
+    Returns None when the two sides differ, which means the caller was handed a
+    pairing that is not comparable and should not be quoting one shape's noise
+    floor at it.
+    """
+    rows = {(r["person"], r["period"]): r["shape"]
+            for r in (shape_conf or {}).get("rows", [])}
+    a = rows.get((pairing["a"], pairing.get("a_src") or pairing["period"]))
+    b = rows.get((pairing["b"], pairing.get("b_src") or pairing["period"]))
+    return a if a is not None and a == b else None
+
+
 def spend_rows(repo: Path) -> tuple[list[dict], list[str]]:
     """Per-stage spend from every run manifest under data/pilot/manifests/.
 
@@ -775,14 +789,10 @@ def main() -> int:
     if joint and noise:
         comp = [j for j in joint.get("jointly_covered", [])
                 if j.get("comparability") == "comparable"]
-        # Use the LSD for the shape the comparable pairings actually carry, not
-        # the pooled one. Falls back to pooled only if no shape figure exists.
         _by_shape = noise["headline"].get("by_shape") or {}
-        _shape_lsds = [s["least_significant_difference_95pct"]
-                       for s in _by_shape.values()
-                       if s["least_significant_difference_95pct"] is not None]
-        lsd = (max(_shape_lsds) if _shape_lsds
-               else noise["headline"].get("least_significant_difference_95pct"))
+        _measured = {k: v["least_significant_difference_95pct"]
+                     for k, v in _by_shape.items()
+                     if v["least_significant_difference_95pct"] is not None}
         section("The bottom line, stated plainly")
         w("")
         n_comp = len(comp)
@@ -801,11 +811,32 @@ def main() -> int:
                     continue
                 w(f"- **{j.get('work') or 'relationship'} ({j['period']})**: "
                   f"gap **{g:+.1f}**")
-                if lsd:
+                # A comparable pairing has ONE shape on both sides, so that
+                # shape's own noise floor is the one that applies. Taking the
+                # largest measured LSD across shapes would answer a different
+                # question. Where the pairing's shape has no measured floor --
+                # the award shape returned identical values on every repeat --
+                # say so, and quote the largest measured floor as a stated
+                # upper bound rather than pretending it is the right number.
+                _shape = shape_for_pairing(j, shape_conf)
+                _own = _measured.get(_shape)
+                if _own is not None:
                     verdict = ("**not distinguishable from zero**"
-                               if abs(g) <= lsd else "above the noise floor")
-                    w(f"  - Repeat-scoring puts the least significant difference "
-                      f"at about **{lsd}** points, so this gap is {verdict}.")
+                               if abs(g) <= _own else "above the noise floor")
+                    w(f"  - Both sides are `{_shape}`-shaped, and repeat-scoring "
+                      f"puts that shape's least significant difference at about "
+                      f"**{_own}** points, so this gap is {verdict}.")
+                elif _measured:
+                    _up = max(_measured.values())
+                    _src = max(_measured, key=lambda k: _measured[k])
+                    verdict = ("**not distinguishable from zero**"
+                               if abs(g) <= _up else "above every measured floor")
+                    w(f"  - Both sides are `{_shape or 'unknown'}`-shaped, and "
+                      f"that shape's repeat variance is **unmeasured**: every "
+                      f"repeat returned the same value, which cannot tell low "
+                      f"variance from none. The largest measured floor is "
+                      f"`{_src}`'s **{_up}** points. Against that upper bound "
+                      f"the gap is {verdict}.")
             w("")
         w("So the project can now produce a signed, exactly mirrored, "
           "evidence-backed gap for a real couple. It cannot yet produce one that "

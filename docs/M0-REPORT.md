@@ -366,7 +366,7 @@ This is independent of section 6b and agrees with it. The repeats there were del
 Of 4 jointly covered pairing-periods, **1** compares two people judged by the same kind of evidence. The rest compare an award against a list placement, where format explains much of the gap.
 
 - **Daredevil (2003)**: gap **+0.0**
-  - Repeat-scoring puts the least significant difference at about **2.22** points, so this gap is **not distinguishable from zero**.
+  - Both sides are `editorial_award`-shaped, and that shape's repeat variance is **unmeasured**: every repeat returned the same value, which cannot tell low variance from none. The largest measured floor is `ranked`'s **2.22** points. Against that upper bound the gap is **not distinguishable from zero**.
 
 So the project can now produce a signed, exactly mirrored, evidence-backed gap for a real couple. It cannot yet produce one that is both comparable and larger than its own measurement noise. That is a much better place than this run started, and it is not a leaderboard.
 
