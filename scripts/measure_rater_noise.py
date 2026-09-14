@@ -19,7 +19,7 @@ from packages.llmkit.budget import Budget, BudgetExhausted           # noqa: E40
 from packages.llmkit.contract import load_contract                   # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge           # noqa: E402
 from packages.llmkit.manifest import RunManifest                     # noqa: E402
-from packages.llmkit.outputs import guard_output                     # noqa: E402
+from packages.llmkit.outputs import archive_previous, guard_output                     # noqa: E402
 from packages.schema.records import (                                # noqa: E402
     EvidenceType, Lineage, ListEdition, Observation,
 )
@@ -149,6 +149,13 @@ def summarise(per_target: list[dict], all_judges: list[str]) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description='Repeat-score unchanged dossiers to measure rater spread. SPENDS MODEL QUOTA.')
     ap.add_argument("--repeats", type=int, default=4)
+    ap.add_argument("--ranked", type=int, default=1, metavar="N",
+                    help=("How many rank-shaped dossiers to repeat. The LSD is "
+                          "quoted per shape and the ranked shape holds all of "
+                          "the measured variance, so this is the number that "
+                          "decides how well the noise floor is known."))
+    ap.add_argument("--award", type=int, default=1, metavar="N",
+                    help="How many award-shaped dossiers to repeat.")
     ap.add_argument("--account", default="/Users/tonygwu/.claude-e")
     ap.add_argument("--max-calls-per-judge", type=int, default=12)
     ap.add_argument("--judges", default="fable,astra")
@@ -177,7 +184,14 @@ def main() -> int:
 
     blob = json.loads((REPO / "data/pilot/observations/observations.json").read_text())
     cohort = json.loads((REPO / "docs/pilot-cohort.json").read_text())
-    names = {p["wikidata_qid"]: p["display_name"] for p in cohort["people"]}
+    # Partners are not in the cohort file, so a cohort-only name map printed
+    # bare Q-ids -- "Q32522 1996 [ranked]" rather than Jennifer Aniston -- and
+    # that id would have gone into the artifact's `person` field and from there
+    # into the report tables. gender_shape_confound.py already reads both.
+    _partners = json.loads(
+        (REPO / "data/pilot/records/partner_universe.json").read_text())["people"]
+    names = {p["wikidata_qid"]: p["display_name"]
+             for p in cohort["people"] + _partners}
     editions, by_pp = _rebuild(blob)
 
     # one ranked dossier and one award dossier, so the comparison is like-for-like
@@ -185,11 +199,19 @@ def main() -> int:
               if any(o.evidence_type is EvidenceType.ORDERED_RANK for o in v)]
     award = [(k, v) for k, v in by_pp.items()
              if all(o.evidence_type is EvidenceType.EDITORIAL_AWARD for o in v)]
-    targets = ranked[:1] + award[:1]
+    # Sample size is a choice, not a constant. It was `ranked[:1] + award[:1]`,
+    # which is why the published LSD rested on a single ranked dossier.
+    targets = ranked[:args.ranked] + award[:args.award]
+    if not targets:
+        print("no dossier matches the requested shapes; nothing to measure",
+              file=sys.stderr)
+        return 2
     plan = [(p, per, "ranked" if (p, per) in dict.fromkeys(k for k, _ in ranked)
              else "award") for (p, per), _ in targets]
 
-    print(f"targets ({len(targets)}), {args.repeats} repeats each, 2 judges:")
+    _wanted = [j.strip() for j in args.judges.split(",") if j.strip()]
+    print(f"targets ({len(targets)}), {args.repeats} repeats each, "
+          f"{len(_wanted)} judge(s) ({', '.join(_wanted)}):")
     for p, per, shape in plan:
         print(f"  {names.get(p, p):22} {per}  [{shape}]")
     calls = len(targets) * args.repeats * len(
@@ -203,6 +225,10 @@ def main() -> int:
     # refuse a run that would replace a richer result.
     guard_output(REPO / args.out, field="repeats", value=args.repeats,
                  force=args.force)
+
+    _kept = archive_previous(REPO / args.out)
+    if _kept is not None:
+        print(f"  [archive] previous measurement kept at {_kept}")
 
     contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
     rubric, schema = RUBRIC.read_text(), SCHEMA.read_text()
