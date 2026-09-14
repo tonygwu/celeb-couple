@@ -79,10 +79,12 @@ made public later.
 ```sh
 uv venv --python 3.12 .venv
 uv pip install --python .venv/bin/python -r requirements.txt
-.venv/bin/python -m pytest tests -q      # 134 tests, no model quota spent
+.venv/bin/python -m pytest tests -q      # offline; spends no model quota
 ```
 
-The suite is offline and deterministic. **Treat any non-zero exit as failure,
+The suite is offline and deterministic. The count is deliberately not written
+down here: a hand-typed number goes stale and then lies, which is the defect
+this project's sibling repo paid for five separate times. Run it and read it. **Treat any non-zero exit as failure,
 including 5**, which pytest returns when it collects no tests at all. Never
 write `pytest ...; echo $?` — the `;` reports the status of `echo`.
 
