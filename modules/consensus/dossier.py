@@ -95,8 +95,13 @@ def _render_observation(o: Observation, edition: ListEdition, n: int) -> str:
         when += " — RETROSPECTIVE: written later about this period"
 
     if o.evidence_type is EvidenceType.ORDERED_RANK:
+        depth = ob.get("list_length")
+        where = (f"Ranked {ob['rank']} of {depth}" if depth
+                 else f"Ranked {ob['rank']}, but the source does not state how "
+                      f"long the list was, so how selective this placement is "
+                      f"cannot be judged from it")
         body = (
-            f"Ranked {ob['rank']} of {ob['list_length']} in \"{edition.title}\". "
+            f"{where} in \"{edition.title}\". "
             f"The page establishes the order as a ranking: {ob['order_basis']!r}."
         )
     elif o.evidence_type is EvidenceType.UNORDERED_INCLUSION:

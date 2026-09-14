@@ -256,3 +256,20 @@ def test_an_unstated_list_size_is_none_and_never_zero():
         _obs(EvidenceType.UNORDERED_INCLUSION, {"list_length": -3})
     with pytest.raises(SchemaError, match="list_length is required"):
         _obs(EvidenceType.UNORDERED_INCLUSION, {})
+
+
+def test_a_rank_without_a_stated_depth_keeps_the_depth_unknown():
+    """Found by audit: a prose mention saying only "topping the ranking" was
+    being merged as "1 of 100". Rank 1 of 100 reads far more selective than
+    "first, of an unstated list", and the depth is the fact that decides it."""
+    ok = _obs(EvidenceType.ORDERED_RANK, {
+        "rank": 1, "list_length": None, "order_is_ranking": True,
+        "order_basis": "the article says she topped the ranking"})
+    assert ok.observed["list_length"] is None
+    with pytest.raises(SchemaError, match="list_length is required"):
+        _obs(EvidenceType.ORDERED_RANK, {
+            "rank": 1, "order_is_ranking": True, "order_basis": "x"})
+    with pytest.raises(SchemaError, match=">= rank"):
+        _obs(EvidenceType.ORDERED_RANK, {
+            "rank": 50, "list_length": 10, "order_is_ranking": True,
+            "order_basis": "x"})

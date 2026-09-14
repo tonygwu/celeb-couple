@@ -165,3 +165,10 @@ def test_negation_does_not_reach_across_a_long_distance():
     c = _check(filler + "obs_1 is a headline placement.",
                [_obs(etype="ordered_rank", rank=87, length=100)])
     assert any("top_placement_claim" in f for f in c.failures)
+
+
+def test_an_unstated_depth_cannot_support_a_top_placement_claim():
+    """Assuming a depth of 100 would let 'ranked 9th' of an unknown list pass."""
+    c = _check("obs_1 is a top decile placement.",
+               [_obs(etype="ordered_rank", rank=9, length=None)])
+    assert any("top_placement_claim" in f for f in c.failures)

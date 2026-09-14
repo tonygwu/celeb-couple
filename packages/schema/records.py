@@ -139,12 +139,23 @@ def _check_ordered_rank(o: Observation) -> None:
             f"{o.observation_id}: order_basis must quote the page text that "
             "establishes the order as a ranking"
         )
-    rank, length = obs.get("rank"), obs.get("list_length")
+    rank = obs.get("rank")
     if not isinstance(rank, int) or rank < 1:
         raise SchemaError(f"{o.observation_id}: rank must be a positive integer")
+    if "list_length" not in obs:
+        raise SchemaError(
+            f"{o.observation_id}: list_length is required; use None when the "
+            "source states a position but not how long the list was"
+        )
+    length = obs["list_length"]
+    if length is None:
+        # "5th" with no stated depth is a real thing a source says. Filling in a
+        # plausible depth would invent the very fact that decides how selective
+        # the placement was, so it stays unknown.
+        return
     if not isinstance(length, int) or length < rank:
         raise SchemaError(
-            f"{o.observation_id}: list_length must be an integer >= rank"
+            f"{o.observation_id}: list_length must be an integer >= rank, or None"
         )
 
 

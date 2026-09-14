@@ -160,8 +160,11 @@ def check_rationale(
     if _asserted(_TOP_CLAIM, rationale):
         supports_top = any(
             o.get("evidence_type") == "editorial_award"
+            # An unstated depth cannot establish a top-decile placement:
+            # assuming 100 would let "ranked 9th" of an unknown list pass.
             or (o.get("evidence_type") == "ordered_rank"
-                and (o.get("rank") or 999) <= max(1, (o.get("list_length") or 100) // 10))
+                and o.get("list_length")
+                and (o.get("rank") or 999) <= max(1, o["list_length"] // 10))
             for o in observations
         )
         if not supports_top:

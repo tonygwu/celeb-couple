@@ -92,7 +92,9 @@ def main() -> int:
         })
         observed = {}
         if m["shape"] == "ordered_rank":
-            observed = {"rank": m["rank"], "list_length": m.get("list_length") or 100,
+            # None, never a plausible-looking default: an invented depth is
+            # the fact that decides how selective the placement was.
+            observed = {"rank": m["rank"], "list_length": m.get("list_length"),
                         "order_is_ranking": True,
                         "order_basis": "the article states an explicit position"}
         elif m["shape"] == "editorial_award":

@@ -207,3 +207,18 @@ def test_qualitative_commentary_points_the_judge_at_the_quote():
     text = build_dossier("p_1", "Ada", "2012", [o], EDITIONS).text
     assert "the quoted text below is the whole of the judgment" in text.lower()
     assert "the most beautiful face in the room" in text
+
+
+def test_a_rank_with_no_stated_depth_says_so_rather_than_implying_one():
+    o = Observation(
+        observation_id="obs_r2", person_id="p_1", list_edition_id="le_1",
+        evidence_type=EvidenceType.ORDERED_RANK,
+        observed={"rank": 1, "list_length": None, "order_is_ranking": True,
+                  "order_basis": "the article says she topped the ranking"},
+        concerns_period=_pd("2004"), published_at=_pd("2004"),
+        lineage=Lineage(original_source="le_1"),
+        excerpt="topping the ranking in 2004", excerpt_locator="prose",
+    )
+    text = build_dossier("p_1", "Ada", "2004", [o], EDITIONS).text
+    assert "of 100" not in text
+    assert "does not state how long the list was" in text
