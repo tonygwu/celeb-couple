@@ -297,3 +297,42 @@ def test_a_named_dossier_reports_nothing_residual():
     d = build_dossier("Q1", "Ben Affleck", "1997",
                       [_obs_with("Ben placed 12th.")], EDITIONS, anonymise=False)
     assert d.residual_name_tokens == ()
+
+
+def test_a_dossier_cannot_be_built_for_an_unresolved_name():
+    """Every scoring script calls `build_dossier(person, names.get(person,
+    person), ...)`, so a person whose label never resolved is handed to the
+    judge as `Subject: Q13909`.
+
+    Two partners really did enter this corpus as bare Q-ids, because they carry
+    no English Wikidata label at all. Had they been scored, a model would have
+    been asked to rate an identifier, and the resulting estimate would sit in
+    the artifact looking exactly like every other estimate.
+
+    That is worth a refusal rather than a fallback: an estimate nobody can
+    attribute to a person is not a cheaper estimate, it is a different thing.
+    """
+    import pytest
+    obs = [_obs_with("Someone placed 12th.")] if "_obs_with" in dir() else None
+    with pytest.raises(ValueError, match="unresolved"):
+        build_dossier("Q13909", "Q13909", "2006", [], EDITIONS)
+
+
+def test_a_real_name_still_builds():
+    d = build_dossier("Q13909", "Angelina Jolie", "2006", [], EDITIONS)
+    assert d.person_id == "Q13909"
+
+
+def test_the_check_is_on_the_name_not_the_id():
+    """person_id IS a Q-id and must stay one."""
+    d = build_dossier("Q35332", "Brad Pitt", "1995", [], EDITIONS)
+    assert d.person_id == "Q35332"
+
+
+def test_an_anonymised_dossier_still_refuses_an_unresolved_name():
+    """Anonymisation replaces the name with [SUBJECT], which would HIDE the
+    problem rather than fix it: the judge sees a clean dossier and the estimate
+    is still attributed to nobody."""
+    import pytest
+    with pytest.raises(ValueError, match="unresolved"):
+        build_dossier("Q13909", "Q13909", "2006", [], EDITIONS, anonymise=True)

@@ -198,6 +198,22 @@ def build_dossier(
     score the same.  ``shuffle_seed`` reorders the observations, for the
     order-sensitivity evaluation.
     """
+    # Every scoring script passes `names.get(person, person)`, so a person
+    # whose label never resolved arrives here as their own Wikidata id and the
+    # judge is asked to rate "Subject: Q13909". Two partners really did enter
+    # this corpus as bare Q-ids -- they carry no English label at all -- and an
+    # estimate attributed to an identifier is not a cheaper estimate, it is a
+    # different thing. Checked BEFORE anonymisation, which would replace the
+    # id with [SUBJECT] and hide the problem rather than fix it.
+    if re.fullmatch(r"Q\d+", display_name.strip()):
+        raise ValueError(
+            f"refusing to build a dossier for an unresolved name: "
+            f"display_name is {display_name!r}, which is a Wikidata id rather "
+            f"than a person. Resolve the label first (see fetch_labels, which "
+            f"falls back to the English Wikipedia sitelink title) or leave the "
+            f"person unscored."
+        )
+
     kept, dropped = collapse_syndication(observations)
     if shuffle_seed is not None:
         random.Random(shuffle_seed).shuffle(kept)
