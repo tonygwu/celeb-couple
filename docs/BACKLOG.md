@@ -39,10 +39,12 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 
 ## Coverage
 
-- **Joint pairing coverage is 1 of 51 candidate pairings.** Person-period
-  availability is 13 observations over 9 of 14 people; the binding constraint is
-  that both sides must be scorable over the same period. **Difficulty: blocked
-  on evidence.**
+- **Joint pairing coverage is 4 pairing-periods of 51 candidate pairings**,
+  and only 1 of those 4 is shape-comparable. Person-period availability is no
+  longer the binding constraint: the corpus now holds 41 observations over 9 of
+  14 people. The constraint is that BOTH sides must be scorable over the SAME
+  period, and prose extraction did not move it. **Difficulty: blocked on
+  evidence.**
 - **Rowspan continuation rows are skipped** in award tables: 3 in Sexiest Man
   Alive, 2 in Most Beautiful. They carry no date cell, so they are dropped
   rather than mis-dated. None was a cohort member. **Difficulty: easy.**
@@ -52,7 +54,7 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 - **The one comparable gap is 0.0 against an LSD of 1.2.** Daredevil 2003,
   Affleck and Garner, both judged by an editorial award. Everything larger is
   shape-mismatched. **Difficulty: blocked on evidence.**
-- **Shape confound is unmitigated.** 42% of the estimate is evidence type.
+- **Shape confound is unmitigated.** 39% of the estimate is evidence type.
   Options not yet explored: restricting the board to same-shape pairings as the
   primary view rather than a scenario, or a within-shape calibration that would
   have to be disclosed as a modelling convention. **Difficulty: hard, and it is

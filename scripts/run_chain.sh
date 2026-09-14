@@ -48,6 +48,9 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   run scripts/grounding_audit.py
   run scripts/offset_diagnostic.py
   run scripts/write_m0_report.py
+  # Last, because it checks the prose against the artifacts every stage above
+  # just rewrote. Running it earlier would audit the previous run's numbers.
+  run scripts/audit_doc_numbers.py
 fi
 
 printf '\n'
