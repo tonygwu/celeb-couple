@@ -88,3 +88,55 @@ def test_the_committed_report_matches_the_committed_artifacts():
                                   json.loads(dens.read_text()))
     report = (REPO / "docs/M0-REPORT.md").read_text()
     assert para in report, "docs/M0-REPORT.md is stale; re-run write_m0_report.py"
+
+
+# --------------------------------------------------------------------------
+# The report's input fingerprint
+# --------------------------------------------------------------------------
+
+def test_the_fingerprint_ignores_a_changed_generation_timestamp():
+    """Measured 2026-09-14: `bash scripts/run_chain.sh reports` produced a
+    one-line diff in docs/M0-REPORT.md -- the fingerprint -- with not one
+    number moved. Ten artifacts carry `generated_at_utc`, the fingerprint
+    hashed the raw bytes, and so it tracked when the chain last ran rather
+    than what the chain found.
+
+    That is the defect the fingerprint was introduced to fix. verbatim-index
+    stamped its pages with the RENDER date, which made every regeneration a
+    diff and told a reader nothing. Hashing a generation timestamp inside the
+    inputs is the same bug one level down.
+    """
+    gen = _gen()
+    a = {"generated_at_utc": "2026-09-14T10:00:00+00:00", "n": 39}
+    b = {"generated_at_utc": "2026-09-14T23:59:59+00:00", "n": 39}
+    assert gen.stable_bytes(a) == gen.stable_bytes(b)
+
+
+def test_the_fingerprint_still_moves_when_a_number_moves():
+    gen = _gen()
+    a = {"generated_at_utc": "2026-09-14T10:00:00+00:00", "n": 39}
+    c = {"generated_at_utc": "2026-09-14T10:00:00+00:00", "n": 40}
+    assert gen.stable_bytes(a) != gen.stable_bytes(c)
+
+
+def test_a_nested_generation_timestamp_is_also_ignored():
+    gen = _gen()
+    a = {"run": {"generated_at_utc": "2026-09-14T10:00:00+00:00", "n": 1}}
+    b = {"run": {"generated_at_utc": "2026-09-15T10:00:00+00:00", "n": 1}}
+    assert gen.stable_bytes(a) == gen.stable_bytes(b)
+
+
+def test_a_meaningful_date_is_never_stripped():
+    """`data_as_of` and `last_supported_active` are findings, not stamps. An
+    over-broad strip would hide a real change in the evidence cutoff."""
+    gen = _gen()
+    a = {"data_as_of": "2026-09-14", "last_supported_active": "2005-01-01"}
+    b = {"data_as_of": "2026-09-20", "last_supported_active": "2005-01-01"}
+    assert gen.stable_bytes(a) != gen.stable_bytes(b)
+    c = {"data_as_of": "2026-09-14", "last_supported_active": "2006-01-01"}
+    assert gen.stable_bytes(a) != gen.stable_bytes(c)
+
+
+def test_a_non_json_input_is_still_hashed():
+    gen = _gen()
+    assert gen.stable_bytes(b"raw bytes") == b"raw bytes"

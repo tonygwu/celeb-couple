@@ -1,8 +1,8 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `5759dd5e8463`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `dcd8eb39bff5`. Every number below is read from a JSON artifact, not typed.
 
-The fingerprint, not the date, is this report's identity: regenerating it over unchanged artifacts produces an identical file, so a diff means the numbers moved.
+The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged findings produces an identical file. A diff means the numbers moved, not that the chain ran again.
 
 **Private pilot. Nothing here is published, ranked, or deployed. Every relationship and every on-screen pairing is an UNVERIFIED candidate.**
 

@@ -28,12 +28,51 @@ def load(p: str, default=None):
     return default
 
 
+#: Keys recording WHEN an artifact was written, never WHAT it says. Hashing
+#: them makes the fingerprint track the last chain run instead of the findings,
+#: which is the exact defect the fingerprint replaced. Ten pilot artifacts
+#: carry `generated_at_utc`.
+#:
+#: Deliberately narrow. `data_as_of` and `last_supported_active` are findings
+#: about the evidence, not stamps about the process, and an over-broad strip
+#: would hide a real change in the cutoff.
+VOLATILE_KEYS = frozenset({"generated_at_utc", "generated_at", "rendered_at"})
+
+
+def stable_bytes(obj):
+    """Canonical bytes for a loaded artifact, with process stamps removed.
+
+    Non-dict, non-list input is returned as bytes unchanged, so an artifact
+    that is not JSON is still hashed rather than silently skipped.
+    """
+    import json as _json
+
+    def strip(o):
+        if isinstance(o, dict):
+            return {k: strip(v) for k, v in o.items() if k not in VOLATILE_KEYS}
+        if isinstance(o, list):
+            return [strip(v) for v in o]
+        return o
+
+    if isinstance(obj, (dict, list)):
+        return _json.dumps(strip(obj), sort_keys=True,
+                           separators=(",", ":")).encode()
+    if isinstance(obj, bytes):
+        return obj
+    return str(obj).encode()
+
+
 def _fingerprint() -> str:
     import hashlib
     h = hashlib.sha256()
     for rel in sorted(_INPUTS):
         h.update(rel.encode())
-        h.update((REPO / rel).read_bytes())
+        raw = (REPO / rel).read_bytes()
+        try:
+            payload = stable_bytes(json.loads(raw))
+        except (ValueError, UnicodeDecodeError):
+            payload = raw
+        h.update(payload)
     return h.hexdigest()[:12]
 
 
@@ -137,9 +176,10 @@ def main() -> int:
       f"artifacts under `data/pilot/`, input fingerprint `{_fingerprint()}`. "
       f"Every number below is read from a JSON artifact, not typed.")
     w("")
-    w("The fingerprint, not the date, is this report's identity: regenerating it "
-      "over unchanged artifacts produces an identical file, so a diff means the "
-      "numbers moved.")
+    w("The fingerprint, not the date, is this report's identity: it hashes the "
+      "artifacts with their `generated_at_utc` stamps removed, so re-running the "
+      "chain over unchanged findings produces an identical file. A diff means "
+      "the numbers moved, not that the chain ran again.")
     w("")
     w("**Private pilot. Nothing here is published, ranked, or deployed. Every "
       "relationship and every on-screen pairing is an UNVERIFIED candidate.**")
