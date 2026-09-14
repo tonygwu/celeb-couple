@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 09:39 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 10:22 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
 
 **Private pilot. Nothing here is published, ranked, or deployed. Every relationship and every on-screen pairing is an UNVERIFIED candidate.**
 
@@ -20,7 +20,7 @@ But across the 14-person cohort, the permitted sources yielded **35 attractivene
 
 Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **4** pairings are jointly covered.
 
-**The decisive measurement**: 22 of 34 scored person-periods rest on a one-winner editorial award, and every single one scored exactly 92.0 — both model families, to the digit. The one person-period resting on an ORDERED rank (5th of 100) scored 64.0. Award-shaped evidence cannot tell winners apart. Ranked evidence can.
+**The decisive measurement**: 21 of 34 scored person-periods rest on a one-winner editorial award, and every single one scored exactly 92.0 — both model families, to the digit. The one person-period resting on an ORDERED rank (5th of 100) scored 66.0. Award-shaped evidence cannot tell winners apart. Ranked evidence can.
 
 ## 1. Cohort
 
@@ -122,41 +122,41 @@ Both are reused estimates flagged `nearby_period`. Any simulation must give each
 | Michelle Pfeiffer | 1990 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Michelle Pfeiffer | 1995 | 1 | 86.0 | 86.0 | – | – | single_source |
 | Brad Pitt | 1995 | 2 | 93.0 | 93.0 | – | – | multi |
-| Jennifer Aniston | 1996 | 1 | 82.0 | 82.0 | – | – | single_source |
+| Jennifer Aniston | 1996 | 1 | 84.0 | 84.0 | – | – | single_source |
 | Denzel Washington | 1996 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Liv Tyler | 1997 | 1 | 72.0 | 72.0 | – | – | single_source |
-| Jennifer Aniston | 1997 | 1 | 91.0 | 91.0 | – | – | single_source |
-| Jennifer Aniston | 1998 | 1 | 86.0 | 86.0 | – | – | single_source |
+| Jennifer Aniston | 1997 | 1 | 90.0 | 90.0 | – | – | single_source |
+| Jennifer Aniston | 1998 | 1 | 88.0 | 88.0 | – | – | single_source |
 | Harrison Ford | 1998 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Michelle Pfeiffer | 1999 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Aniston | 1999 | 1 | 84.0 | 84.0 | – | – | single_source |
 | Jennifer Aniston | 2000 | 1 | 80.0 | 80.0 | – | – | single_source |
 | Brad Pitt | 2000 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Lopez | 2000 | 1 | 93.0 | 93.0 | – | – | single_source |
-| Jennifer Lopez | 2001 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Lopez | 2001 | 1 | 93.0 | 93.0 | – | – | single_source |
 | Jennifer Garner | 2002 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Lopez | 2002 | 1 | 90.0 | 90.0 | – | – | single_source |
+| Jennifer Lopez | 2002 | 1 | 88.0 | 88.0 | – | – | single_source |
 | Ben Affleck | 2002 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Lopez | 2003 | 1 | 86.0 | 86.0 | – | – | single_source |
-| Michelle Pfeiffer | 2004 | 1 | 86.0 | 86.0 | – | – | single_source |
+| Jennifer Lopez | 2003 | 1 | 84.0 | 84.0 | – | – | single_source |
+| Michelle Pfeiffer | 2004 | 1 | 80.0 | 80.0 | – | – | single_source |
 | Jennifer Aniston | 2004 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Lopez | 2004 | 1 | 84.0 | 84.0 | – | – | single_source |
+| Jennifer Lopez | 2004 | 1 | 86.0 | 86.0 | – | – | single_source |
 | Kate Beckinsale | 2009 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Aniston | 2011 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Jennifer Aniston | 2011 | 1 | 93.0 | 93.0 | – | – | single_source |
 | Jennifer Lopez | 2011 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Aniston | 2012 | 1 | 64.0 | 64.0 | – | – | single_source |
-| Idris Elba | 2013 | 1 | 91.0 | 91.0 | – | – | single_source |
+| Jennifer Aniston | 2012 | 1 | 66.0 | 66.0 | – | – | single_source |
+| Idris Elba | 2013 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Gwyneth Paltrow | 2013 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Aniston | 2016 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Idris Elba | 2017 | 1 | 84.0 | 84.0 | – | – | single_source |
+| Idris Elba | 2017 | 1 | 83.0 | 83.0 | – | – | single_source |
 | Idris Elba | 2018 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Garner | 2019 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Michelle Pfeiffer | 2020 | 1 | 80.0 | 80.0 | – | – | single_source |
+| Michelle Pfeiffer | 2020 | 1 | 84.0 | 84.0 | – | – | single_source |
 | Melissa McCarthy | 2023 | 1 | 92.0 | 92.0 | – | – | single_source |
 
 ### Score compression — the most consequential measurement result
 
-Every scored person-period carries exactly one observation, and every one of those observations is a one-winner editorial award. All 34 estimates land between **64.0** and **93.0**, a spread of **29.0** points on a 0-100 scale.
+Every scored person-period carries exactly one observation, and every one of those observations is a one-winner editorial award. All 34 estimates land between **66.0** and **93.0**, a spread of **27.0** points on a 0-100 scale.
 
 The judges agree almost perfectly: 0 of 0 person-periods came back identical from both families, and the largest disagreement was 0 point. So the compression is not rater noise. It is the evidence.
 
@@ -200,7 +200,7 @@ Coverage asks whether a person-year has any evidence. Density asks how much. Mea
 
 | Corpus | n | range | distinct values | SD |
 |---|---|---|---|---|
-| Real | 34 | 29.0 | **10** | 6.425 |
+| Real | 34 | 27.0 | **10** | 6.239 |
 | Synthetic stress | 23 | 29 | 10 | 9.183 |
 
 The rubric discriminates; the corpus does not let it. A lone one-winner award is superlative by construction and can only land in one band, so a person-period carrying exactly that produces the same number every time. What the board needs is not more sources covering more people, but sources landing on the SAME person-year as an existing observation.
@@ -235,14 +235,14 @@ Two things follow. Widening the bound from ±1 to ±2 would triple joint coverag
 
 ## 5a. The most serious bias: evidence shape drives the estimate
 
-**Evidence type alone explains 42% of the variance in the estimates** (eta-squared 0.421).
+**Evidence type alone explains 46% of the variance in the estimates** (eta-squared 0.46).
 
 | Evidence shape | n | mean | range | SD |
 |---|---|---|---|---|
-| `editorial_award` | 18 | 91.5 | 84.0–92.0 | 1.833 |
+| `editorial_award` | 18 | 91.56 | 83.0–93.0 | 2.088 |
 | `editorial_award+unordered_inclusion` | 1 | 93.0 | 93.0–93.0 | 0.0 |
-| `ordered_rank` | 12 | 84.83 | 64.0–93.0 | 7.381 |
-| `unordered_inclusion` | 3 | 79.33 | 72.0–86.0 | 5.735 |
+| `ordered_rank` | 12 | 85.17 | 66.0–93.0 | 6.841 |
+| `unordered_inclusion` | 3 | 78.67 | 72.0–84.0 | 4.989 |
 
 **3 of 4 jointly covered pairings have MISMATCHED evidence shapes on the two sides.**
 
@@ -309,7 +309,7 @@ A constant cross-gender offset shifts every PAW rate by exactly delta, so rate r
 
 ## 6d. Grounding audit
 
-34 rationales checked: **34** passed the automated checks, 0 failed, 30 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
+34 rationales checked: **34** passed the automated checks, 0 failed, 28 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
 
 *These checks prove a rationale does not assert MORE than its evidence carries. They do not prove it is a fair reading. Only the human sheet can establish that.*
 

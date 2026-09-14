@@ -57,7 +57,7 @@ _JUDGES = os.environ.get("CELEB_JUDGES", "fable,astra").split(",")
 judges = []
 if "fable" in _JUDGES:
     judges.append(("fable", ClaudeJudge("fable", "claude-fable-5-1",
-                                        config_dir="/Users/tonygwu/.claude-e")))
+                                        config_dir=os.environ.get("CELEB_ACCOUNT", "/Users/tonygwu/.claude-e"))))
 if "astra" in _JUDGES:
     judges.append(("astra", CodexJudge("astra", "gpt-6-astra", effort="high")))
 _CAP = int(os.environ.get("CELEB_MAX_CALLS", "60"))
