@@ -1,8 +1,14 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 09:22 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 09:35 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
 
 **Private pilot. Nothing here is published, ranked, or deployed. Every relationship and every on-screen pairing is an UNVERIFIED candidate.**
+
+This report covers the 14-person pilot. Three companion documents cover what came after it:
+
+- [`docs/SCALING.md`](SCALING.md) — whether growing the roster to 100 helps, and what a usable source would have to look like
+- [`docs/SOURCE-HUNT.md`](SOURCE-HUNT.md) — every surface checked, and the negative result
+- [`docs/REACHABLE-PRODUCTS.md`](REACHABLE-PRODUCTS.md) — what can be built with the evidence that exists
 
 ## The answer first
 
@@ -10,7 +16,7 @@ Generated 2026-09-14 09:22 UTC from the run artifacts under `data/pilot/`. Every
 
 The rubric behaves as intended under adversarial testing: 25 of 27 stress scorings succeeded and every construct check passed. Two model families independently agreed on the calibration anchor.
 
-But across the 14-person cohort, the permitted sources yielded **27 attractiveness observations total**, covering 12 of 14 people. 5 people have none at all.
+But across the 14-person cohort, the permitted sources yielded **35 attractiveness observations total**, covering 13 of 14 people. 5 people have none at all.
 
 Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **4** pairings are jointly covered.
 
@@ -23,17 +29,17 @@ Across all 31 relationship episodes and 20 co-starring films — **51 candidate 
 | Person | Gender | Casting type | Observations found |
 |---|---|---|---|
 | Ben Affleck | male | 1990s-2020s lead | 1 |
-| Brad Pitt | male | 1990s-2020s lead | 2 |
+| Brad Pitt | male | 1990s-2020s lead | 3 |
 | Denzel Washington | male | 1980s-2020s lead | 1 |
 | Harrison Ford | male | 1980s-2010s lead | 1 |
-| Idris Elba | male | 2000s-2020s lead | 1 |
+| Idris Elba | male | 2000s-2020s lead | 3 |
 | Adam Sandler | male | comic lead | **0** |
 | Paul Giamatti | male | character lead | **0** |
 | Ana de Armas | female | 2010s-2020s lead | **0** |
 | Jennifer Garner | female | 2000s-2010s lead | 2 |
 | Kate Beckinsale | female | 1990s-2010s lead | 1 |
-| Liv Tyler | female | 1990s-2000s lead | **0** |
-| Michelle Pfeiffer | female | 1980s-1990s lead | 3 |
+| Liv Tyler | female | 1990s-2000s lead | 1 |
+| Michelle Pfeiffer | female | 1980s-1990s lead | 5 |
 | Melissa McCarthy | female | comic lead | 1 |
 | Zendaya | female | 2010s-2020s lead | **0** |
 
@@ -194,7 +200,7 @@ Coverage asks whether a person-year has any evidence. Density asks how much. Mea
 
 | Corpus | n | range | distinct values | SD |
 |---|---|---|---|---|
-| Real | 18 | 22.0 | **6** | 5.858 |
+| Real | 34 | 29.0 | **10** | 6.425 |
 | Synthetic stress | 23 | 29 | 10 | 9.183 |
 
 The rubric discriminates; the corpus does not let it. A lone one-winner award is superlative by construction and can only land in one band, so a person-period carrying exactly that produces the same number every time. What the board needs is not more sources covering more people, but sources landing on the SAME person-year as an existing observation.

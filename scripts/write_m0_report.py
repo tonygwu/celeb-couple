@@ -48,6 +48,16 @@ def main() -> int:
     w("**Private pilot. Nothing here is published, ranked, or deployed. Every "
       "relationship and every on-screen pairing is an UNVERIFIED candidate.**")
     w("")
+    w("This report covers the 14-person pilot. Three companion documents cover "
+      "what came after it:")
+    w("")
+    w("- [`docs/SCALING.md`](SCALING.md) — whether growing the roster to 100 "
+      "helps, and what a usable source would have to look like")
+    w("- [`docs/SOURCE-HUNT.md`](SOURCE-HUNT.md) — every surface checked, and "
+      "the negative result")
+    w("- [`docs/REACHABLE-PRODUCTS.md`](REACHABLE-PRODUCTS.md) — what can be "
+      "built with the evidence that exists")
+    w("")
 
     # ---------- the answer first ----------
     w("## The answer first")
