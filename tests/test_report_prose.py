@@ -933,3 +933,34 @@ def test_the_source_verification_breakdown_accounts_for_every_observation():
         "observations were checked, so a category is missing from a sentence "
         "that reads as exhaustive"
     )
+
+
+def test_the_relationship_corroboration_figures_match_the_artifact():
+    """Section 17's headline must be read from the artifact, not typed.
+
+    It states two counts and a third inside an italic caveat -- how many
+    episodes had no stored year in the prose -- and that third one is the
+    number most likely to be left behind, because it sits in a sentence rather
+    than in a table.
+    """
+    import json
+    import re
+
+    art = REPO / "data/pilot/records/relationship_corroboration.json"
+    doc = REPO / "docs/M0-REPORT.md"
+    if not art.exists() or not doc.exists():
+        pytest.skip("data/ is gitignored; run the chain first")
+    payload = json.loads(art.read_text())
+    text = doc.read_text()
+    if "against Wikipedia's own prose" not in text:
+        pytest.skip("the corroboration section is not in this report")
+
+    vc = payload["verdict_counts"]
+    conf = vc.get("prose_confirms_a_stored_year", 0)
+    m = re.search(r"\*\*(\d+) of (\d+)\*\* episodes are corroborated", text)
+    assert m, "the corroboration headline is missing"
+    assert (int(m.group(1)), int(m.group(2))) == (conf, payload["episodes_checked"])
+
+    m2 = re.search(r"all (\d+) episodes whose prose named\s+no stored year", text)
+    assert m2, "the caveat naming the prose_names_other_years count is missing"
+    assert int(m2.group(1)) == vc.get("prose_names_other_years", 0)

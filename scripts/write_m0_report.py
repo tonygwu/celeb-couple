@@ -371,6 +371,7 @@ def main() -> int:
     xrun = load("data/pilot/run/cross_run_stability.json")
     robust = load("data/pilot/run/conclusion_robustness.json")
     srcver = load("data/pilot/run/observation_verification.json")
+    relcorr = load("data/pilot/records/relationship_corroboration.json")
 
     L: list[str] = []
     w = L.append
@@ -516,6 +517,11 @@ def main() -> int:
     w(f"- Merged into {e['episodes_after_merge']} episodes, joining "
       f"{e['merged_progressions']} dating-to-marriage progressions that Wikidata "
       f"stores as two abutting statements.")
+    if e.get("mirrored_duplicates_collapsed"):
+        w(f"  - {e['mirrored_duplicates_collapsed']} of the candidates were the "
+          f"SAME statement read off both people's Wikidata items, which happens "
+          f"whenever both halves of a couple are in the cohort. They are "
+          f"collapsed, and the count is reported rather than swallowed.")
     w(f"- {e['with_defects']} episodes carry defects and are unscorable:")
     for kind, n in episodes["defects"].items():
         w(f"  - `{kind}`: {n}")
@@ -525,8 +531,16 @@ def main() -> int:
       f"(span {e['period_span'][0]}–{e['period_span'][1]}), against an M0 cap of 50. "
       f"The pilot samples at most three periods per pairing.")
     w("")
+    prec = Counter(c.get("release_precision") for c in films["candidates"])
     w(f"On screen: {n_films} co-starring films found via Wikidata cast lists. "
       f"{films['caveat']}")
+    if prec.get("year"):
+        w("")
+        w(f"Film release dates carry their source precision too: "
+          f"{prec['year']} of {n_films} are year-precision and are stored as "
+          f"years. Wikidata repeats a publication date per country, so where "
+          f"only dated releases exist the year most of them agree on is taken; "
+          f"the dates not chosen are kept in the record.")
     w("")
 
     # ---------- stress ----------
@@ -1151,6 +1165,31 @@ def main() -> int:
           "Wikipedia itself carries is reproduced here and confirmed here. "
           "The check is that extraction was faithful, which is a smaller "
           "claim than the sources being right.*")
+        w("")
+
+    # ---------- relationship corroboration ----------
+    if relcorr:
+        section("The relationship dates, against Wikipedia's own prose")
+        w("")
+        vc = relcorr["verdict_counts"]
+        conf = vc.get("prose_confirms_a_stored_year", 0)
+        w(f"Every relationship here comes from Wikidata, and nothing used to "
+          f"cross-check it. Both people's English Wikipedia articles are now "
+          f"read and the sentences naming the other person are carried into "
+          f"`docs/RELATIONSHIP-REVIEW.md`. Wikidata statements and article "
+          f"prose are edited by different people, so agreement is worth "
+          f"something.")
+        w("")
+        w(f"**{conf} of {relcorr['episodes_checked']}** episodes are "
+          f"corroborated by prose naming a year this project stored. "
+          f"{vc.get('not_mentioned', 0)} are named in neither article, which is "
+          f"the weakest kind of claim in the corpus and is flagged as such.")
+        w("")
+        w("*These labels are not verdicts and the sheet says so. On the first "
+          "run, all "
+          f"{vc.get('prose_names_other_years', 0)} episodes whose prose named "
+          "no stored year turned out to have CORRECT dates, in sentences "
+          "carrying another year for another reason.*")
         w("")
 
     # ---------- cross-run stability ----------

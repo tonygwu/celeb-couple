@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `c04c872e5401`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `6bca3c20b028`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -76,6 +76,7 @@ This is an engineering access assessment from published directives and terms. It
 - 34 relationship candidates for 14 subjects, 27 carrying a source reference.
 - **16 of 32 start dates are year-precision only.** They are stored as years, not as 1 January.
 - Merged into 29 episodes, joining 3 dating-to-marriage progressions that Wikidata stores as two abutting statements.
+  - 2 of the candidates were the SAME statement read off both people's Wikidata items, which happens whenever both halves of a couple are in the cohort. They are collapsed, and the count is reported rather than swallowed.
 - 3 episodes carry defects and are unscorable:
   - `no_start_date`: 2
   - `end_before_start`: 1
@@ -83,6 +84,8 @@ This is an engineering access assessment from published directives and terms. It
 - Scoring every year of every eligible episode would need **633 person-period estimates** (span 1964–2026), against an M0 cap of 50. The pilot samples at most three periods per pairing.
 
 On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in a cast list proves only that both were in the film. A qualifying on-screen pairing needs an established reciprocal romance between their CHARACTERS, which scripts/classify_romance.py decides. Most co-starring pairs are not romances; the current count is in data/pilot/records/romance.json.
+
+Film release dates carry their source precision too: 11 of 20 are year-precision and are stored as years. Wikidata repeats a publication date per country, so where only dated releases exist the year most of them agree on is taken; the dates not chosen are kept in the record.
 
 ## 4. Measurement stress tests
 
@@ -384,7 +387,15 @@ Until this ran, nothing had checked them. Every finding in this report rests on 
 
 *What this does NOT establish. It checks the corpus against Wikipedia, not Wikipedia against the publishers. An error that Wikipedia itself carries is reproduced here and confirmed here. The check is that extraction was faithful, which is a smaller claim than the sources being right.*
 
-## 17. The same dossier, scored in two separate runs
+## 17. The relationship dates, against Wikipedia's own prose
+
+Every relationship here comes from Wikidata, and nothing used to cross-check it. Both people's English Wikipedia articles are now read and the sentences naming the other person are carried into `docs/RELATIONSHIP-REVIEW.md`. Wikidata statements and article prose are edited by different people, so agreement is worth something.
+
+**21 of 29** episodes are corroborated by prose naming a year this project stored. 2 are named in neither article, which is the weakest kind of claim in the corpus and is flagged as such.
+
+*These labels are not verdicts and the sheet says so. On the first run, all 4 episodes whose prose named no stored year turned out to have CORRECT dates, in sentences carrying another year for another reason.*
+
+## 18. The same dossier, scored in two separate runs
 
 `data/pilot/run/evidenced_scores.json` and `data/roster100/run/joint_scores.json` were scored in separate runs. 3 person-periods carry a byte-identical dossier in both -- the same observation ids, the same contract id, the same judge family -- so any difference is run-to-run variance and nothing else.
 
@@ -398,7 +409,7 @@ Until this ran, nothing had checked them. Every finding in this report rests on 
 
 This is independent of the rater-noise section and agrees with it. The repeats there were deliberate re-invocations inside one run; these two runs did not know about each other. Both say the award shape holds still and the ranked shape does not.
 
-## 18. Do the conclusions depend on the choices that were made?
+## 19. Do the conclusions depend on the choices that were made?
 
 The ±1 nearby-period bound, the romance filter on co-starring films and the enforcement of shape comparability were all argued in the plan and could defensibly have gone the other way. A conclusion that only holds at one setting of three dials is a property of the dials.
 
@@ -421,7 +432,7 @@ The counterexample there is `Thor: Love and Thunder 2022: +3` — a film co-appe
 
 *Every setting reuses the SAME estimates. This tests whether the conclusions depend on the three methodological dials, not whether they survive different evidence.*
 
-## 19. The bottom line, stated plainly
+## 20. The bottom line, stated plainly
 
 Of 4 jointly covered pairing-periods, **1** compares two people judged by the same kind of evidence. The rest compare an award against a list placement, where format explains much of the gap.
 
@@ -430,7 +441,7 @@ Of 4 jointly covered pairing-periods, **1** compares two people judged by the sa
 
 So the project can now produce a signed, exactly mirrored, evidence-backed gap for a real couple. It cannot yet produce one that is both comparable and larger than its own measurement noise. That is a much better place than this run started, and it is not a leaderboard.
 
-## 20. Cost and budget
+## 21. Cost and budget
 
 Stages that record a call budget in their own artifact:
 
@@ -454,7 +465,7 @@ Repeated runs of a stage are summed. A superseded run spent quota too, and this 
 - Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and inventing a figure for the other arm would be a fabricated number.
 - **Human review time: 0 minutes so far.** The plan budgeted 60–90 minutes for one batch covering the pairing relationship claims and a sample of rationales for the grounding audit. None of it has happened, so every real-life relationship claim in this report remains an unverified candidate and the grounding audit remains automated-only.
 
-## 21. Do the estimates reflect substance, or source availability?
+## 22. Do the estimates reflect substance, or source availability?
 
 **Substance, where evidence exists. Availability decides whether it exists at all.**
 
@@ -464,7 +475,7 @@ With one exception, and it is about FORMAT rather than count: **S2_format_equiva
 
 But which person-years have any evidence is decided entirely by which publishers happen to be reachable. On the permitted routes the men's award is an annual one-winner prize reported on Wikipedia since 1985, and the women's equivalent is a single number-one per year since 2000. Everything deeper sits behind terms that forbid this use.
 
-## 22. Against the plan's M0 deliverables
+## 23. Against the plan's M0 deliverables
 
 The plan's section 8.2 lists six things M0 should produce. Where each one is, and whether it is done:
 
@@ -474,12 +485,12 @@ The plan's section 8.2 lists six things M0 should produce. Where each one is, an
 | 2 | Dossiers, estimates, support, rationales, exclusions, lineage | `data/pilot/run/evidenced_scores.json`, sections 6 and 15 | yes — 39 person-periods |
 | 3 | VERIFIED pairings, with mirrored contribution arithmetic | section 6; `docs/RELATIONSHIP-REVIEW.md` for the verification | arithmetic yes, mirrors exact; **verification NOT done** — it needs a person, and the sheet is ready |
 | 4 | Person-period and joint pairing-period coverage, with failures | sections 5 and 8, and the near-miss list | yes |
-| 5 | Stress tests, offset diagnostic, actual costs, review minutes | sections 4, 14 and 20 | yes — review minutes are **0**, stated |
-| 6 | An assessment: substance, or source availability? | section 21 | yes |
+| 5 | Stress tests, offset diagnostic, actual costs, review minutes | sections 4, 14 and 21 | yes — review minutes are **0**, stated |
+| 6 | An assessment: substance, or source availability? | section 22 | yes |
 
 **One deliverable is outstanding and it is the one only a person can do.** Everything else is here. The two review sheets each lead with the entries that carry a published conclusion, so the load-bearing part of the work is the first part encountered.
 
-## 23. What M0 did not establish
+## 24. What M0 did not establish
 
 - **Human verification has not happened.** Every relationship remains a Wikidata candidate that no person has checked, and the plan budgeted 60-90 minutes for exactly that.
   On-screen pairings ARE romance-filtered — 8 of 20 candidates are confirmed reciprocal romances from the plot text — so that is no longer an open item, but the filter is a model's reading of a Wikipedia summary, not a human's.
