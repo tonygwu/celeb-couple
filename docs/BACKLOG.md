@@ -84,9 +84,36 @@ fired on a downstream number. Neither would have surfaced on its own.
   14 people. The constraint is that BOTH sides must be scorable over the SAME
   period, and prose extraction did not move it. **Difficulty: blocked on
   evidence.**
-- **Rowspan continuation rows are skipped** in award tables: 3 in Sexiest Man
-  Alive, 2 in Most Beautiful. They carry no date cell, so they are dropped
-  rather than mis-dated. None was a cohort member. **Difficulty: easy.**
+- ~~Rowspan continuation rows are skipped in award tables.~~ **Fixed
+  2026-09-14, and the entry above was wrong about what the bug was.** It
+  counted five dropped rows as one defect. Only three were rowspan
+  continuations. The other two were the 2024 and 2025 Sexiest Man Alive
+  winners, whose dates People now writes as `November 13, 2024` rather than
+  `{{dts|...}}`. That second bug is the worse one: it takes the newest row
+  every year, and it hides itself by shrinking the corpus instead of
+  corrupting it, so the table looks merely short rather than wrong.
+
+  A rowspan is now read, not guessed: `rowspan="3"` carries its date to
+  exactly two following rows and no further, a row with its own date cancels
+  an unfinished carry, and a row with no rowspan above it is still skipped.
+  Continuation rows have one fewer cell, so the winner is read from the first
+  cell rather than the second. Sexiest Man Alive parses 40 rows to 43 with 0
+  skips, Most Beautiful 37 to 38. **The corpus did not change**: the same 41
+  observation ids, none added, none removed, because none of the recovered
+  winners is in the cohort or the partner universe. Four `ListEdition` records
+  were added for the recovered years.
+
+- **Unlinked winners are still dropped, and one is a real person.** Maxim's
+  2006 row names `Eva Longoria` in plain text with no wiki-link, so it is
+  counted as `skipped_no_link`. The existing reasoning holds in general -- a
+  plain-text cell is usually a note, and inventing a person from one is the
+  quiet wrong answer this project exists to avoid. But `to_records` only emits
+  an observation for a winner already in `name_to_person`, so matching plain
+  cell text against the KNOWN roster names would invent nothing: either it is
+  an exact match for a person we already track, or it is dropped as now.
+  Not done tonight because it changes a shared parser and yields zero
+  observations today -- neither Longoria nor the other unlinked row (an
+  infant, correctly unlinked) is in any roster. **Difficulty: easy.**
 
 ## Measurement (added late 2026-09-14)
 

@@ -43,6 +43,17 @@ USER_AGENT = (
 _DTS = re.compile(r"\{\{dts\|(\d{4})(?:\|(\d{1,2}))?(?:\|(\d{1,2}))?[^}]*\}\}")
 _LINK = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]+)?\]\]")
 _REF = re.compile(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>", re.S)
+#: ``rowspan="3"`` on a date cell: the table itself declaring how many rows
+#: share that date. Read, never guessed.
+_ROWSPAN = re.compile(r'rowspan\s*=\s*"?(\d+)"?', re.I)
+#: "November 13, 2024" -- People switched the Sexiest Man Alive table to plain
+#: English dates in 2024, and the {{dts}}-only parser dropped every row that
+#: used them.
+_PLAIN_DATE = re.compile(
+    r"^\s*([A-Z][a-z]+)\s+(\d{1,2}),\s*(\d{4})\s*$")
+_MONTHS = {m: i for i, m in enumerate(
+    ["January", "February", "March", "April", "May", "June", "July",
+     "August", "September", "October", "November", "December"], start=1)}
 
 
 @dataclass(frozen=True)
@@ -100,36 +111,72 @@ def parse_award_table_with_stats(wikitext: str) -> tuple[list[AwardRow], TableSt
     """
     rows: list[AwardRow] = []
     no_date = no_link = 0
+    carried = 0          # rows still covered by the last rowspan
+    carry: tuple[str, Precision, str] | None = None
     body = _REF.sub("", wikitext)
     blocks = body.split("\n|-")
     for block in blocks:
         cells = [c.strip() for c in block.split("\n|")[1:]]
         if len(cells) < 2:
             continue
-        m = _DTS.search(cells[0])
-        if m:
-            y, mo, d = m.group(1), m.group(2), m.group(3)
-            if mo and d:
-                value, prec = f"{int(y):04d}-{int(mo):02d}-{int(d):02d}", Precision.DAY
-            elif mo:
-                value, prec = f"{int(y):04d}-{int(mo):02d}", Precision.MONTH
-            else:
-                value, prec = y, Precision.YEAR
+        parsed = _parse_date_cell(cells[0])
+        if parsed:
+            value, prec, y = parsed
+            # The date cell says how many rows it covers. Its own row is one
+            # of them, so N=3 carries to the next two.
+            span = _ROWSPAN.search(cells[0])
+            carried = int(span.group(1)) - 1 if span else 0
+            carry = (value, prec, y) if carried > 0 else None
+            winner_cell = cells[1]
+        elif carried > 0 and carry is not None:
+            # A continuation row has no date cell at all, so every cell shifts
+            # left: the winner is cells[0], not cells[1]. Reading cells[1]
+            # here would take the age column and find no link in it.
+            value, prec, y = carry
+            carried -= 1
+            winner_cell = cells[0]
         else:
-            bare = re.match(r"^\s*(\d{4})\s*$", cells[0])
-            if not bare:
-                no_date += 1
-                continue
-            value, prec, y = bare.group(1), Precision.YEAR, bare.group(1)
-        link = _LINK.search(cells[1])
+            no_date += 1
+            carry, carried = None, 0
+            continue
+        link = _LINK.search(winner_cell)
         if not link:
             no_link += 1
             continue
-        rows.append(AwardRow(int(y), value, prec, link.group(1).strip(), cells[1][:120]))
+        rows.append(AwardRow(int(y), value, prec, link.group(1).strip(),
+                             winner_cell[:120]))
     return rows, TableStats(
         row_blocks=max(0, len(blocks) - 1), parsed=len(rows),
         skipped_no_date=no_date, skipped_no_link=no_link,
     )
+
+
+def _parse_date_cell(cell: str) -> tuple[str, Precision, str] | None:
+    """Read a date cell in any of the three shapes these tables use.
+
+    Returns None when the cell holds no date, which is how a continuation row
+    is recognised. A cell that holds SOMETHING unparseable also returns None
+    and is counted as a skip rather than guessed at.
+    """
+    m = _DTS.search(cell)
+    if m:
+        y, mo, d = m.group(1), m.group(2), m.group(3)
+        if mo and d:
+            return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}", Precision.DAY, y
+        if mo:
+            return f"{int(y):04d}-{int(mo):02d}", Precision.MONTH, y
+        return y, Precision.YEAR, y
+    # Strip any cell attributes ("rowspan=2 | November 13, 2024") before
+    # matching the text.
+    text = cell.split("|")[-1].strip() if "|" in cell else cell.strip()
+    plain = _PLAIN_DATE.match(text)
+    if plain and plain.group(1) in _MONTHS:
+        y, mo, d = plain.group(3), _MONTHS[plain.group(1)], int(plain.group(2))
+        return f"{int(y):04d}-{mo:02d}-{d:02d}", Precision.DAY, y
+    bare = re.match(r"^\s*(\d{4})\s*$", text)
+    if bare:
+        return bare.group(1), Precision.YEAR, bare.group(1)
+    return None
 
 
 def to_records(

@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `563be7940aec`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `8cd5206ad388`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -65,9 +65,9 @@ This is an engineering access assessment from published directives and terms. It
 
 | Source | Publisher | Serves | Shape | Parsed | Years | Cohort hits |
 |---|---|---|---|---|---|---|
-| Sexiest Man Alive | PEOPLE | male | `editorial_award` | 40 winner rows | 1985–2025 | 6 |
+| Sexiest Man Alive | PEOPLE | male | `editorial_award` | 43 winner rows | 1985–2025 | 6 |
 | Maxim Hot 100 number one | Maxim | female | `editorial_award` | 24 winner rows | 2000–2025 | 1 |
-| Most Beautiful cover choice | PEOPLE | mixed | `editorial_award` | 37 winner rows | 1990–2026 | 9 |
+| Most Beautiful cover choice | PEOPLE | mixed | `editorial_award` | 38 winner rows | 1990–2026 | 9 |
 | Sexiest Woman Alive | Esquire | female | `editorial_award` | 11 winner rows | 2005–2015 | 1 |
 | FHM 100 Sexiest Women (UK) | FHM | female | `ordered_rank` | 229 entries, 206 ranked | 1995–2017 | 16 |
 
