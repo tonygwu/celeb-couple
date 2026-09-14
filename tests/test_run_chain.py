@@ -98,3 +98,35 @@ def test_both_mention_files_are_merged():
     only one leaves the partner side of every pairing thinner."""
     assert "prose_mentions.json" in CHAIN
     assert "prose_mentions_partners.json" in CHAIN
+
+
+def _prose_chain_order() -> list[str]:
+    """The stage names from AGENTS.md's 'run the whole chain in this order'."""
+    text = (REPO / "AGENTS.md").read_text()
+    start = text.index("changing any source:")
+    para = text[start:text.index("\n\n", start)]
+    return [m for m in re.findall(r"`([a-z_0-9]+)`", para)]
+
+
+def test_the_prose_chain_order_matches_the_script():
+    """AGENTS.md states the order in prose and run_chain.sh encodes it.
+
+    The script's own header says an order written in two places drifts, and it
+    then did: verify_observations.py was added to the script after the merge
+    and to the prose after verify_trap, in the same edit. Only stages the
+    script actually runs are compared, because the prose also lists the
+    quota-spending stages, which are deliberately not in the script.
+    """
+    in_script = [s for s in _prose_chain_order() if f"{s}.py" in CHAIN]
+    positions = [CHAIN.index(f"{s}.py") for s in in_script]
+    assert positions == sorted(positions), (
+        "AGENTS.md lists these stages in an order run_chain.sh does not use: "
+        f"{in_script}"
+    )
+
+
+def test_the_prose_chain_names_real_scripts():
+    """A renamed script leaves its old name in the prose, pointing at nothing."""
+    missing = [s for s in _prose_chain_order()
+               if not (REPO / "scripts" / f"{s}.py").exists()]
+    assert missing == [], f"AGENTS.md names scripts that do not exist: {missing}"

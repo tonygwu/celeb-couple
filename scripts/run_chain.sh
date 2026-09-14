@@ -45,6 +45,10 @@ if [[ "$MODE" == "free" || "$MODE" == "all" ]]; then
            data/pilot/observations/prose_mentions_partners.json; do
     [ -f "$m" ] && run scripts/merge_prose_mentions.py --mentions "$m"
   done
+  # After the merge, so it sees the corpus the reports will actually read.
+  # This is the only stage that checks the observations against the live pages
+  # they were extracted from; everything downstream takes them on trust.
+  run scripts/verify_observations.py
 fi
 
 if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then

@@ -169,6 +169,7 @@ running anything in the first group.
 | `scripts/verify_trap.py` | re-derive THE-TRAP.md's three structural claims; exits 1 if any stopped holding | no |
 | `scripts/cross_run_stability.py` | do two separate runs score an identical dossier the same | no |
 | `scripts/audit_doc_numbers.py` | cross-checks measured numbers typed into any tracked Markdown against the artifacts; exits 1 on a stale one | no |
+| `scripts/verify_observations.py` | re-checks every observation against the live Wikipedia page it came from; exits 1 if one stopped matching | no |
 | `scripts/run_stress.py --out data/pilot/stress` | the eight measurement stress cases | **yes** |
 | `scripts/score_evidenced.py` | scores person-periods that have evidence | **yes** |
 | `scripts/classify_romance.py` | is a co-starring pair actually a romance in the film | **yes** |
@@ -189,7 +190,7 @@ The quota-spending scripts take `CELEB_JUDGES` (default `fable,astra`) and
 `CELEB_MAX_CALLS`, or equivalent flags. Run the whole chain in this order after
 changing any source: `fetch_records` → `build_episodes` → `build_partner_universe` →
 `fetch_observations` → `merge_prose_mentions` (once per
-mentions file) → `score_evidenced` → `joint_coverage` → `evidence_density` →
+mentions file) → `verify_observations` → `score_evidenced` → `joint_coverage` → `evidence_density` →
 `alignment_gap` → `shape_confound` → `grounding_audit` → `offset_diagnostic` →
 `relationship_review` → `conclusion_robustness` → `verify_trap` →
 `cross_run_stability` →
