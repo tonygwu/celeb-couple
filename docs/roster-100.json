@@ -1,0 +1,707 @@
+{
+  "version": "roster-2026-09-14-draft",
+  "selected_on": "2026-09-14",
+  "selection_basis": "Five decades of leading roles, both genders equally, deliberately including older stars, comic and character leads, and performers not cast as heartthrobs. Chosen on prominence BEFORE any check of how easy each is to score.",
+  "people": [
+    {
+      "display_name": "Mel Gibson",
+      "wikidata_qid": "Q42229",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor, director, producer and screenwriter (born 1956)"
+    },
+    {
+      "display_name": "Harrison Ford",
+      "wikidata_qid": "Q81328",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1942)"
+    },
+    {
+      "display_name": "Tom Cruise",
+      "wikidata_qid": "Q37079",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor and film producer (born 1962)"
+    },
+    {
+      "display_name": "Kevin Costner",
+      "wikidata_qid": "Q11930",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor and filmmaker (born 1955)"
+    },
+    {
+      "display_name": "Denzel Washington",
+      "wikidata_qid": "Q42101",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1954)"
+    },
+    {
+      "display_name": "Patrick Swayze",
+      "wikidata_qid": "Q49004",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor, producer, singer and dancer (1952\u20132009)"
+    },
+    {
+      "display_name": "Richard Gere",
+      "wikidata_qid": "Q48410",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1949)"
+    },
+    {
+      "display_name": "Michael Douglas",
+      "wikidata_qid": "Q119798",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor, producer and activist (born 1944)"
+    },
+    {
+      "display_name": "Tom Hanks",
+      "wikidata_qid": "Q2263",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor and film producer (born 1956)"
+    },
+    {
+      "display_name": "Nicolas Cage",
+      "wikidata_qid": "Q42869",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1964)"
+    },
+    {
+      "display_name": "Brad Pitt",
+      "wikidata_qid": "Q35332",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1963)"
+    },
+    {
+      "display_name": "George Clooney",
+      "wikidata_qid": "Q23844",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American-French actor and filmmaker (born 1961)"
+    },
+    {
+      "display_name": "Matt Damon",
+      "wikidata_qid": "Q175535",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1970)"
+    },
+    {
+      "display_name": "Ben Affleck",
+      "wikidata_qid": "Q483118",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American film actor, director and screenwriter (born 1972)"
+    },
+    {
+      "display_name": "Leonardo DiCaprio",
+      "wikidata_qid": "Q38111",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor and producer (born 1974)"
+    },
+    {
+      "display_name": "Johnny Depp",
+      "wikidata_qid": "Q37175",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1963)"
+    },
+    {
+      "display_name": "Will Smith",
+      "wikidata_qid": "Q40096",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor, film producer and rapper (born 1968)"
+    },
+    {
+      "display_name": "Keanu Reeves",
+      "wikidata_qid": "Q43416",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "Canadian actor and musician (born 1964)"
+    },
+    {
+      "display_name": "Hugh Grant",
+      "wikidata_qid": "Q163286",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "British actor"
+    },
+    {
+      "display_name": "Jude Law",
+      "wikidata_qid": "Q160432",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "English actor"
+    },
+    {
+      "display_name": "Colin Farrell",
+      "wikidata_qid": "Q172035",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "Irish actor (born 1976)"
+    },
+    {
+      "display_name": "Russell Crowe",
+      "wikidata_qid": "Q129817",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "New Zealand actor"
+    },
+    {
+      "display_name": "Ewan McGregor",
+      "wikidata_qid": "Q165518",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "Scottish actor"
+    },
+    {
+      "display_name": "Mark Wahlberg",
+      "wikidata_qid": "Q164119",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1971)"
+    },
+    {
+      "display_name": "Josh Hartnett",
+      "wikidata_qid": "Q303957",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor and producer"
+    },
+    {
+      "display_name": "Orlando Bloom",
+      "wikidata_qid": "Q44467",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "English actor and model (born 1977)"
+    },
+    {
+      "display_name": "Ryan Gosling",
+      "wikidata_qid": "Q193815",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "Canadian actor (born 1980)"
+    },
+    {
+      "display_name": "Ryan Reynolds",
+      "wikidata_qid": "Q192682",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "Canadian-American actor (born 1976)"
+    },
+    {
+      "display_name": "Bradley Cooper",
+      "wikidata_qid": "Q205707",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1975)"
+    },
+    {
+      "display_name": "Chris Hemsworth",
+      "wikidata_qid": "Q54314",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "Australian actor (born 1983)"
+    },
+    {
+      "display_name": "Chris Evans",
+      "wikidata_qid": "Q178348",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1981)"
+    },
+    {
+      "display_name": "Chris Pratt",
+      "wikidata_qid": "Q503706",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1979)"
+    },
+    {
+      "display_name": "Channing Tatum",
+      "wikidata_qid": "Q212064",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor, dancer and model (born 1980)"
+    },
+    {
+      "display_name": "Jake Gyllenhaal",
+      "wikidata_qid": "Q133313",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1980)"
+    },
+    {
+      "display_name": "Idris Elba",
+      "wikidata_qid": "Q342604",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "British actor"
+    },
+    {
+      "display_name": "Michael B. Jordan",
+      "wikidata_qid": "Q3308007",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1987)"
+    },
+    {
+      "display_name": "Tom Hardy",
+      "wikidata_qid": "Q208026",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "British actor (born 1977)"
+    },
+    {
+      "display_name": "Robert Pattinson",
+      "wikidata_qid": "Q36767",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "British actor (born 1986)"
+    },
+    {
+      "display_name": "Zac Efron",
+      "wikidata_qid": "Q45229",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor and singer (born 1987)"
+    },
+    {
+      "display_name": "Henry Cavill",
+      "wikidata_qid": "Q295498",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "English actor (born 1983)"
+    },
+    {
+      "display_name": "Oscar Isaac",
+      "wikidata_qid": "Q336788",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "Guatemalan-American actor"
+    },
+    {
+      "display_name": "Mahershala Ali",
+      "wikidata_qid": "Q360531",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor"
+    },
+    {
+      "display_name": "Adam Sandler",
+      "wikidata_qid": "Q132952",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor and comedian"
+    },
+    {
+      "display_name": "Jonah Hill",
+      "wikidata_qid": "Q313388",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1983)"
+    },
+    {
+      "display_name": "Seth Rogen",
+      "wikidata_qid": "Q220308",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "Canadian actor, comedian, and filmmaker (born 1982)"
+    },
+    {
+      "display_name": "Steve Carell",
+      "wikidata_qid": "Q216221",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor and comedian (born 1962)"
+    },
+    {
+      "display_name": "Jack Black",
+      "wikidata_qid": "Q483907",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor, comedian, and musician (born 1969)"
+    },
+    {
+      "display_name": "Danny DeVito",
+      "wikidata_qid": "Q26806",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor, comedian, director and producer (born 1944)"
+    },
+    {
+      "display_name": "Kevin Hart",
+      "wikidata_qid": "Q618352",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American comedian and actor (born 1979)"
+    },
+    {
+      "display_name": "Paul Giamatti",
+      "wikidata_qid": "Q208649",
+      "gender_category": "male",
+      "cohort_note": "plan roster draft",
+      "description": "American actor (born 1967)"
+    },
+    {
+      "display_name": "Michelle Pfeiffer",
+      "wikidata_qid": "Q159778",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1958)"
+    },
+    {
+      "display_name": "Julia Roberts",
+      "wikidata_qid": "Q40523",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1967)"
+    },
+    {
+      "display_name": "Demi Moore",
+      "wikidata_qid": "Q43044",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and producer (born 1962)"
+    },
+    {
+      "display_name": "Sandra Bullock",
+      "wikidata_qid": "Q40791",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and film producer"
+    },
+    {
+      "display_name": "Nicole Kidman",
+      "wikidata_qid": "Q37459",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "Australian-American actress, producer, and model (born 1967)"
+    },
+    {
+      "display_name": "Sharon Stone",
+      "wikidata_qid": "Q62975",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1958)"
+    },
+    {
+      "display_name": "Meg Ryan",
+      "wikidata_qid": "Q167498",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1961)"
+    },
+    {
+      "display_name": "Winona Ryder",
+      "wikidata_qid": "Q101797",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress"
+    },
+    {
+      "display_name": "Jodie Foster",
+      "wikidata_qid": "Q41351",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and filmmaker (born 1962)"
+    },
+    {
+      "display_name": "Halle Berry",
+      "wikidata_qid": "Q1033016",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1966)"
+    },
+    {
+      "display_name": "Jennifer Aniston",
+      "wikidata_qid": "Q32522",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1969)"
+    },
+    {
+      "display_name": "Gwyneth Paltrow",
+      "wikidata_qid": "Q34460",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress, entrepreneur, writer and singer (born 1972)"
+    },
+    {
+      "display_name": "Cameron Diaz",
+      "wikidata_qid": "Q44380",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and model"
+    },
+    {
+      "display_name": "Charlize Theron",
+      "wikidata_qid": "Q80046",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "South African and American actress (born 1975)"
+    },
+    {
+      "display_name": "Angelina Jolie",
+      "wikidata_qid": "Q13909",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1975)"
+    },
+    {
+      "display_name": "Catherine Zeta-Jones",
+      "wikidata_qid": "Q47664",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "British actress (born 1969)"
+    },
+    {
+      "display_name": "Salma Hayek",
+      "wikidata_qid": "Q125106",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "Mexican and American actress (born 1966)"
+    },
+    {
+      "display_name": "Kate Beckinsale",
+      "wikidata_qid": "Q179414",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "English actress (born 1973)"
+    },
+    {
+      "display_name": "Liv Tyler",
+      "wikidata_qid": "Q168763",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1977)"
+    },
+    {
+      "display_name": "Jennifer Garner",
+      "wikidata_qid": "Q172044",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress"
+    },
+    {
+      "display_name": "Jennifer Lopez",
+      "wikidata_qid": "Q40715",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American singer and actress (born 1969)"
+    },
+    {
+      "display_name": "Pen\u00e9lope Cruz",
+      "wikidata_qid": "Q39666",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "Spanish actress (born 1974)"
+    },
+    {
+      "display_name": "Rachel Weisz",
+      "wikidata_qid": "Q134077",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "British actress (born 1970)"
+    },
+    {
+      "display_name": "Naomi Watts",
+      "wikidata_qid": "Q132616",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "English actress (born 1968)"
+    },
+    {
+      "display_name": "Eva Mendes",
+      "wikidata_qid": "Q170606",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and model (born 1974)"
+    },
+    {
+      "display_name": "Jessica Alba",
+      "wikidata_qid": "Q44077",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and businesswoman (born 1981)"
+    },
+    {
+      "display_name": "Scarlett Johansson",
+      "wikidata_qid": "Q34436",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1984)"
+    },
+    {
+      "display_name": "Natalie Portman",
+      "wikidata_qid": "Q37876",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "Israeli-American actress (born 1981)"
+    },
+    {
+      "display_name": "Anne Hathaway",
+      "wikidata_qid": "Q36301",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1982)"
+    },
+    {
+      "display_name": "Mila Kunis",
+      "wikidata_qid": "Q37628",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1983)"
+    },
+    {
+      "display_name": "Megan Fox",
+      "wikidata_qid": "Q80069",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and model"
+    },
+    {
+      "display_name": "Emma Stone",
+      "wikidata_qid": "Q147077",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1988)"
+    },
+    {
+      "display_name": "Jennifer Lawrence",
+      "wikidata_qid": "Q189490",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and producer (born 1990)"
+    },
+    {
+      "display_name": "Margot Robbie",
+      "wikidata_qid": "Q1924847",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "Australian actress (born 1990)"
+    },
+    {
+      "display_name": "Gal Gadot",
+      "wikidata_qid": "Q185654",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "Israeli actress, and model; Miss Israel 2004 (born 1985)"
+    },
+    {
+      "display_name": "Zendaya",
+      "wikidata_qid": "Q189489",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and singer (born 1996)"
+    },
+    {
+      "display_name": "Ana de Armas",
+      "wikidata_qid": "Q698173",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "Cuban-Spanish actress and model (born 1988)"
+    },
+    {
+      "display_name": "Sydney Sweeney",
+      "wikidata_qid": "Q49561909",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1997)"
+    },
+    {
+      "display_name": "Florence Pugh",
+      "wikidata_qid": "Q22277803",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "British actress (born 1996)"
+    },
+    {
+      "display_name": "Zo\u00eb Kravitz",
+      "wikidata_qid": "Q227129",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress, director, singer and model (born 1988)"
+    },
+    {
+      "display_name": "Lupita Nyong'o",
+      "wikidata_qid": "Q3840847",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "Mexican-Kenyan actress and film director (born 1983)"
+    },
+    {
+      "display_name": "Rosario Dawson",
+      "wikidata_qid": "Q228692",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress (born 1979)"
+    },
+    {
+      "display_name": "Melissa McCarthy",
+      "wikidata_qid": "Q229048",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and comedian"
+    },
+    {
+      "display_name": "Tina Fey",
+      "wikidata_qid": "Q14540",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress, comedian, writer, producer, and playwright"
+    },
+    {
+      "display_name": "Amy Poehler",
+      "wikidata_qid": "Q230203",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress"
+    },
+    {
+      "display_name": "Rebel Wilson",
+      "wikidata_qid": "Q442897",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "Australian actress, writer, and producer"
+    },
+    {
+      "display_name": "Kristen Wiig",
+      "wikidata_qid": "Q231382",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and comedian (born 1973)"
+    },
+    {
+      "display_name": "Maya Rudolph",
+      "wikidata_qid": "Q236527",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress and comedian"
+    },
+    {
+      "display_name": "Octavia Spencer",
+      "wikidata_qid": "Q229254",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American actress"
+    },
+    {
+      "display_name": "Kathy Bates",
+      "wikidata_qid": "Q544465",
+      "gender_category": "female",
+      "cohort_note": "plan roster draft",
+      "description": "American film actress and director"
+    }
+  ]
+}

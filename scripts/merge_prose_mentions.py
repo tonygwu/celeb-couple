@@ -120,6 +120,18 @@ def main() -> int:
                  "name because the same franchise gets described differently in "
                  "a table title and in prose."),
     })
+    # Recompute the derived coverage block. It is written by fetch_observations
+    # and was going stale the moment anything merged in: the scaling table read
+    # 27 observations from it while the file held 35.
+    from collections import Counter
+    ed = {e["list_edition_id"]: e for e in obs["editions"]}
+    per_person = Counter(o["person_id"] for o in obs["observations"])
+    cov = obs.setdefault("coverage", {})
+    cov["total_observations"] = len(obs["observations"])
+    cov["per_person"] = dict(per_person.most_common())
+    cov["cohort_people_with_any_observation"] = len(per_person)
+    cov["recomputed_after_merge"] = True
+
     (REPO / args.out).write_text(json.dumps(obs, indent=2))
     print(f"mentions in: {len(mentions)}  added: {len(added)}  "
           f"dup vs existing: {dup_existing}  dup within mentions: {dup_within}")
