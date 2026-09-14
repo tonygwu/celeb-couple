@@ -140,3 +140,24 @@ def test_no_document_claims_a_test_count():
             f"{rel} states a test count {hits}; run the suite instead. A typed "
             "count goes stale and then lies."
         )
+
+
+def test_regenerating_the_report_over_unchanged_artifacts_is_a_no_op():
+    """verbatim-index stamps its page with the RENDER date, so every rebuild is a
+    diff that tells a reader nothing about whether the numbers moved. This report
+    is identified by a fingerprint over its inputs instead."""
+    import subprocess
+    import sys
+    script = REPO / "scripts/write_m0_report.py"
+    report = REPO / "docs/M0-REPORT.md"
+    if not report.exists():
+        pytest.skip("report absent")
+    before = report.read_text()
+    proc = subprocess.run([sys.executable, str(script)], cwd=str(REPO),
+                          capture_output=True, text=True, timeout=120)
+    if proc.returncode != 0:
+        pytest.skip(f"report inputs unavailable: {proc.stderr[-200:]}")
+    assert report.read_text() == before, (
+        "regenerating over unchanged artifacts changed the file; the report's "
+        "identity must be its input fingerprint, not the wall clock"
+    )

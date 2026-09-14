@@ -13,9 +13,28 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 
 
+#: Every artifact the report reads. The fingerprint over these is the report's
+#: real identity: verbatim-index stamps its pages with the RENDER date, which
+#: makes every regeneration a diff and tells a reader nothing about whether the
+#: numbers moved.
+_INPUTS: list[str] = []
+
+
 def load(p: str, default=None):
     f = REPO / p
-    return json.loads(f.read_text()) if f.exists() else default
+    if f.exists():
+        _INPUTS.append(p)
+        return json.loads(f.read_text())
+    return default
+
+
+def _fingerprint() -> str:
+    import hashlib
+    h = hashlib.sha256()
+    for rel in sorted(_INPUTS):
+        h.update(rel.encode())
+        h.update((REPO / rel).read_bytes())
+    return h.hexdigest()[:12]
 
 
 def main() -> int:
@@ -41,9 +60,13 @@ def main() -> int:
     w = L.append
     w("# M0 pilot report — Celebrity Pairing WAR")
     w("")
-    w(f"Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} "
-      f"from the run artifacts under `data/pilot/`. Every number below is read "
-      f"from a JSON artifact, not typed.")
+    w(f"Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d')} from the run "
+      f"artifacts under `data/pilot/`, input fingerprint `{_fingerprint()}`. "
+      f"Every number below is read from a JSON artifact, not typed.")
+    w("")
+    w("The fingerprint, not the date, is this report's identity: regenerating it "
+      "over unchanged artifacts produces an identical file, so a diff means the "
+      "numbers moved.")
     w("")
     w("**Private pilot. Nothing here is published, ranked, or deployed. Every "
       "relationship and every on-screen pairing is an UNVERIFIED candidate.**")
