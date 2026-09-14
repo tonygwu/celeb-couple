@@ -278,6 +278,21 @@ fired on a downstream number. Neither would have surfaced on its own.
   the next agent knows which capabilities exist only on paper.
   **Difficulty: not a task; a note.**
 
+- **Two quota-produced artifacts predate tonight's record fixes and disagree
+  with the live records.** `data/pilot/records/romance.json` carries film
+  release dates in the old flattened form (`1993-01-01` for a year-precision
+  source), and `data/pilot/run/evidenced_scores.json` still reports
+  `max_fetches: 1000000000`. Both were written by scripts that spend model
+  quota and cannot be re-run for free, so they keep the shape they had when
+  they were made.
+
+  Neither is used for anything that moved: the romance classifier keys on the
+  film's Wikipedia page, not its date, and nothing reads the fetch fields. The
+  next paid run of each drops both. Recorded so a reader comparing
+  `romance.json` against `onscreen_candidates.json` does not read the
+  difference as a bug in the live path. **Difficulty: resolves itself on the
+  next re-score.**
+
 ## Measurement (added late 2026-09-14)
 
 - **The one comparable gap is 0.0 against a rank-shaped LSD of 2.56.** Daredevil 2003,
