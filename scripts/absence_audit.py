@@ -64,9 +64,24 @@ def main() -> int:
     ap.add_argument("--cohort", default="docs/pilot-cohort.json")
     ap.add_argument("--observations", default="data/pilot/observations/observations.json")
     ap.add_argument("--out", default="data/pilot/run/absence_audit.json")
+    ap.add_argument(
+        "--source", choices=("cohort", "partners"), default="cohort",
+        help=("`partners` audits the partner universe instead. Partner "
+              "evidence is what makes a pairing jointly covered, so the same "
+              "question matters more there than for the cohort."))
     args = ap.parse_args()
 
-    people = require(REPO, args.cohort)["people"]
+    if args.source == "partners":
+        # Only the ones a human already judged rateable. Someone classified
+        # not_a_public_figure_do_not_rate is not missing evidence; the project
+        # has decided not to look, and auditing them would read as a gap.
+        detail = require(REPO, "data/pilot/records/partner_eligibility.json")
+        people = [{"display_name": r["name"], "wikidata_qid": r["qid"],
+                   "gender_category": r.get("gender", "unknown")}
+                  for r in detail["partners_detail"]
+                  if r["status"] == "public_figure_no_evidence_found"]
+    else:
+        people = require(REPO, args.cohort)["people"]
     obs = require(REPO, args.observations)
     have = {o["person_id"] for o in obs["observations"]}
     missing = [p for p in people if p["wikidata_qid"] not in have]
@@ -114,6 +129,7 @@ def main() -> int:
         })
 
     payload = {
+        "source": args.source,
         "cohort": args.cohort,
         "cohort_size": len(people),
         "with_observations": len(people) - len(missing),

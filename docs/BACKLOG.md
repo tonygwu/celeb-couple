@@ -293,6 +293,24 @@ fired on a downstream number. Neither would have surfaced on its own.
   difference as a bug in the live path. **Difficulty: resolves itself on the
   next re-score.**
 
+- **Peter Horton was named one of People's "50 Most Beautiful People" and the
+  corpus cannot use it.** Found 2026-09-14 by `absence_audit.py --source
+  partners`, which flagged him `named_somewhere_investigate` because his own
+  article names a permitted publisher. Investigating: *"During his run on
+  Thirtysomething, People magazine named him one of the '50 Most Beautiful
+  People.'"*
+
+  There is no year. Thirtysomething ran 1987-1991, and the mention pins nothing
+  inside that. The rubric's rule is "no usable dated evidence -> unscored", so
+  the pipeline is right to hold nothing, and the flag did its job: it said
+  look, and looking showed the absence was correct.
+
+  It is recorded because it is the only lead in sixteen audited people and
+  because it is a concrete example of the shape the evidence supply actually
+  has. He is Michelle Pfeiffer's spouse 1981-1988, so a dated version of this
+  one mention would make that pairing scorable on one side. **Difficulty:
+  blocked on evidence, and the evidence is undated rather than missing.**
+
 ## Measurement (added late 2026-09-14)
 
 - **The one comparable gap is 0.0 against a rank-shaped LSD of 2.56.** Daredevil 2003,

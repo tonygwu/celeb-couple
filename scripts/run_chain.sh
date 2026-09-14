@@ -56,6 +56,11 @@ if [[ "$MODE" == "free" || "$MODE" == "all" ]]; then
   # from "no permitted route reaches them", which is the difference between an
   # invitation to look harder and a finding.
   run scripts/absence_audit.py
+  # The partner universe matters more than the cohort here: partner evidence is
+  # what makes a pairing jointly covered.
+  [ -f data/pilot/records/partner_eligibility.json ] && \
+    run scripts/absence_audit.py --source partners \
+        --out data/pilot/run/absence_audit_partners.json
   # Needs episodes.json. Feeds the review sheet in the reports pass, so it has
   # to run before it rather than beside it.
   run scripts/corroborate_relationships.py

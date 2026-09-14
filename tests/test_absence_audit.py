@@ -101,3 +101,57 @@ def test_no_audited_person_is_a_pipeline_gap():
     assert gaps == [], (
         f"these are named in a permitted source but carry no observation, "
         f"which is a pipeline gap rather than a source gap: {gaps}")
+
+
+# ---------------------------------------------------------------------------
+# the partner universe
+# ---------------------------------------------------------------------------
+
+def test_the_partner_audit_only_covers_people_the_project_would_rate():
+    """Someone classified not_a_public_figure_do_not_rate is not missing
+    evidence. The project has decided not to look, and auditing them would
+    report a gap where there is a policy."""
+    import json
+    path = REPO / "data/pilot/run/absence_audit_partners.json"
+    elig = REPO / "data/pilot/records/partner_eligibility.json"
+    if not (path.exists() and elig.exists()):
+        pytest.skip("data/ is gitignored; run the chain first")
+    payload = json.loads(path.read_text())
+    assert payload["source"] == "partners"
+    status = {r["qid"]: r["status"]
+              for r in json.loads(elig.read_text())["partners_detail"]}
+    assert payload["rows"], "no partners audited, so the counts are vacuous"
+    for r in payload["rows"]:
+        assert status[r["wikidata_qid"]] == "public_figure_no_evidence_found", (
+            f"{r['person']} is {status[r['wikidata_qid']]} and should not be "
+            "in an evidence-absence audit")
+
+
+def test_a_surname_only_hit_is_not_counted_as_being_named():
+    """Pauletta Pearson Washington matches "Washington" in two tables, because
+    Denzel Washington is in them. A surname is not a person."""
+    import json
+    path = REPO / "data/pilot/run/absence_audit_partners.json"
+    if not path.exists():
+        pytest.skip("data/ is gitignored")
+    for r in json.loads(path.read_text())["rows"]:
+        if r["surname_only_in"] and not r["named_in_source_tables"] \
+                and not r["publisher_named_in_own_article"]:
+            assert r["verdict"] == "no_permitted_route_reaches_them", (
+                f"{r['person']} was counted as named on a surname match alone")
+
+
+def test_the_partner_audit_flags_rather_than_decides():
+    """Peter Horton's article names People's "50 Most Beautiful People" with no
+    year, so the corpus correctly holds nothing. The audit must surface him for
+    a human rather than either ignoring him or inventing an observation."""
+    import json
+    path = REPO / "data/pilot/run/absence_audit_partners.json"
+    if not path.exists():
+        pytest.skip("data/ is gitignored")
+    rows = {r["person"]: r for r in json.loads(path.read_text())["rows"]}
+    horton = rows.get("Peter Horton")
+    if horton is None:
+        pytest.skip("Peter Horton is not in this partner universe")
+    assert horton["verdict"] == "named_somewhere_investigate"
+    assert horton["publisher_named_in_own_article"] == ["Most Beautiful"]
