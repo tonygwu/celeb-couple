@@ -163,6 +163,25 @@ fired on a downstream number. Neither would have surfaced on its own.
   alongside the `contract_id` boundary item above, when the id changes anyway.
   **Difficulty: trivial, must be bundled.**
 
+- **`estimate.schema.json` declares two fields nullable that its own enums
+  forbid.** `missingness_reason` and `band` both carry
+  `"type": ["string", "null"]` alongside an `enum` that does not list `null`.
+  JSON Schema keywords are conjunctive: an instance must satisfy `type` AND
+  `enum`, so `null` is invalid for both despite the type.
+
+  Every SCORED record sets `missingness_reason` to null, correctly. So under
+  strict validation essentially every record in the corpus would be rejected.
+
+  **Nothing validates against this schema today** — it is read as bytes for the
+  contract hash and shown to the judge, and `parse_verdict` does its checks by
+  hand — so nothing is broken. It is a landmine: **do not add jsonschema
+  validation without fixing the enums first**, or the first thing it will do is
+  reject the entire corpus.
+
+  The fix is to add `null` to both enums. Not done now because the schema is
+  part of the hashed contract; bundle it with the next version bump alongside
+  the other two contract items above. **Difficulty: trivial, must be bundled.**
+
 ## Tooling
 
 - ~~Smoke tests can clobber production artifacts.~~ **Fixed 2026-09-14.**

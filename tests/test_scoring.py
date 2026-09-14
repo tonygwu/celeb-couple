@@ -329,3 +329,37 @@ def test_records_all_lacking_a_contract_id_are_still_one_unknown_version():
     MIXED either, and this function only answers the mixing question."""
     from packages.llmkit.contract import refuse_mixed_contracts
     refuse_mixed_contracts([{"estimate": 90}, {"estimate": 80}])
+
+
+def test_the_schema_nullable_enum_landmine_is_still_only_a_landmine():
+    """`missingness_reason` and `band` are declared nullable by `type` while
+    their `enum` omits null. JSON Schema keywords are conjunctive, so null is
+    invalid for both — and every scored record sets missingness_reason to null.
+
+    Nothing validates against the schema today, so nothing is broken. This
+    test fails the moment a validator is introduced without fixing the enums,
+    which is the sequence that would reject the entire corpus in one go.
+    """
+    import json
+    from pathlib import Path as _P
+    repo = _P(__file__).resolve().parent.parent
+    schema = json.loads((repo / "rubrics/standing/estimate.schema.json").read_text())
+    nullable_but_not_in_enum = [
+        name for name, spec in schema["properties"].items()
+        if isinstance(spec.get("type"), list) and "null" in spec["type"]
+        and "enum" in spec and None not in spec["enum"]
+    ]
+    if not nullable_but_not_in_enum:
+        return          # fixed at a contract bump; nothing to guard
+
+    try:
+        import jsonschema        # noqa: F401
+    except ImportError:
+        return          # the landmine is inert
+
+    raise AssertionError(
+        "jsonschema is now installed and these fields are declared nullable "
+        f"while their enum forbids null: {nullable_but_not_in_enum}. Add null "
+        "to both enums before validating anything, or every scored record in "
+        "the corpus will be rejected. See docs/BACKLOG.md."
+    )
