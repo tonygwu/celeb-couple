@@ -389,3 +389,23 @@ def test_no_artifact_reading_states_a_stale_corpus_size():
         for stated in re.findall(r"(\d+) observations", reading):
             assert int(stated) == n, (
                 f"{rel} says {stated} observations; the corpus holds {n}")
+
+
+def test_claude_md_is_still_a_symlink_to_agents_md():
+    """CLAUDE.md and AGENTS.md are one file, so an agent reading either gets
+    the same rules. Some editors and tools replace a symlink with a copy, after
+    which the two drift apart silently and half the fleet reads stale rules.
+
+    Git records the mode, so this checks what is committed rather than what
+    happens to be on disk.
+    """
+    import subprocess
+    from pathlib import Path as _P
+    repo = _P(__file__).resolve().parent.parent
+    out = subprocess.run(["git", "ls-files", "-s", "CLAUDE.md"], cwd=repo,
+                         capture_output=True, text=True, check=True).stdout
+    assert out.startswith("120000"), (
+        f"CLAUDE.md is committed as mode {out.split()[0] if out else 'missing'}, "
+        "not a symlink (120000). It and AGENTS.md must stay one file."
+    )
+    assert (repo / "CLAUDE.md").read_text() == (repo / "AGENTS.md").read_text()
