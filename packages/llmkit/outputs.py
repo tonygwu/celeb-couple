@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-__all__ = ["ClobberRefused", "guard_output"]
+__all__ = ["ClobberRefused", "guard_output", "archive_previous"]
 
 
 class ClobberRefused(SystemExit):
@@ -49,3 +49,34 @@ def guard_output(path: Path, *, field: str, value, force: bool = False) -> None:
             f"  four-repeat result tonight.\n"
             f"  Write elsewhere with --out, or pass --force if you mean it.\n"
         )
+
+
+def archive_previous(path: Path) -> Path | None:
+    """Keep a copy of ``path``'s current contents before it is overwritten.
+
+    Returns the archived path, or ``None`` when there was nothing to keep.
+
+    `guard_output` refuses to replace a RICHER artifact with a poorer one. It
+    says nothing about an equally rich replacement, which is the ordinary case
+    for a re-score and the one that silently loses the previous estimates. That
+    loss is why the run-to-run stability measurement rests on three rows that
+    happened to overlap between two corpora rather than on the whole corpus.
+
+    The copy is content-addressed, so re-running a stage that produces the same
+    answer does not grow the history. The original is left in place: this runs
+    BEFORE the new write, and moving it would lose the artifact entirely if
+    that write then failed.
+    """
+    import hashlib
+    import shutil
+
+    if not path.exists():
+        return None
+    raw = path.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()[:12]
+    history = path.parent / "history"
+    history.mkdir(parents=True, exist_ok=True)
+    dest = history / f"{path.stem}-{digest}{path.suffix}"
+    if not dest.exists():
+        shutil.copy2(path, dest)
+    return dest

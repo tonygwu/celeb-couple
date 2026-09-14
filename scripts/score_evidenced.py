@@ -10,6 +10,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.llmkit.budget import Budget, BudgetExhausted                  # noqa: E402
 from packages.llmkit.contract import load_contract                          # noqa: E402
+from packages.llmkit.outputs import archive_previous                        # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge                  # noqa: E402
 from packages.schema.records import (EvidenceType, Lineage, ListEdition,    # noqa: E402
                                      Observation)
@@ -119,6 +120,13 @@ for (person, period), observations in sorted(by_pp.items(), key=lambda kv: (kv[0
 # call, and a crash in the cheap derived step below used to throw all of them
 # away: 34 scores lost to a KeyError on a partner's name.
 out.mkdir(parents=True, exist_ok=True)
+# Keep the previous run's numbers. A re-score replaces every estimate in place,
+# and those estimates are the only record of what the model said last time --
+# run-to-run variance is only measurable if both runs survive.
+for _name in ("person_period_scores.json", "evidenced_scores.json"):
+    _kept = archive_previous(out / _name)
+    if _kept is not None:
+        print(f"  [archive] previous {_name} kept at {_kept.relative_to(out)}")
 (out / "person_period_scores.json").write_text(json.dumps(
     {"person_periods": records, "failures": failures, "halted": halted}, indent=2))
 print(f"\n  [checkpoint] wrote {len(records)} person-period scores before pairings")

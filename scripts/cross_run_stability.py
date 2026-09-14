@@ -74,7 +74,11 @@ def main() -> int:
     ap.add_argument("--a-scores", default="data/pilot/run/evidenced_scores.json")
     ap.add_argument("--a-obs", default="data/pilot/observations/observations.json")
     ap.add_argument("--a-name", default="pilot")
-    ap.add_argument("--b-scores", default="data/roster100/run/joint_scores.json")
+    ap.add_argument("--b-scores", default="data/roster100/run/joint_scores.json",
+                    help=("Any score artifact. To compare two runs of the SAME "
+                          "corpus, point this at a file under the run's "
+                          "`history/` directory, which score_evidenced.py "
+                          "writes before it overwrites."))
     ap.add_argument("--b-obs", default="data/roster100/observations/observations.json")
     ap.add_argument("--b-name", default="roster100")
     ap.add_argument("--out", default="data/pilot/run/cross_run_stability.json")
