@@ -34,6 +34,7 @@ def main() -> int:
     grounding = load("data/pilot/run/grounding_audit.json")
     density = load("data/pilot/run/evidence_density.json")
     align = load("data/pilot/run/alignment_gap.json")
+    elig = load("data/pilot/records/partner_eligibility.json")
 
     L: list[str] = []
     w = L.append
@@ -351,6 +352,31 @@ def main() -> int:
           "one.")
         w("")
         w(f"*{align['caveat']}*")
+        w("")
+
+    # ---------- partner eligibility ----------
+    if elig:
+        w("## 6f. How much of the board is even reachable")
+        w("")
+        w("A pairing needs both sides. The partners missing evidence are two "
+          "different populations, and counting them together overstates what the "
+          "project can reach.")
+        w("")
+        w("| Status | Partners |")
+        w("|---|---|")
+        labels = {
+            "evidenced": "Evidenced",
+            "public_figure_no_evidence_found": "Public figure, no evidence found — **a real gap**",
+            "notable_but_not_public_facing": "Notable but not public-facing (producers, directors)",
+            "not_a_public_figure_do_not_rate": "Not a public figure — **never rate**",
+        }
+        for k, v in sorted(elig["counts"].items(), key=lambda kv: -kv[1]):
+            w(f"| {labels.get(k, k)} | {v} |")
+        w("")
+        w(f"**Reachable ceiling: {elig['reachable_ceiling']} of {elig['partners']} "
+          f"partners.**")
+        w("")
+        w(elig["reading"])
         w("")
 
     # ---------- romance ----------
