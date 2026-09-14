@@ -61,8 +61,8 @@ decided by which sex somebody is rather than by what the judgments said.
 
 **Every comparable pairing the project can produce is exactly 0.0, and every
 non-zero gap is confounded by publication format.** That is structural, not a
-shortage of data: a one-winner award is superlative by construction and pins at
-92, the award shape is the only one the free sources publish often enough to
+shortage of data: a one-winner award is superlative by construction and so
+concentrates on a single value, the award shape is the only one the free sources publish often enough to
 match, and comparability requires matching shapes. So the pairings that qualify
 as comparable are exactly the ones pinned at 92 on both sides.
 [`docs/THE-TRAP.md`](docs/THE-TRAP.md) sets it out in full.
@@ -75,6 +75,14 @@ This is a working measurement apparatus and it is not a leaderboard.
 uv venv --python 3.12 .venv
 uv pip install --python .venv/bin/python -r requirements.txt
 .venv/bin/python -m pytest tests -q     # offline, deterministic, spends no quota
+```
+
+Plain `pip` works too, and is what CI uses — verified, since CI itself has never
+been able to run:
+
+```sh
+python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pytest tests -q
 ```
 
 `data/` is gitignored: the corpus belongs in a separate private repository. Every
