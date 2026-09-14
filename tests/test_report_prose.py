@@ -787,3 +787,31 @@ def test_the_deliverables_table_points_at_the_right_headings():
         assert any(want in headings[n] for n in nums), (
             f"row {row_marker!r} points at {[headings[n] for n in nums]}, "
             f"expected one to be {want!r}")
+
+
+def test_the_decisive_measurement_counts_rather_than_claiming_one_band():
+    """"A one-winner award ... can only land in one band" was typed, and the
+    award-shaped estimates span 78 to 94, which crosses a band boundary. The
+    same absolute this report had already stopped making two sections later."""
+    import json
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    conf = REPO / "data/pilot/run/shape_confound.json"
+    if "The decisive measurement" not in text or not conf.exists():
+        pytest.skip("needs the generated report and the artifact")
+    assert "can only land in one band" not in text
+    rows = [r for r in json.loads(conf.read_text())["rows"]
+            if r["shape"] == "editorial_award"]
+    at_92 = sum(1 for r in rows if r["estimate"] == 92.0)
+    assert f"{at_92} of {len(rows)} award-shaped estimates are exactly 92" in text
+
+
+def test_the_cohort_line_is_a_sentence():
+    """`selection_basis` is a lowercase fragment and was rendered after a full
+    stop: "selected 2026-09-14. diversity of era, gender and casting type"."""
+    import re
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "## 1. Cohort" not in text:
+        pytest.skip("report not generated in this clone")
+    line = text.split("## 1. Cohort")[1].strip().splitlines()[0]
+    assert not re.search(r"\.\s+[a-z]", line), (
+        f"a lowercase fragment follows a full stop: {line!r}")

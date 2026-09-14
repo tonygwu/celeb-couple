@@ -97,10 +97,16 @@ def main() -> int:
         "real_estimate_spread": real_spread,
         "synthetic_estimate_spread": synthetic_spread,
         "reading": (
+            # "can only land in one band ... produces the same number every
+            # time" was typed and both halves are false: award-shaped
+            # estimates run 78 to 94, crossing a band, and 15 of 18 are 92
+            # rather than all of them. The argument does not need the
+            # absolutes -- concentration is enough, and it is what was measured.
             "The rubric discriminates; the corpus does not let it. A lone "
-            "one-winner award is superlative by construction and can only land "
-            "in one band, so a person-period carrying exactly that produces the "
-            "same number every time. What the board needs is not more sources "
+            "one-winner award is superlative by construction, so it "
+            "concentrates almost all of its estimates on a single value, and a "
+            "person-period carrying exactly that has almost no room to differ "
+            "from the next one. What the board needs is not more sources "
             "covering more people, but sources landing on the SAME person-year "
             "as an existing observation."
         ),

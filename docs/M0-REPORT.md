@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `5a7f117418f3`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `3190e0f16b01`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -24,11 +24,11 @@ But across the 14-person cohort, the permitted sources yielded **41 attractivene
 
 Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **4** pairings are jointly covered.
 
-**The decisive measurement**: of 39 scored person-periods, 18 rest on a one-winner editorial award and 16 on an ordered rank. The award-shaped ones cluster at mean 91.28 with sd **3.263**; the rank-shaped ones sit lower, at mean 84.56, and spread more than twice as wide, sd **6.727**. A one-winner award is superlative by construction, so it can only land in one band. Ranked evidence carries a degree, so it can tell people apart.
+**The decisive measurement**: of 39 scored person-periods, 18 rest on a one-winner editorial award and 16 on an ordered rank. The award-shaped ones cluster at mean 91.28 with sd **3.263**; the rank-shaped ones sit lower, at mean 84.56, and spread more than twice as wide, sd **6.727**. A one-winner award is superlative by construction, so it concentrates: 15 of 18 award-shaped estimates are exactly 92. Ranked evidence carries a degree, so it can tell people apart.
 
 ## 1. Cohort
 
-`pilot-cohort-2026-09-14`, selected 2026-09-14. diversity of era, gender and casting type, chosen BEFORE any check of how easy each is to score
+`pilot-cohort-2026-09-14`, selected 2026-09-14, on diversity of era, gender and casting type, chosen BEFORE any check of how easy each is to score.
 
 | Person | Gender | Casting type | Observations found |
 |---|---|---|---|
@@ -229,7 +229,7 @@ Coverage asks whether a person-year has any evidence. Density asks how much. Mea
 | Real | 39 | 30.0 | **12** | 6.367 |
 | Synthetic stress | 23 | 29 | 10 | 9.183 |
 
-The rubric discriminates; the corpus does not let it. A lone one-winner award is superlative by construction and can only land in one band, so a person-period carrying exactly that produces the same number every time. What the board needs is not more sources covering more people, but sources landing on the SAME person-year as an existing observation.
+The rubric discriminates; the corpus does not let it. A lone one-winner award is superlative by construction, so it concentrates almost all of its estimates on a single value, and a person-period carrying exactly that has almost no room to differ from the next one. What the board needs is not more sources covering more people, but sources landing on the SAME person-year as an existing observation.
 
 This reframes what "more sources" has to mean. A source that adds a hundred new people at one observation each raises coverage and changes nothing about the board, because every one of those dossiers still lands in a single band. Only a source that puts a SECOND observation on a person-year that already has one can widen the distribution.
 

@@ -89,6 +89,11 @@ def decisive_measurement(shape_conf: dict, n_scored: int) -> str:
     by_shape = (shape_conf or {}).get("by_shape") or {}
     award = by_shape.get("editorial_award")
     rank = by_shape.get("ordered_rank")
+    # "it can only land in one band" was typed, and the award-shaped estimates
+    # span 78 to 94 -- which crosses a band boundary. Count instead.
+    _rows_aw = [r for r in (shape_conf or {}).get("rows", [])
+                if r.get("shape") == "editorial_award"]
+    _at_92 = sum(1 for r in _rows_aw if r["estimate"] == 92.0)
     if not (award and rank):
         return ("**The decisive measurement** needs both award-shaped and "
                 "rank-shaped person-periods to compare, and this corpus does "
@@ -100,8 +105,9 @@ def decisive_measurement(shape_conf: dict, n_scored: int) -> str:
         f"{award['mean']} with sd **{award['sd']}**; the rank-shaped ones sit "
         f"lower, at mean {rank['mean']}, and spread more than twice as wide, "
         f"sd **{rank['sd']}**. A one-winner award is superlative by "
-        f"construction, so it can only land in one band. Ranked evidence "
-        f"carries a degree, so it can tell people apart.")
+        f"construction, so it concentrates: {_at_92} of {len(_rows_aw)} "
+        f"award-shaped estimates are exactly 92. Ranked evidence carries a "
+        f"degree, so it can tell people apart.")
 
 
 def noise_floor(noise: dict | None) -> float | None:
@@ -450,8 +456,11 @@ def main() -> int:
     # ---------- cohort ----------
     section("Cohort")
     w("")
-    w(f"`{cohort['version']}`, selected {cohort['selected_on']}. "
-      f"{cohort['selection_basis']}")
+    # selection_basis is a lowercase fragment, so rendering it after a full
+    # stop produced "selected 2026-09-14. diversity of era, gender and ..."
+    _basis = (cohort.get("selection_basis") or "").strip()
+    w(f"`{cohort['version']}`, selected {cohort['selected_on']}"
+      + (f", on {_basis}." if _basis else "."))
     w("")
     w("| Person | Gender | Casting type | Observations found |")
     w("|---|---|---|---|")
