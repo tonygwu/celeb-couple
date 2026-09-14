@@ -199,10 +199,26 @@ def summarise(results: list[dict]) -> dict:
     means = {k: _mean(v) for k, v in a.items()}
     vals = [v for v in means.values() if v is not None]
     if vals:
+        # Report PER JUDGE. A pooled mean hides the case where one judge is
+        # perfectly stable and the other moves, which is what actually happened.
+        per_judge: dict[str, dict[str, float | None]] = {}
+        for arm, rows in a.items():
+            for r in rows:
+                per_judge.setdefault(r["judge"], {})[arm] = r["estimate"]
+        spreads = {
+            j: (max(v.values()) - min(v.values()))
+            for j, v in per_judge.items()
+            if len(v) > 1 and None not in v.values()
+        }
+        worst = max(spreads.values()) if spreads else 0
         out["S6_identity_leakage"] = {
-            "per_arm": means, "spread": max(vals) - min(vals),
-            "reading": "identity moved the score" if max(vals) - min(vals) > 0
-            else "identical under all three identities",
+            "per_arm_pooled": means, "per_judge": per_judge,
+            "per_judge_spread": spreads, "worst_spread": worst,
+            "reading": (
+                "no judge moved under a changed identity" if worst == 0
+                else f"largest move under a changed identity was {worst} points; "
+                     "compare against rater noise before calling it leakage"
+            ),
         }
 
     a = _by(results, "S7_order_sensitivity")

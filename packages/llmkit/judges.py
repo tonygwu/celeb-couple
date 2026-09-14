@@ -325,11 +325,19 @@ class CodexJudge:
             raise JudgeError(E_EMPTY, f"{self.name} produced no agent message")
 
         reasoning = usage.get("reasoning_output_tokens")
-        if self.effort in ("high", "max") and not reasoning:
+        # Measured 2026-09-14: an EMPTY dossier legitimately returns
+        # reasoning_output_tokens == 0, because there is nothing to reason about.
+        # Raising on that discarded two correct "unscored" answers. Zero
+        # reasoning is therefore recorded, not fatal, and only a non-trivial turn
+        # that also reports zero is treated as effort not taking effect.
+        substantial = (usage.get("output_tokens") or 0) > 120
+        effort_took_effect = bool(reasoning) or not substantial
+        if self.effort in ("high", "max") and substantial and not reasoning:
             raise JudgeError(
                 E_MODEL_MISMATCH,
-                f"{self.name}: effort {self.effort!r} was requested but the turn "
-                f"reports reasoning_output_tokens={reasoning!r}, so it did not take effect",
+                f"{self.name}: effort {self.effort!r} was requested and the turn "
+                f"produced {usage.get('output_tokens')} output tokens, but reports "
+                f"reasoning_output_tokens={reasoning!r}, so it did not take effect",
             )
 
         return JudgeResult(
@@ -343,5 +351,6 @@ class CodexJudge:
                 "input_tokens": usage.get("input_tokens"),
                 "output_tokens": usage.get("output_tokens"),
                 "reasoning_output_tokens": reasoning,
+                "effort_took_effect": effort_took_effect,
             },
         )
