@@ -87,7 +87,8 @@ fired on a downstream number. Neither would have surfaced on its own.
 - **The one comparable gap is 0.0 against a rank-shaped LSD of 2.22.** Daredevil 2003,
   Affleck and Garner, both judged by an editorial award. Everything larger is
   shape-mismatched. **Difficulty: blocked on evidence.**
-- **Shape confound is unmitigated.** 39% of the estimate is evidence type.
+- **Shape confound is unmitigated.** 31% of the estimate is evidence type
+  (omega-squared; the biased eta-squared reads 39%).
   Options not yet explored: restricting the board to same-shape pairings as the
   primary view rather than a scenario, or a within-shape calibration that would
   have to be disclosed as a modelling convention. **Difficulty: hard, and it is

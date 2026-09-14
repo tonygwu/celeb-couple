@@ -81,7 +81,9 @@ RULES: tuple[Rule, ...] = (
     Rule(
         name="shape_confound_pct",
         artifact="data/pilot/run/shape_confound.json",
-        extract=lambda d: d["eta_squared_shape_explains"],
+        # The documents lead with omega-squared now: eta is biased upward and
+        # was overstating this by about eight points.
+        extract=lambda d: d["omega_squared_shape_explains"],
         render=lambda v: str(round(v * 100)),
         pattern=r"(\d+)% of the (?:estimate|variance)",
         why="how much of an estimate is evidence format rather than the person",

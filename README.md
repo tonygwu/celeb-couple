@@ -42,7 +42,9 @@ The measurement works. The evidence does not support the product as specified.
   range. It now produces 12 across a range of 30.0
   (64.0–94.0), against the synthetic stress corpus's 29.
   The measurement apparatus is no longer the limiting factor.
-- Evidence **shape** explains 39% of the estimate. An award pins near 92 by
+- Evidence **shape** explains 31% of the estimate — omega-squared, the
+  unbiased estimator. Earlier documents quoted 39%, which is eta-squared and
+  biased upward by the five shape groups. An award pins near 92 by
   construction; ranked placements spread lower.
 - **Coverage does not scale.** Going from 14 people to 100 gave 3.2x the
   observations and 8.5x the episodes, and left the count of comparable pairings

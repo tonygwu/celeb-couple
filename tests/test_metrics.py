@@ -318,3 +318,43 @@ def test_mirroring_preserves_the_partition():
     m = k.mirror()
     assert sum((p.q for p in m.periods), F(0)) == 1
     assert gap(m) == -gap(k)
+
+
+# -- the shape-confound effect size ------------------------------------------
+
+def test_omega_squared_is_smaller_than_eta_squared():
+    """eta-squared is biased UPWARD and the bias grows with the number of
+    groups. This corpus has 39 estimates over 5 shape groups, two of which hold
+    a single estimate -- and a group of one has its mean equal to its value by
+    construction, so it adds to between-group variance with nothing
+    within-group to offset it.
+
+    Measured: eta 0.389 against omega 0.311. The published "39% of the
+    variance" was about eight percentage points high.
+    """
+    import json
+    from pathlib import Path
+    f = Path(__file__).resolve().parent.parent / "data/pilot/run/shape_confound.json"
+    if not f.exists():
+        import pytest
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+    d = json.loads(f.read_text())
+    omega = d["omega_squared_shape_explains"]
+    eta = d["eta_squared_shape_explains_biased"]
+    assert omega is not None and eta is not None
+    assert omega < eta, "omega-squared corrects eta-squared downward"
+    assert 0 < omega < 1
+
+
+def test_the_singleton_groups_are_visible():
+    """Two shape groups hold one estimate each, which is what makes the bias
+    worth correcting rather than ignoring."""
+    import json
+    from pathlib import Path
+    f = Path(__file__).resolve().parent.parent / "data/pilot/run/shape_confound.json"
+    if not f.exists():
+        import pytest
+        pytest.skip("data/ is gitignored")
+    groups = json.loads(f.read_text())["groups"]
+    assert sum(1 for n in groups.values() if n == 1) >= 1, groups
+    assert sum(groups.values()) == 39

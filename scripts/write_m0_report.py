@@ -829,9 +829,23 @@ def main() -> int:
         section("Evidence shape drives the estimate")
         w("")
         w(f"**Evidence type alone explains "
-          f"{round((shape_conf['eta_squared_shape_explains'] or 0) * 100)}% of the "
-          f"variance in the estimates** (eta-squared "
-          f"{shape_conf['eta_squared_shape_explains']}).")
+          f"{round((shape_conf.get('omega_squared_shape_explains') or 0) * 100)}% "
+          f"of the variance in the estimates** (omega-squared "
+          f"{shape_conf.get('omega_squared_shape_explains')}, the unbiased "
+          f"estimator).")
+        w("")
+        w(f"Earlier versions of this report quoted "
+          f"{round((shape_conf.get('eta_squared_shape_explains_biased') or 0) * 100)}%, "
+          f"which is eta-squared. Eta-squared is biased upward, and this corpus "
+          f"has {sum((shape_conf.get('groups') or {}).values())} estimates over "
+          f"{len(shape_conf.get('groups') or {})} shape groups, two of them "
+          f"holding a single estimate \u2014 and a group of one has its mean "
+          f"equal to its value by construction, contributing to between-group "
+          f"variance with nothing within-group to offset it. The gap between "
+          f"the two figures is the size of that bias. The conclusion does not "
+          f"turn on it: a third of the variance in an attractiveness estimate "
+          f"being explained by the FORMAT of the evidence is decisive either "
+          f"way.")
         w("")
         w("| Evidence shape | n | mean | range | SD |")
         w("|---|---|---|---|---|")

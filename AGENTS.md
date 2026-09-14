@@ -210,7 +210,8 @@ anything. The findings that should shape any next step:
 2. **Evidence density was the bottleneck.** Every real dossier once carried
    exactly one observation, so the corpus produced two distinct values. Adding
    prose mentions took it to twelve.
-3. **Evidence SHAPE explains 39% of the estimate.** An editorial award pins
+3. **Evidence SHAPE explains 31% of the estimate** (omega-squared,
+   unbiased; the biased eta-squared that earlier documents quoted reads 39%). An editorial award pins
    near 92 by construction; ranked placements spread lower. Three of four
    jointly covered pairings pit one against the other, so their gaps are
    substantially about publication format.

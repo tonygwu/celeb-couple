@@ -42,8 +42,8 @@ half right, and the half it missed matters more.
   synthetic one produced ten. Adding prose mentions took the real corpus to six
   distinct values, and the single person-period carrying two publishers is the
   only one that scored above the award ceiling.
-- **Shape confounds the gap.** Evidence type alone explains 39% of the
-  estimate. Three of four jointly covered pairings pit an award against a list
+- **Shape confounds the gap.** Evidence type alone explains 31% of the
+  estimate (omega-squared, unbiased; eta-squared reads 39%). Three of four jointly covered pairings pit an award against a list
   placement, so their gaps are substantially about publication format.
 - **The reachable ceiling is lower than the pairing count suggests.** Of 22
   partners, 7 are people the plan forbids rating at all.

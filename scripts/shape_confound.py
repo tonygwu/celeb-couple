@@ -64,6 +64,21 @@ def main() -> int:
     ss_between = sum(
         len(v) * (statistics.mean(v) - grand) ** 2 for v in by_shape.values())
     eta_sq = (ss_between / ss_total) if ss_total else None
+    # eta-squared is biased UPWARD, and the bias grows with the number of
+    # groups and shrinks with n. This corpus has 39 estimates across 5 shape
+    # groups, two of which hold a single estimate -- and a group of one has its
+    # mean equal to its value by construction, so it contributes to
+    # between-group variance with no within-group variance to offset it.
+    #
+    # Measured here: eta^2 0.389 against omega^2 0.311. The published 39% was
+    # roughly eight percentage points high. omega-squared is the standard
+    # unbiased estimator and is what the documents now lead with.
+    k = len(by_shape)
+    n_all = len(all_vals)
+    ms_within = ((ss_total - ss_between) / (n_all - k)) if n_all > k else None
+    omega_sq = (
+        (ss_between - (k - 1) * ms_within) / (ss_total + ms_within)
+        if ms_within is not None and (ss_total + ms_within) else None)
 
     mismatched = []
     for j in joint.get("jointly_covered", []):
@@ -76,13 +91,27 @@ def main() -> int:
 
     payload = {
         "by_shape": summary,
+        # omega is the headline: eta is kept because earlier documents quote it
+        # and because the pair together shows how much of the figure was bias.
+        "omega_squared_shape_explains": (
+            None if omega_sq is None else round(omega_sq, 3)),
+        "eta_squared_shape_explains_biased": (
+            None if eta_sq is None else round(eta_sq, 3)),
         "eta_squared_shape_explains": None if eta_sq is None else round(eta_sq, 3),
+        "effect_size_note": (
+            "omega-squared is the unbiased estimator and is the figure to "
+            "quote. eta-squared is biased upward, and with 5 shape groups over "
+            f"{n_all} estimates -- two groups holding a single estimate -- the "
+            "gap between them is the size of that bias."),
+        "groups": {kk: len(vv) for kk, vv in sorted(by_shape.items())},
         "jointly_covered_pairings": len(joint.get("jointly_covered", [])),
         "pairings_with_mismatched_shapes": len(mismatched),
         "mismatched": mismatched,
         "reading": (
             "Evidence type explains "
-            f"{round((eta_sq or 0) * 100)}% of the variance in the estimates. "
+            f"{round((omega_sq or 0) * 100)}% of the variance in the estimates "
+            f"(omega-squared, unbiased; the biased eta-squared reads "
+            f"{round((eta_sq or 0) * 100)}%). "
             "Where a pairing's two sides carry DIFFERENT evidence types, the "
             "signed gap is substantially a statement about which publication "
             "covered whom in what format, not about the two people. Every such "

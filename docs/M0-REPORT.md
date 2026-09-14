@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `ef6aa9a7732d`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `ed27dec4193b`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -277,7 +277,9 @@ Men hold 0 ranked observations and women 17. Because an award pins near the top 
 
 ## 10. Evidence shape drives the estimate
 
-**Evidence type alone explains 39% of the variance in the estimates** (eta-squared 0.389).
+**Evidence type alone explains 31% of the variance in the estimates** (omega-squared 0.311, the unbiased estimator).
+
+Earlier versions of this report quoted 39%, which is eta-squared. Eta-squared is biased upward, and this corpus has 39 estimates over 5 shape groups, two of them holding a single estimate — and a group of one has its mean equal to its value by construction, contributing to between-group variance with nothing within-group to offset it. The gap between the two figures is the size of that bias. The conclusion does not turn on it: a third of the variance in an attractiveness estimate being explained by the FORMAT of the evidence is decisive either way.
 
 | Evidence shape | n | mean | range | SD |
 |---|---|---|---|---|
