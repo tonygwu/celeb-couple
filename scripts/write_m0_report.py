@@ -681,11 +681,22 @@ def main() -> int:
               f"{max(gaps) if gaps else 0} point. So the compression is not rater noise. "
               f"It is the evidence.")
             w("")
-            w("An annual one-winner award is a superlative judgment by construction, so "
-              "the rubric correctly places every winner in band 90-100. The consequence "
-              "is that **award-shaped evidence cannot discriminate between winners.** "
-              "A leaderboard built on it would rank people by a half-point that is the "
-              "difference between one judge saying 92 and another saying 93.")
+            # "places every winner in band 90-100" was typed and is false: one
+            # award-shaped estimate sits at 78. Count them.
+            _aw = ((shape_conf or {}).get("by_shape") or {}).get("editorial_award")
+            _rows = [r for r in (shape_conf or {}).get("rows", [])
+                     if r.get("shape") == "editorial_award"]
+            _in_band = [r for r in _rows if r["estimate"] >= 90]
+            _out = sorted(r["estimate"] for r in _rows if r["estimate"] < 90)
+            w("An annual one-winner award is a superlative judgment by "
+              "construction, so the rubric places almost every winner in band "
+              f"90-100: {len(_in_band)} of {len(_rows)} award-shaped estimates"
+              + (f", the exception{'s' if len(_out) > 1 else ''} being "
+                 f"{', '.join(str(v) for v in _out)}" if _out else "")
+              + ". The consequence is that **award-shaped evidence cannot "
+                "discriminate between winners.** A leaderboard built on it "
+                "would rank people by the difference between one judge saying "
+                "92 and another saying 93.")
             w("")
             w("This was predicted in the plan's worked example A and is now measured. "
               "It is the strongest argument for either finding ordered, depth-carrying "
@@ -1156,11 +1167,27 @@ def main() -> int:
     w("")
     w("**Substance, where evidence exists. Availability decides whether it exists at all.**")
     w("")
-    w("The stress cases say the rubric is reading the judgments rather than counting "
-      "documents: one award beat two low placements by a wide margin, three "
-      "corroborating publishers moved the estimate by a point, and five copies of one "
-      "list moved it by zero. Both model families agreed exactly on every construct "
-      "case they both ran.")
+    # This listed only the cases that passed. S2 exceeded the noise floor and
+    # was left out of a summary claiming the rubric reads substance rather
+    # than format -- which is precisely what S2 tests.
+    _f2 = (stress.get("findings") or {})
+    _fl2 = noise_floor(noise)
+    _over2 = sorted(k for k, v in _f2.items()
+                    if isinstance(v, dict) and v.get("spread") is not None
+                    and _fl2 is not None and v["spread"] > _fl2)
+    w("The stress cases say the rubric is reading the judgments rather than "
+      "counting documents: one award beat two low placements by a wide margin, "
+      "three corroborating publishers moved the estimate by a point, and five "
+      "copies of one list moved it by zero. Both model families agreed exactly "
+      "on every construct case they both ran.")
+    if _over2:
+        w("")
+        w(f"With one exception, and it is about FORMAT rather than count: "
+          f"**{', '.join(_over2)}** exceeded the measured noise floor. The "
+          f"rubric reads the substance of a judgment and not the number of "
+          f"documents carrying it — but it does not read the same substance "
+          f"identically in every shape, which is the confound this report "
+          f"measures observationally elsewhere.")
     w("")
     w("But which person-years have any evidence is decided entirely by which "
       "publishers happen to be reachable. On the permitted routes the men's award is "

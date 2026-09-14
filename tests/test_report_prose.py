@@ -648,3 +648,33 @@ def test_no_measured_floor_means_no_verdict():
     mod = _stress()
     v = mod.verdict(4, None, "a", "b")
     assert "no verdict" in v and "measure_rater_noise" in v
+
+
+def test_the_award_band_claim_counts_rather_than_asserting_every():
+    """"the rubric correctly places EVERY winner in band 90-100" was typed and
+    is false: one award-shaped estimate sits at 78."""
+    import json
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    conf = REPO / "data/pilot/run/shape_confound.json"
+    if "award-shaped estimates" not in text or not conf.exists():
+        pytest.skip("needs the generated report and the artifact")
+    assert "places every winner in band 90-100" not in text
+
+    rows = [r for r in json.loads(conf.read_text())["rows"]
+            if r["shape"] == "editorial_award"]
+    in_band = sum(1 for r in rows if r["estimate"] >= 90)
+    assert f"{in_band} of {len(rows)} award-shaped estimates" in text
+
+
+def test_the_assessment_does_not_omit_the_stress_case_that_failed():
+    """§19 argues the rubric reads substance rather than document count, and
+    listed only the cases that passed. S2 — the one testing whether FORMAT
+    moves the estimate — exceeded the floor and was left out of a summary about
+    exactly that."""
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "Do the estimates reflect substance" not in text:
+        pytest.skip("report not generated in this clone")
+    tail = text[text.index("Do the estimates reflect substance"):]
+    assert "S2_format_equivalence" in tail, (
+        "the failing case must appear in the section that summarises them"
+    )

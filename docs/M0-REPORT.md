@@ -182,7 +182,7 @@ All 39 estimates land between **64.0** and **94.0**, a spread of **30.0** points
 
 The judges agree almost perfectly: 0 of 0 person-periods came back identical from both families, and the largest disagreement was 0 point. So the compression is not rater noise. It is the evidence.
 
-An annual one-winner award is a superlative judgment by construction, so the rubric correctly places every winner in band 90-100. The consequence is that **award-shaped evidence cannot discriminate between winners.** A leaderboard built on it would rank people by a half-point that is the difference between one judge saying 92 and another saying 93.
+An annual one-winner award is a superlative judgment by construction, so the rubric places almost every winner in band 90-100: 17 of 18 award-shaped estimates, the exception being 78.0. The consequence is that **award-shaped evidence cannot discriminate between winners.** A leaderboard built on it would rank people by the difference between one judge saying 92 and another saying 93.
 
 This was predicted in the plan's worked example A and is now measured. It is the strongest argument for either finding ordered, depth-carrying lists on permitted routes, or leading the men's and women's views with intervals instead of point estimates.
 
@@ -417,6 +417,8 @@ Repeated runs of a stage are summed. A superseded run spent quota too, and this 
 **Substance, where evidence exists. Availability decides whether it exists at all.**
 
 The stress cases say the rubric is reading the judgments rather than counting documents: one award beat two low placements by a wide margin, three corroborating publishers moved the estimate by a point, and five copies of one list moved it by zero. Both model families agreed exactly on every construct case they both ran.
+
+With one exception, and it is about FORMAT rather than count: **S2_format_equivalence** exceeded the measured noise floor. The rubric reads the substance of a judgment and not the number of documents carrying it — but it does not read the same substance identically in every shape, which is the confound this report measures observationally elsewhere.
 
 But which person-years have any evidence is decided entirely by which publishers happen to be reachable. On the permitted routes the men's award is an annual one-winner prize reported on Wikipedia since 1985, and the women's equivalent is a single number-one per year since 2000. Everything deeper sits behind terms that forbid this use.
 
