@@ -206,10 +206,13 @@ anything. The four findings that should shape any next step:
    jointly covered pairings pit one against the other, so their gaps are
    substantially about publication format.
 4. **The one comparable gap is 0.0**, against a least significant difference of
-   about 2.4 points for rank-shaped estimates. There is no leaderboard here
-   yet, and adding more award-shaped sources will not create one. The LSD is
-   quoted PER SHAPE: pooling the award dossier's zero measured variance with
-   the ranked dossier's halved it to 1.2, which several documents published.
+   about 2.22 points for rank-shaped estimates, measured on four dossiers
+   repeated four times each. There is no leaderboard here yet, and adding more
+   award-shaped sources will not create one. The LSD is quoted PER SHAPE:
+   pooling the award dossiers' zero measured variance with the ranked ones'
+   halved it to 1.2, which several documents published. Every one of the four
+   ranked dossiers moved between repeats; both award dossiers returned the
+   same number eight times out of eight.
 
 Do not treat a bigger confounded number as progress over a smaller comparable
 one.

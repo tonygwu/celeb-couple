@@ -51,7 +51,7 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 
 ## Measurement (added late 2026-09-14)
 
-- **The one comparable gap is 0.0 against a rank-shaped LSD of 2.4.** Daredevil 2003,
+- **The one comparable gap is 0.0 against a rank-shaped LSD of 2.22.** Daredevil 2003,
   Affleck and Garner, both judged by an editorial award. Everything larger is
   shape-mismatched. **Difficulty: blocked on evidence.**
 - **Shape confound is unmitigated.** 39% of the estimate is evidence type.
@@ -62,9 +62,11 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 - **Rater noise rests on one judge and two dossiers.** Codex hit 0% quota
   mid-run. Re-run with both families when it resets in ~5 days.
   **Difficulty: easy, blocked on quota.**
-- **The award shape's noise is unmeasured, not zero.** Four repeats all returned
-  92, which cannot distinguish low variance from none, so no LSD is quoted for
-  it. More repeats would settle it. **Difficulty: easy, blocked on quota.**
+- **The award shape's noise is unmeasured, not zero.** Two dossiers, four
+  repeats each, returned 92 eight times out of eight. That is much stronger
+  than the original four-of-four but still cannot distinguish low variance from
+  none, so no LSD is quoted for the shape. More dossiers would settle it.
+  **Difficulty: easy, blocked on quota.**
 - **`measure_rater_noise.py --account` hardcodes `/Users/tonygwu/.claude-e`.**
   The account list should be derived from `quotapick status`, not typed: the
   operator's own notes record four separate places that broke when an account

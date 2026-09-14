@@ -80,10 +80,15 @@ One returned the same estimate and two moved by 2.0 points:
 
 The award held still and both ranks moved, which is the same split the repeat
 measurement found. It also means the published least significant difference of
-1.2 points was too small: it pooled the award dossier's zero measured variance
-with the ranked dossier's, halving it. Quoted per shape, the rank-shaped LSD is
-**2.4 points**, and a 2.0-point run-to-run move is consistent with that rather
-than with 1.2.
+1.2 points was too small: it pooled the award dossiers' zero measured variance
+with the ranked ones', halving it. Quoted per shape, over four ranked dossiers
+repeated four times each, the rank-shaped LSD is **2.22 points**. A 2.0-point
+run-to-run move is consistent with that and not with 1.2.
+
+Which dossiers move is itself the finding. All four ranked dossiers moved
+between repeats, with SDs of 0.5, 0.71, 1.0 and 1.0. Both award dossiers
+returned 92 eight times out of eight. The shape that pins is also the shape
+that holds still, and the shape that discriminates is the shape that wobbles.
 
 None of this changes the conclusion below. The comparable gap is 0.0 and the
 noise floor is now known to be higher, so it is even less distinguishable from
