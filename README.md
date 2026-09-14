@@ -41,6 +41,12 @@ The measurement works. The evidence does not support the product as specified.
 - The source that would fix it — about a hundred ranked names a year — exists
   and is not reachable on any permitted route.
 
+**The confound is aligned with gender.** Men in the corpus hold zero ranked
+observations and women hold twelve, so the male mean sits 3.65 points above the
+female mean before any fact about any individual enters. In a product that
+compares a man against a woman in every row, the sign of a typical gap is
+decided by which sex somebody is rather than by what the judgments said.
+
 **Every comparable pairing the project can produce is exactly 0.0, and every
 non-zero gap is confounded by publication format.** That is structural, not a
 shortage of data: a one-winner award is superlative by construction and pins at

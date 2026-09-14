@@ -3,6 +3,41 @@
 Filed 2026-09-14. This is the capstone finding of the overnight run, and it is
 structural rather than a shortage of data.
 
+## The part that matters most: the confound is aligned with gender
+
+Sourcing partner gender from Wikidata turned the shape confound into something
+sharper. The evidence shapes are not distributed evenly across the sexes. They
+are almost perfectly separated.
+
+| | `editorial_award` | `ordered_rank` | `unordered_inclusion` |
+|---|---|---|---|
+| **male** | 8 | **0** | 1 |
+| **female** | 11 | **12** | 3 |
+
+**Men in this corpus hold zero ranked observations. Women hold twelve.**
+
+An award pins near the top of the scale by construction; a ranked placement does
+not. So the imbalance shows up directly in the estimates:
+
+| | n | mean | SD | range |
+|---|---|---|---|---|
+| male | 8 | **91.0** | 3.04 | 83.0–93.0 |
+| female | 26 | **87.35** | 6.70 | 66.0–93.0 |
+
+**The male mean sits 3.65 points above the female mean before any fact about
+any individual enters**, and the male estimates are compressed (SD 3.04 against
+6.70) because six of the eight are exactly 92.
+
+A four-view product compares a man against a woman in every row. With shapes
+distributed this unevenly, the sign of a typical gap is decided by which sex
+somebody is rather than by what the judgments said. That is not a subtle
+statistical caveat; it is the measurement reporting a property of how magazines
+publish as though it were a finding about couples.
+
+It is also why the Brad Pitt and Jennifer Aniston gaps of −8 and −12 must not be
+read as results. He is judged by an award, she by ranked placements, and that
+alone accounts for a large part of the sign and the size.
+
 ## The observation
 
 Across the pilot and the 100-name roster, every jointly covered pairing the
