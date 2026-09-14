@@ -87,12 +87,29 @@ RANKED_SOURCES = [
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cohort", default="docs/pilot-cohort.json")
+    ap.add_argument("--partners", default="data/pilot/records/partner_universe.json")
     ap.add_argument("--out", default="data/pilot/observations")
     args = ap.parse_args()
 
     cohort = json.loads((REPO / args.cohort).read_text())
-    name_to_person = {p["display_name"]: p["wikidata_qid"] for p in cohort["people"]}
-    gender = {p["wikidata_qid"]: p["gender_category"] for p in cohort["people"]}
+    people = list(cohort["people"])
+    # The partner universe must be matched too. Without it a list-article row
+    # naming a partner is parsed and then DISCARDED, because the name map only
+    # held the cohort. Jennifer Lopez is People's 2011 Most Beautiful cover
+    # choice, that row was parsed on every run, and it was thrown away every
+    # time -- while the partner-eligibility report listed her as a public figure
+    # with no evidence found.
+    partners_path = REPO / args.partners
+    if partners_path.exists():
+        people += json.loads(partners_path.read_text())["people"]
+    seen = set()
+    name_to_person, gender = {}, {}
+    for p in people:
+        if p["wikidata_qid"] in seen:
+            continue
+        seen.add(p["wikidata_qid"])
+        name_to_person[p["display_name"]] = p["wikidata_qid"]
+        gender[p["wikidata_qid"]] = p.get("gender_category", "unknown")
     now = datetime.now(timezone.utc).isoformat()
 
     all_editions, all_obs, source_notes = [], [], []
@@ -201,6 +218,11 @@ def main() -> int:
                 p["display_name"] for p in cohort["people"]
                 if p["wikidata_qid"] not in people_with
             ),
+            "partner_universe_matched": sorted(
+                {n for n, q in name_to_person.items()
+                 if q in people_with and q not in
+                 {c["wikidata_qid"] for c in cohort["people"]}}
+            ),
         },
     }
     (out / "observations.json").write_text(json.dumps(payload, indent=2))
@@ -209,7 +231,11 @@ def main() -> int:
     print("\nobservations per cohort member:")
     for qid, n in per_person.most_common():
         print(f"  {names.get(qid, qid):22} {gender.get(qid,'?'):7} {n}")
-    print("\nno observations at all:")
+    if payload["coverage"]["partner_universe_matched"]:
+        print("\npartners matched from the list articles:")
+        for n in payload["coverage"]["partner_universe_matched"]:
+            print(f"  {n}")
+    print("\ncohort members with no observations at all:")
     for n in payload["coverage"]["people_with_none"]:
         print(f"  {n}")
     print(f"\nby gender: {dict(by_gender)}")
