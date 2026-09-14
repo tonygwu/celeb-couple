@@ -2,3 +2,5 @@
 # No numpy, no scipy: a dependency that must be installed is a check that will
 # not get run. Exact arithmetic uses fractions.Fraction from the stdlib.
 pytest==8.3.4
+# Property-based tests for the metric invariants. Offline and deterministic.
+hypothesis==6.168.0
