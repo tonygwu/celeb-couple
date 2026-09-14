@@ -18,6 +18,9 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
+from modules.consensus.ranked_lists import (  # noqa: E402
+    parse_ranked_table, ranked_to_records,
+)
 from modules.consensus.wikipedia_lists import (  # noqa: E402
     fetch_section_wikitext, parse_award_table_with_stats, to_records,
 )
@@ -47,6 +50,36 @@ SOURCES = [
         ),
         "url": "https://en.wikipedia.org/wiki/People_(magazine)#100_Most_Beautiful_People",
         "gender_served": "mixed",
+    },
+    {
+        "page": "Esquire (magazine)", "section": 6,
+        "section_title": "Sexiest Woman Alive",
+        "publisher": "Esquire", "award_name": "Sexiest Woman Alive",
+        "candidate_pool": "women in entertainment, chosen editorially by the magazine",
+        "url": "https://en.wikipedia.org/wiki/Esquire_(magazine)#Sexiest_Woman_Alive",
+        "gender_served": "female",
+    },
+]
+
+#: Sources that publish an ORDERED ranking with depth, which is the shape M0
+#: showed a one-winner award cannot supply.
+RANKED_SOURCES = [
+    {
+        "page": "FHM's 100 Sexiest Women (UK)", "section": 2,
+        "section_title": "100 Sexiest Women winners",
+        "publisher": "FHM", "list_title": "FHM 100 Sexiest Women (UK)",
+        "list_length": 100,
+        "order_basis": (
+            "the table publishes a winner and an explicitly numbered top ten "
+            "('2nd:', '3rd:', ...) for each year"
+        ),
+        "candidate_pool": (
+            "women in entertainment and modelling, reader-voted in a UK men's "
+            "magazine; the readership skews British, so the pool is NOT the same "
+            "pool as a US Hollywood list"
+        ),
+        "url": "https://en.wikipedia.org/wiki/FHM%27s_100_Sexiest_Women_(UK)",
+        "gender_served": "female",
     },
 ]
 
@@ -92,6 +125,34 @@ def main() -> int:
         })
         print(f"{src['award_name']:30} parsed={len(rows):3} skipped={stats.skipped} "
               f"cohort hits={len(obs)}  years={rows[0].year}-{rows[-1].year}")
+
+    for src in RANKED_SOURCES:
+        wikitext, sha = fetch_section_wikitext(src["page"], src["section"])
+        entries, stats = parse_ranked_table(wikitext, list_length=src["list_length"])
+        editions, obs = ranked_to_records(
+            entries, page=src["page"], section_title=src["section_title"],
+            publisher=src["publisher"], list_title=src["list_title"],
+            list_length=src["list_length"], order_basis=src["order_basis"],
+            candidate_pool=src["candidate_pool"], source_url=src["url"],
+            content_hash=sha, retrieved_at_utc=now, name_to_person=name_to_person,
+        )
+        all_editions += editions
+        all_obs += obs
+        years = sorted({e.year for e in entries})
+        source_notes.append({
+            "publisher": src["publisher"], "award": src["list_title"],
+            "gender_served": src["gender_served"], "route": "wikipedia-api",
+            "shape": "ordered_rank",
+            "ranked_entries_parsed": len(entries),
+            "runner_up_positions": stats["runner_up_positions"],
+            "years": [years[0], years[-1]] if years else [],
+            "observations_for_cohort": len(obs),
+            "content_sha256": sha,
+            "rows_skipped": stats["no_year"] + stats["no_winner"],
+        })
+        print(f"{src['list_title']:30} entries={len(entries):3} "
+              f"ranked={stats['runner_up_positions']} cohort hits={len(obs)}  "
+              f"years={years[0]}-{years[-1]}")
 
     per_person = Counter(o.person_id for o in all_obs)
     by_gender = Counter(gender.get(o.person_id, "?") for o in all_obs)
