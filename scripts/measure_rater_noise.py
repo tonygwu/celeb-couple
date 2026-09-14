@@ -168,9 +168,10 @@ def main() -> int:
             "This is rater variance only. Task variance across different people "
             "and different evidence is larger and is not measured here."
             + ("" if len(contributing) > 1 else
-               f" MEASURED ON ONE JUDGE ({', '.join(contributing) or 'none'}): "
-               f"{', '.join(missing)} produced no runs, so this figure describes "
-               "one model family and not the panel.")
+               f" MEASURED ON ONE JUDGE ({', '.join(contributing) or 'none'}), so "
+               "this figure describes one model family and not a panel."
+               + (f" {', '.join(missing)} was requested and produced no runs."
+                  if missing else ""))
         ),
     }
     stage.notes = headline
