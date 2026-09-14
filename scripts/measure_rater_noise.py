@@ -19,6 +19,7 @@ from packages.llmkit.budget import Budget, BudgetExhausted           # noqa: E40
 from packages.llmkit.contract import load_contract                   # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge           # noqa: E402
 from packages.llmkit.manifest import RunManifest                     # noqa: E402
+from packages.llmkit.outputs import guard_output                     # noqa: E402
 from packages.schema.records import (                                # noqa: E402
     EvidenceType, Lineage, ListEdition, Observation,
 )
@@ -71,6 +72,8 @@ def main() -> int:
     ap.add_argument("--max-calls-per-judge", type=int, default=12)
     ap.add_argument("--judges", default="fable,astra")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--force", action="store_true",
+                    help="overwrite an artifact that holds more repeats than this run")
     ap.add_argument("--out", default="data/pilot/run/rater_noise.json")
     args = ap.parse_args()
 
@@ -97,6 +100,11 @@ def main() -> int:
     if args.dry_run:
         print("dry run; nothing spent")
         return 0
+
+    # After the dry run, which writes nothing, and before spending anything:
+    # refuse a run that would replace a richer result.
+    guard_output(REPO / args.out, field="repeats", value=args.repeats,
+                 force=args.force)
 
     contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
     rubric, schema = RUBRIC.read_text(), SCHEMA.read_text()

@@ -63,11 +63,14 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 
 ## Tooling
 
-- **Smoke tests can clobber production artifacts.** Running
-  `measure_rater_noise.py --repeats 1` as a formatting check overwrote the real
-  4-repeat artifact. Scripts that write a default `--out` should refuse to
-  overwrite a richer existing artifact, or smoke tests should always pass
-  `--out`. **Difficulty: easy.**
+- ~~Smoke tests can clobber production artifacts.~~ **Fixed 2026-09-14.**
+  `packages/llmkit/outputs.guard_output` refuses a write whose declared quality
+  field is strictly lower than the existing artifact's, naming both values and
+  saying to use `--out` or `--force`. Wired into `measure_rater_noise.py` after
+  the dry-run return, so a dry run is never blocked. The guard is deliberately
+  narrow: one declared field, strictly-lower only, because a guard that judges
+  overall richness will eventually block a legitimate write and teach everyone
+  to pass `--force` by reflex.
 - ~~No CI.~~ Added 2026-09-14: `.github/workflows/tests.yml`, treating any
   non-zero exit as failure including pytest's 5.
 - **No page-weight or export tooling**, because there is no site yet.
