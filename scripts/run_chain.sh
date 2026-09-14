@@ -32,6 +32,7 @@ if [[ "$MODE" == "free" || "$MODE" == "all" ]]; then
   run scripts/fetch_records.py
   run scripts/build_episodes.py
   run scripts/build_partner_universe.py
+  run scripts/fetch_onscreen_candidates.py
   run scripts/fetch_observations.py
 fi
 

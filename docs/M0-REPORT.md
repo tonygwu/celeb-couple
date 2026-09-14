@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `e1de99012d98`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `60e740e8a7d9`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: regenerating it over unchanged artifacts produces an identical file, so a diff means the numbers moved.
 
@@ -80,7 +80,7 @@ This is an engineering access assessment from published directives and terms. It
 - 28 episodes eligible after the adult window.
 - Scoring every year of every eligible episode would need **633 person-period estimates** (span 1964–2026), against an M0 cap of 50. The pilot samples at most three periods per pairing.
 
-On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in a cast list proves only that both were in the film. A qualifying on-screen pairing needs an established reciprocal romance shown by plot or dialogue evidence. None of these is verified.
+On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in a cast list proves only that both were in the film. A qualifying on-screen pairing needs an established reciprocal romance between their CHARACTERS, which scripts/classify_romance.py decides. Seventeen of the pilot's first twenty were not romances.
 
 ## 4. Measurement stress tests
 

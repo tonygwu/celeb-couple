@@ -23,7 +23,7 @@ class MissingArtifact(SystemExit):
 PRODUCERS = {
     "data/pilot/records/relationship_candidates.json": "scripts/fetch_records.py",
     "data/pilot/records/episodes.json": "scripts/build_episodes.py",
-    "data/pilot/records/onscreen_candidates.json": "scripts/fetch_records.py (then the on-screen query)",
+    "data/pilot/records/onscreen_candidates.json": "scripts/fetch_onscreen_candidates.py",
     "data/pilot/records/romance.json": "scripts/classify_romance.py  [spends quota]",
     "data/pilot/records/partner_universe.json": "scripts/build_partner_universe.py",
     "data/pilot/records/partner_eligibility.json": "scripts/partner_eligibility.py",

@@ -98,6 +98,7 @@ read-only against Wikidata and Wikipedia. The last three spend model quota.
 | `scripts/fetch_records.py` | relationship candidates + birth dates for the cohort | no |
 | `scripts/build_episodes.py` | merges progressions, flags defects, applies the adult window | no |
 | `scripts/build_partner_universe.py` | derives the outside-roster partners from scorable episodes | no |
+| `scripts/fetch_onscreen_candidates.py` | films where a male and a female roster member co-star | no |
 | `scripts/resolve_roster.py` | turns a name list into a roster file with Wikidata ids | no |
 | `scripts/scaling_report.py` | pilot vs full roster; does coverage scale | no |
 | `scripts/source_requirement.py` | how deep a source would have to be | no |

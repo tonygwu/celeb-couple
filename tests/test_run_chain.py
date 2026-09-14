@@ -30,7 +30,8 @@ def test_every_free_analysis_script_is_in_the_chain():
             "run_pilot", "resolve_roster", "merge_prose_mentions",
             "scaling_report", "source_requirement", "reachable_products",
             "write_m0_report", "fetch_records", "build_episodes",
-            "build_partner_universe", "fetch_observations"}
+            "build_partner_universe", "fetch_observations",
+            "fetch_onscreen_candidates"}
     for script in sorted((repo / "scripts").glob("*.py")):
         if script.stem in paid:
             continue
