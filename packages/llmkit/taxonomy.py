@@ -26,10 +26,13 @@ E_TOOL_USE = "judge_attempted_tool_use"
 ALL_ERROR_TYPES: tuple[str, ...] = (
     E_CLI_NONZERO, E_TIMEOUT, E_EMPTY, E_NO_JSON, E_JSON_PARSE, E_SCHEMA,
     E_MODEL_MISMATCH, E_AUTH_QUOTA, E_TRANSIENT, E_REFUSED, E_BUDGET,
-    E_ROUTE_RESTRICTED, E_CITES_NOTHING, E_TOOL_USE,
+    E_ROUTE_RESTRICTED, E_CITES_NOTHING, E_TOOL_USE, "unclassified_failure",
 )
 
 ErrorType = str
+
+
+E_UNCLASSIFIED = "unclassified_failure"
 
 
 def classify_detail(detail: str) -> ErrorType:
@@ -37,12 +40,19 @@ def classify_detail(detail: str) -> ErrorType:
 
     Longest wins so a shorter label cannot shadow a longer one that starts
     with the same characters.
+
+    An unrecognised string becomes ``unclassified_failure``, NOT
+    ``transient_retryable``. The old default meant an unknown permanent error
+    was labelled retryable, so a caller would retry it three times, spend the
+    quota, and file it in the taxonomy under a cause it does not have. "I do
+    not recognise this" and "this will probably work next time" are different
+    statements and only one of them is true by default.
     """
     best = ""
     for label in ALL_ERROR_TYPES:
         if detail.startswith(label) and len(label) > len(best):
             best = label
-    return best or E_TRANSIENT
+    return best or E_UNCLASSIFIED
 
 
 #: Quota exhaustion and a transient auth race arrive looking alike: an OAuth

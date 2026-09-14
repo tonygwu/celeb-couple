@@ -158,3 +158,39 @@ def test_write_leaves_no_temp_file_when_reconciliation_fails(tmp_path):
     assert list(tmp_path.iterdir()) == [], (
         f"left behind {[p.name for p in tmp_path.iterdir()]}"
     )
+
+
+def test_an_unrecognised_error_is_not_labelled_retryable():
+    """`classify_detail` returned `transient_retryable` for anything it did not
+    recognise. An unknown PERMANENT error would then be retried three times,
+    spend the quota, and be filed in the taxonomy under a cause it does not
+    have.
+
+    "I do not recognise this" and "this will probably work next time" are
+    different statements, and only one of them is safe as a default.
+    """
+    from packages.llmkit.taxonomy import ALL_ERROR_TYPES, classify_detail
+    assert classify_detail("something nobody has seen before") == "unclassified_failure"
+    assert "unclassified_failure" in ALL_ERROR_TYPES, (
+        "the manifest refuses labels outside the taxonomy, so a new label must "
+        "be declared or it cannot be recorded"
+    )
+
+
+def test_a_recognised_error_still_classifies():
+    from packages.llmkit.taxonomy import classify_detail
+    assert classify_detail("auth_or_quota: hit the weekly limit") == "auth_or_quota"
+
+
+def test_the_longest_matching_label_wins():
+    from packages.llmkit.taxonomy import classify_detail
+    assert classify_detail("cli_timeout after 600s") == "cli_timeout"
+
+
+def test_an_unclassified_failure_can_be_recorded_in_a_manifest():
+    """A label the manifest refuses is worse than no label: record_failure
+    raises and the whole run's manifest is lost."""
+    s = StageSummary(stage="x")
+    s.attempted += 1
+    s.record_failure("unclassified_failure")
+    s.reconcile()
