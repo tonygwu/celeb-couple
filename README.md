@@ -89,6 +89,16 @@ match, and comparability requires matching shapes. So the pairings that qualify
 as comparable are exactly the ones pinned at 92 on both sides.
 [`docs/THE-TRAP.md`](docs/THE-TRAP.md) sets it out in full.
 
+**Every one of those findings has been sensitivity-tested.** The structural
+claims hold at nine of ten settings of the nearby-period bound and the romance
+filter, failing only with both dials at their loosest. The noise floor moves
+between 2.35 and 2.89 when any single repeated dossier is dropped, and no
+verdict flips across that range. The gender offset moves between 2.9 and 5.3
+when any single man is removed entirely, and never reverses. The source
+requirement converges on the same answer under three different popularity
+weightings. None of the conclusions rests on one choice, one dossier, or one
+person.
+
 This is a working measurement apparatus and it is not a leaderboard.
 
 ## Running it
