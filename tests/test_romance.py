@@ -200,3 +200,41 @@ def test_the_summary_counts_films_with_no_sitelink():
     ]
     assert sum(1 for r in results
                if (r.get("exclusion") or "").startswith("no English")) == 1
+
+
+def test_an_unresolved_label_is_reported_not_shown_as_a_name():
+    """`_val(r, "filmLabel") or film` falls back to the Wikidata id, so a film
+    with no English label enters the corpus titled "Q194413" and the report's
+    film table shows an identifier where a title belongs. Two PEOPLE already
+    entered this corpus as bare Q-ids for the same reason.
+
+    Shape assertion against a fixture: data/ is gitignored, so a test reading
+    the live artifact passes in one clone and fails in every fresh one.
+    """
+    import re
+    candidates = [
+        {"title": "Pearl Harbor", "male": "Ben Affleck", "female": "Kate Beckinsale"},
+        {"title": "Q194413", "male": "Ben Affleck", "female": "Q179414"},
+    ]
+    unresolved = sorted(
+        {v for c in candidates for k, v in c.items()
+         if k in ("title", "male", "female") and re.fullmatch(r"Q\d+", str(v))})
+    assert unresolved == ["Q179414", "Q194413"], (
+        "both the film title and the person name must be caught"
+    )
+
+
+def test_the_live_candidates_carry_no_unresolved_labels():
+    """Optional: only runs where the artifact exists."""
+    import json
+    import re
+    from pathlib import Path
+    f = (Path(__file__).resolve().parent.parent
+         / "data/pilot/records/onscreen_candidates.json")
+    if not f.exists():
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+    blob = json.loads(f.read_text())
+    bad = [c for c in blob["candidates"]
+           if any(re.fullmatch(r"Q\d+", str(c.get(k, "")))
+                  for k in ("title", "male", "female"))]
+    assert not bad, f"unresolved labels in the film candidates: {bad}"

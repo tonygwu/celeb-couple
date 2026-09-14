@@ -54,11 +54,16 @@ def main() -> int:
     rows = _query(QUERY % (" ".join(f"wd:{q}" for q in men),
                            " ".join(f"wd:{q}" for q in women), args.limit))
     seen: dict[tuple, dict] = {}
+    rows_missing_ids = 0
     for r in rows:
         film = (_val(r, "film") or "").rsplit("/", 1)[-1]
         m = (_val(r, "m") or "").rsplit("/", 1)[-1]
         f = (_val(r, "f") or "").rsplit("/", 1)[-1]
         if not (film and m and f):
+            # A SPARQL row missing one of the three ids is malformed. Dropping
+            # it is right; dropping it without a count means the candidate
+            # total can shrink with nothing to notice.
+            rows_missing_ids += 1
             continue
         seen.setdefault((film, m, f), {
             "work_qid": film, "title": _val(r, "filmLabel") or film,
@@ -67,11 +72,23 @@ def main() -> int:
             "female_qid": f, "female": names.get(f, f)})
 
     out = sorted(seen.values(), key=lambda c: (c["release"] or "9999", c["title"]))
+    # A label that fell back to its own Q-id is an unresolved name, not a name.
+    # Two partners once entered the corpus as bare ids for exactly this reason,
+    # and a film table reading "Q194413" tells a reader nothing.
+    import re as _re
+    unresolved = sorted(
+        {v for c in out for k, v in c.items()
+         if k in ("title", "male", "female") and _re.fullmatch(r"Q\d+", str(v))})
+    if unresolved:
+        print(f"  WARNING: {len(unresolved)} label(s) unresolved, shown as "
+              f"Q-ids: {', '.join(unresolved)}")
     payload = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "source": "wikidata P161 co-appearance",
         "cohort": args.cohort,
         "status": "UNVERIFIED CANDIDATES",
+        "rows_missing_ids": rows_missing_ids,
+        "labels_unresolved": unresolved,
         "caveat": ("Co-appearance in a cast list proves only that both were in "
                    "the film. A qualifying on-screen pairing needs an established "
                    "reciprocal romance between their CHARACTERS, which "
