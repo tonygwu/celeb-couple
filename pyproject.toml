@@ -1,0 +1,14 @@
+[project]
+name = "celeb-couple"
+version = "0.0.1"
+description = "Celebrity Pairing WAR - bounded M0 pilot"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.setuptools.packages.find]
+include = ["packages*"]

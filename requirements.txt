@@ -1,0 +1,4 @@
+# M0 runs on the standard library plus pytest.
+# No numpy, no scipy: a dependency that must be installed is a check that will
+# not get run. Exact arithmetic uses fractions.Fraction from the stdlib.
+pytest==8.3.4
