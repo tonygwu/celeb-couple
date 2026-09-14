@@ -500,6 +500,42 @@ def main() -> int:
         w(f"*{grounding['limitation']}*")
         w("")
 
+    # ---------- bottom line ----------
+    if joint and noise:
+        comp = [j for j in joint.get("jointly_covered", [])
+                if j.get("comparability") == "comparable"]
+        lsd = noise["headline"].get("least_significant_difference_95pct")
+        w("## 6g. The bottom line, stated plainly")
+        w("")
+        n_comp = len(comp)
+        w(f"Of {len(joint.get('jointly_covered', []))} jointly covered "
+          f"pairing-periods, **{n_comp}** "
+          f"{'compares' if n_comp == 1 else 'compare'} two people judged by the "
+          f"same kind of evidence. The rest compare an award against a list "
+          f"placement, where format explains much of the gap.")
+        w("")
+        if comp and scored:
+            gaps = {(p["period"], p["domain"]): p["gap_mens_view"]
+                    for p in scored.get("scored_pairings", [])}
+            for j in comp:
+                g = gaps.get((j["period"], j["domain"]))
+                if g is None:
+                    continue
+                w(f"- **{j.get('work') or 'relationship'} ({j['period']})**: "
+                  f"gap **{g:+.1f}**")
+                if lsd:
+                    verdict = ("**not distinguishable from zero**"
+                               if abs(g) <= lsd else "above the noise floor")
+                    w(f"  - Repeat-scoring puts the least significant difference "
+                      f"at about **{lsd}** points, so this gap is {verdict}.")
+            w("")
+        w("So the project can now produce a signed, exactly mirrored, "
+          "evidence-backed gap for a real couple. It cannot yet produce one that "
+          "is both comparable and larger than its own measurement noise. That is "
+          "a much better place than this run started, and it is not a "
+          "leaderboard.")
+        w("")
+
     # ---------- costs ----------
     w("## 7. Cost and budget")
     w("")

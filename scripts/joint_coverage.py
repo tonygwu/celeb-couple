@@ -16,6 +16,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from modules.analytics.comparability import classify_pairing            # noqa: E402
 from modules.consensus.nearby import NEARBY_BOUND_YEARS, resolve_period  # noqa: E402
 
 
@@ -48,8 +49,17 @@ def main() -> int:
                 qualifying.add(key)
 
     have: dict[str, dict[str, float]] = {}
+    shape_of: dict[tuple[str, str], set[str]] = {}
     for o in obs["observations"]:
         have.setdefault(o["person_id"], {})[o["concerns_period"]] = 1.0
+        shape_of.setdefault((o["person_id"], o["concerns_period"]), set()).add(
+            o["evidence_type"])
+
+    def _shape(pid: str, period: str | None) -> str | None:
+        if period is None:
+            return None
+        shapes = shape_of.get((pid, period))
+        return "+".join(sorted(shapes)) if shapes else None
 
     joint, near_misses = [], []
 
@@ -91,6 +101,17 @@ def main() -> int:
                               "b_dist": rb.distance, "b_support": rb.support,
                               "verification": "wikidata candidate; UNVERIFIED"})
 
+    # Label each jointly covered row: is this gap comparing two people, or two
+    # publication formats? 42% of the estimate is evidence shape.
+    for j in joint:
+        c = classify_pairing(
+            f"{j['domain']}_{j['period']}_{j['a_qid']}_{j['b_qid']}",
+            _shape(j["a_qid"], j["a_src"]), _shape(j["b_qid"], j["b_src"]))
+        j["comparability"] = c.status
+        j["a_shape"], j["b_shape"] = c.a_shape, c.b_shape
+        if c.caveat:
+            j["comparability_caveat"] = c.caveat
+
     distinct = {(j["a_qid"], j["b_qid"], j["work"]) for j in joint}
     payload = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -108,6 +129,10 @@ def main() -> int:
             "candidate_pairings": len(eps["episodes"]) + len(films["candidates"]),
         },
         "jointly_covered_pairing_periods": len(joint),
+        "comparability": {
+            k: sum(1 for j in joint if j.get("comparability") == k)
+            for k in ("comparable", "shape_mismatched", "shape_unknown")
+        },
         "distinct_jointly_covered_pairings": len(distinct),
         "one_sided_film_pairings": len(near_misses),
         "jointly_covered": joint,
@@ -124,10 +149,12 @@ def main() -> int:
               f"(of {len(films['candidates'])}); qualifying: {len(qualifying)}")
     print(f"jointly covered pairing-periods: {len(joint)}  "
           f"(distinct pairings: {len(distinct)})")
+    print(f"comparability: {payload['comparability']}")
     for j in joint:
+        flag = "" if j.get("comparability") == "comparable" else f"  [{j.get('comparability')}]"
         print(f"  {j['domain']:10} {j['period']}  {(j['work'] or '(relationship)')[:32]:32} "
               f"{j['a'][:16]:16} (from {j['a_src']}, d={j['a_dist']}) + "
-              f"{j['b'][:16]:16} (from {j['b_src']}, d={j['b_dist']})")
+              f"{j['b'][:16]:16} (from {j['b_src']}, d={j['b_dist']}){flag}")
     print(f"\none-sided film pairings (exactly one side scorable): {len(near_misses)}")
     print(f"wrote {out}")
     return 0

@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 09:19 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 09:22 UTC from the run artifacts under `data/pilot/`. Every number below is read from a JSON artifact, not typed.
 
 **Private pilot. Nothing here is published, ranked, or deployed. Every relationship and every on-screen pairing is an UNVERIFIED candidate.**
 
@@ -306,6 +306,15 @@ A constant cross-gender offset shifts every PAW rate by exactly delta, so rate r
 34 rationales checked: **34** passed the automated checks, 0 failed, 30 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
 
 *These checks prove a rationale does not assert MORE than its evidence carries. They do not prove it is a fair reading. Only the human sheet can establish that.*
+
+## 6g. The bottom line, stated plainly
+
+Of 4 jointly covered pairing-periods, **1** compares two people judged by the same kind of evidence. The rest compare an award against a list placement, where format explains much of the gap.
+
+- **Daredevil (2003)**: gap **+0.0**
+  - Repeat-scoring puts the least significant difference at about **1.2** points, so this gap is **not distinguishable from zero**.
+
+So the project can now produce a signed, exactly mirrored, evidence-backed gap for a real couple. It cannot yet produce one that is both comparable and larger than its own measurement noise. That is a much better place than this run started, and it is not a leaderboard.
 
 ## 7. Cost and budget
 
