@@ -94,11 +94,17 @@ def main() -> int:
         "min_bound_histogram": {str(k): v for k, v in sorted(hist.items())},
         "jointly_covered_at_bound": cumulative,
         "current_bound": NEARBY_BOUND_YEARS,
+        # Was "from 13 observations to 25", typed when the corpus was 25. It
+        # is 41 now, and the M0 report renders the same sentence from the
+        # density artifact -- so the report said 41 while this artifact said
+        # 25, for anyone reading the JSON.
+        "observations_in_corpus": len(obs["observations"]),
         "reading": (
-            "A pairing needs BOTH people judged near the same year. Growing the "
-            "corpus from 13 observations to 25 did not move joint coverage, "
-            "because the new judgments landed in years the pairings do not span. "
-            "The binding constraint is temporal alignment, not volume."
+            f"A pairing needs BOTH people judged near the same year. The corpus "
+            f"now holds {len(obs['observations'])} observations and joint "
+            f"coverage has not moved with it, because the added judgments land "
+            f"in years the pairings do not span. The binding constraint is "
+            f"temporal alignment, not volume."
         ),
         "caveat": (
             "This measures what the bound costs. It is NOT an argument for "

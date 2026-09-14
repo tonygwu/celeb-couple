@@ -358,3 +358,31 @@ def test_the_joint_coverage_denominators_reconcile():
         "the count of episodes that cannot contribute must match the artifact"
     )
     assert d["films_skipped_no_parseable_year"] == len(d["films_skipped_detail"])
+
+
+def test_no_artifact_reading_states_a_stale_corpus_size():
+    """`alignment_gap.json`'s reading said "growing the corpus from 13
+    observations to 25 did not move joint coverage". The corpus is 41, and the
+    M0 report renders the same sentence from the density artifact — so the
+    report said 41 while this artifact said 25, for anyone reading the JSON.
+
+    Every artifact that mentions the corpus size must take it from the corpus.
+    """
+    import json
+    import re
+    from pathlib import Path
+    repo = Path(__file__).resolve().parent.parent
+    obs = repo / "data/pilot/observations/observations.json"
+    if not obs.exists():
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+
+    n = len(json.loads(obs.read_text())["observations"])
+    for rel in ("data/pilot/run/alignment_gap.json",
+                "data/pilot/run/evidence_density.json"):
+        f = repo / rel
+        if not f.exists():
+            continue
+        reading = json.loads(f.read_text()).get("reading") or ""
+        for stated in re.findall(r"(\d+) observations", reading):
+            assert int(stated) == n, (
+                f"{rel} says {stated} observations; the corpus holds {n}")
