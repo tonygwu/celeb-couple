@@ -16,13 +16,13 @@ import json
 import time
 import urllib.parse
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from packages.ids.keys import pair_key, stable_id
 from packages.temporal.dates import Censoring, Interval, PreciseDate, from_wikidata
 
 __all__ = ["RelationshipCandidate", "fetch_relationships", "fetch_birth_dates",
-           "fetch_gender", "SPARQL"]
+           "fetch_gender", "fetch_labels", "SPARQL"]
 
 SPARQL = "https://query.wikidata.org/sparql"
 USER_AGENT = (
@@ -31,6 +31,48 @@ USER_AGENT = (
 #: Wikidata asks for polite pacing and will 429. Commons returned 429 after
 #: about twenty sequential calls during the feasibility probe.
 PACE_SECONDS = 1.2
+
+
+def fetch_labels(qids: list[str], timeout: int = 45) -> dict[str, str]:
+    """English labels via wbgetentities, as a fallback for the label SERVICE.
+
+    Measured 2026-09-14, and the cause was not what it looked like. Two pilot
+    partners and ten roster partners came back as bare Q-ids, so their episodes
+    were flagged partner_label_unresolved and excluded as defective. It was not a
+    SERVICE quirk: Q13909 and Q2023710 have NO English label in Wikidata at all,
+    though they carry labels in dozens of other languages.
+
+    They do have English Wikipedia sitelinks, which name them Angelina Jolie and
+    Tom Holland. A sitelink title is a sourced name rather than a guess, so it is
+    the fallback. A person with neither stays unresolved and their episode stays
+    excluded, which is the correct outcome for a partner nobody can name.
+    """
+    import urllib.error
+
+    out: dict[str, str] = {}
+    for i in range(0, len(qids), 50):          # the API caps ids per call
+        chunk = qids[i:i + 50]
+        url = ("https://www.wikidata.org/w/api.php?"
+               + urllib.parse.urlencode({
+                   "action": "wbgetentities", "ids": "|".join(chunk),
+                   "props": "labels|sitelinks", "sitefilter": "enwiki",
+                   "languages": "en", "format": "json"}))
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as fh:
+                blob = json.load(fh)
+        except (urllib.error.URLError, TimeoutError):
+            continue                            # a failed lookup leaves it unknown
+        for qid, entity in (blob.get("entities") or {}).items():
+            label = ((entity.get("labels") or {}).get("en") or {}).get("value")
+            if not label:
+                # no English label; the English Wikipedia article title is a
+                # sourced name for the same entity
+                label = ((entity.get("sitelinks") or {}).get("enwiki") or {}).get("title")
+            if label:
+                out[qid] = label
+        time.sleep(PACE_SECONDS)
+    return out
 
 
 def _query(sparql: str, timeout: int = 60) -> list[dict]:
@@ -136,6 +178,16 @@ def fetch_relationships(qids: list[str]) -> list[RelationshipCandidate]:
             seen[key] = cand
         elif cand.has_reference and not prior.has_reference:
             seen[key] = cand
+    # The label SERVICE sometimes returns a bare Q-id. Look those up directly
+    # rather than excluding a real record over one endpoint's quirk.
+    unlabelled = sorted({c.partner_qid for c in seen.values()
+                         if c.partner_label == c.partner_qid})
+    if unlabelled:
+        labels = fetch_labels(unlabelled)
+        if labels:
+            seen = {k: (c if c.partner_qid not in labels
+                        else replace(c, partner_label=labels[c.partner_qid]))
+                    for k, c in seen.items()}
     return sorted(seen.values(), key=lambda c: (c.subject_qid, c.partner_label))
 
 

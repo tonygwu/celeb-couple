@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `2ecb248e5b47`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `f7c91dbf61fb`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: regenerating it over unchanged artifacts produces an identical file, so a diff means the numbers moved.
 
@@ -18,7 +18,7 @@ This report covers the 14-person pilot. Three companion documents cover what cam
 
 The rubric behaves as intended under adversarial testing: 25 of 27 stress scorings succeeded and every construct check passed. Two model families independently agreed on the calibration anchor.
 
-But across the 14-person cohort, the permitted sources yielded **35 attractiveness observations total**, covering 13 of 14 people. 5 people have none at all.
+But across the 14-person cohort, the permitted sources yielded **41 attractiveness observations total**, covering 14 of 14 people. 5 people have none at all.
 
 Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **4** pairings are jointly covered.
 
@@ -65,21 +65,20 @@ This is an engineering access assessment from published directives and terms. It
 |---|---|---|---|---|---|---|
 | Sexiest Man Alive | PEOPLE | male | `editorial_award` | 40 winner rows | 1985–2025 | 6 |
 | Maxim Hot 100 number one | Maxim | female | `editorial_award` | 24 winner rows | 2000–2025 | 1 |
-| Most Beautiful cover choice | PEOPLE | mixed | `editorial_award` | 37 winner rows | 1990–2026 | 8 |
+| Most Beautiful cover choice | PEOPLE | mixed | `editorial_award` | 37 winner rows | 1990–2026 | 9 |
 | Sexiest Woman Alive | Esquire | female | `editorial_award` | 11 winner rows | 2005–2015 | 1 |
-| FHM 100 Sexiest Women (UK) | FHM | female | `ordered_rank` | 229 entries, 206 ranked | 1995–2017 | 11 |
+| FHM 100 Sexiest Women (UK) | FHM | female | `ordered_rank` | 229 entries, 206 ranked | 1995–2017 | 16 |
 
 ## 3. Records
 
 - 34 relationship candidates for 14 subjects, 27 carrying a source reference.
 - **16 of 32 start dates are year-precision only.** They are stored as years, not as 1 January.
 - Merged into 31 episodes, joining 3 dating-to-marriage progressions that Wikidata stores as two abutting statements.
-- 4 episodes carry defects and are unscorable:
+- 3 episodes carry defects and are unscorable:
   - `no_start_date`: 2
-  - `partner_label_unresolved`: 2
   - `end_before_start`: 1
-- 27 episodes eligible after the adult window.
-- Scoring every year of every eligible episode would need **604 person-period estimates** (span 1964–2026), against an M0 cap of 50. The pilot samples at most three periods per pairing.
+- 28 episodes eligible after the adult window.
+- Scoring every year of every eligible episode would need **633 person-period estimates** (span 1964–2026), against an M0 cap of 50. The pilot samples at most three periods per pairing.
 
 On screen: 20 co-starring films found via Wikidata cast lists. Co-appearance in a cast list proves only that both were in the film. A qualifying on-screen pairing needs an established reciprocal romance shown by plot or dialogue evidence. None of these is verified.
 
@@ -198,7 +197,7 @@ This was predicted in the plan's worked example A and is now measured. It is the
 
 ## 6. Evidence density — the actual bottleneck
 
-Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.029**. Distribution: `{'1': 33, '2': 1}`. Person-periods carrying two or more publishers: **1**. Person-periods that are a lone one-winner award: **18 of 34**.
+Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.051**. Distribution: `{'1': 37, '2': 2}`. Person-periods carrying two or more publishers: **2**. Person-periods that are a lone one-winner award: **18 of 39**.
 
 | Corpus | n | range | distinct values | SD |
 |---|---|---|---|---|
@@ -211,10 +210,10 @@ This reframes what "more sources" has to mean. A source that adds a hundred new 
 
 ## 6e. Why joint coverage does not move
 
-The corpus grew from 13 observations to 35 and joint coverage did not move. This is why.
+The corpus grew from 13 observations to 41 and joint coverage did not move. This is why.
 
-- Pairings considered (romance-verified films plus scorable episodes): **35**
-- With evidence on BOTH sides at any distance: **12**
+- Pairings considered (romance-verified films plus scorable episodes): **36**
+- With evidence on BOTH sides at any distance: **13**
 - Missing evidence on one side entirely: **23**
 
 Joint coverage if the nearby-period bound were widened:
@@ -226,10 +225,10 @@ Joint coverage if the nearby-period bound were widened:
 | ±2 | 4 |
 | ±3 | 5 |
 | ±4 | 6 |
-| ±5 | 6 |
-| ±6 | 6 |
-| ±7 | 7 |
-| ±8 | 8 |
+| ±5 | 7 |
+| ±6 | 7 |
+| ±7 | 8 |
+| ±8 | 9 |
 
 Two things follow. Widening the bound from ±1 to ±2 would triple joint coverage, from 1 to 3. And it would not matter much beyond that: the count saturates at 6, because **22 of 30 pairings have no evidence on one side at all**. The bound is a real cost but absence is the bigger one.
 
@@ -279,13 +278,13 @@ A pairing needs both sides. The partners missing evidence are two different popu
 | Status | Partners |
 |---|---|
 | Public figure, no evidence found — **a real gap** | 12 |
+| Evidenced | 4 |
 | Notable but not public-facing (producers, directors) | 4 |
 | Not a public figure — **never rate** | 3 |
-| Evidenced | 3 |
 
-**Reachable ceiling: 15 of 22 partners.**
+**Reachable ceiling: 16 of 23 partners.**
 
-7 of 22 partners are people this project must not rate: the plan forbids rating a private individual merely because they dated a celebrity. Those pairings are a PERMANENT exclusion, not a coverage gap, and counting them in the denominator overstates how much of the board is reachable.
+7 of 23 partners are people this project must not rate: the plan forbids rating a private individual merely because they dated a celebrity. Those pairings are a PERMANENT exclusion, not a coverage gap, and counting them in the denominator overstates how much of the board is reachable.
 
 ## 6a. On-screen romance verification
 

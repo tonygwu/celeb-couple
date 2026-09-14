@@ -23,9 +23,12 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
   record says so, but it is not the same as a sourced `last_supported_active`,
   which nothing currently supplies. Six pilot episodes are affected.
   **Difficulty: medium.**
-- **Two partners resolved to bare Q-ids** (`Q13909`, `Q2023710`) because the
-  Wikidata label service returned no English label. Flagged as a defect and
-  excluded, not guessed. **Difficulty: easy.**
+- ~~Two partners resolved to bare Q-ids.~~ **Fixed 2026-09-14**, and the cause
+  was not the label SERVICE. Q13909 and Q2023710 have no English label in
+  Wikidata at all, despite labels in dozens of other languages. Both carry
+  English Wikipedia sitelinks naming them Angelina Jolie and Tom Holland, which
+  is a sourced name rather than a guess, so that is the fallback. A person with
+  neither stays unresolved and their episode stays excluded.
 - **One Wikidata episode has an end date before its start date.** Flagged,
   excluded, left exactly as sourced. Worth reporting upstream.
   **Difficulty: easy.**
