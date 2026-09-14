@@ -136,6 +136,31 @@ Use this instead, which is what the rest of this repository's tooling does:
 That is not a hypothetical. The pipeline form pushed a failing test twice in
 one night.
 
+## Checking that the reports reproduce
+
+`tests/test_doc_claims.py` proves a generated document is unchanged by
+re-running its generator IN PLACE. That does not prove it is independent of the
+checkout it was generated in, which is AGENTS.md rule 6 applied to the
+deliverable rather than to code.
+
+To prove that, regenerate in a different clone over the same artifacts:
+
+```sh
+D=$(mktemp -d) && git clone -q . "$D" && cp -R data "$D/data"
+cd "$D" && python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt
+bash scripts/run_chain.sh reports
+diff docs/M0-REPORT.md <original clone>/docs/M0-REPORT.md
+```
+
+**Measured 2026-09-14:** all five generated documents came out byte-identical
+-- `M0-REPORT.md`, `SCALING.md`, `REACHABLE-PRODUCTS.md`, `GROUNDING-AUDIT.md`
+and `RELATIONSHIP-REVIEW.md` -- including the report's input fingerprint
+`1d539901f1b8`. Nothing in the reports depends on where they were generated.
+
+This is deliberately NOT in the suite: it clones the repository and builds a
+virtualenv, which is the wrong cost to pay on every `pytest` run. Do it when a
+generator changes, or before handing the reports to anyone.
+
 ## The tools, and how to invoke them
 
 Run every one from a clone root with `.venv/bin/python`. The ones marked **yes**
