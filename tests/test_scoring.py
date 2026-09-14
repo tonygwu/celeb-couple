@@ -298,3 +298,16 @@ def test_the_family_token_is_what_the_telemetry_must_name():
     from packages.llmkit.judges import ClaudeJudge
     assert ClaudeJudge("o", "claude-opus-5").family_token == "opus"
     assert ClaudeJudge("h", "claude-haiku-4-5-20251001").family_token == "haiku"
+
+
+def test_a_missing_duration_is_unknown_not_instant():
+    """`int(payload.get("duration_seconds", 0) * 1000)` turned an absent field
+    into 0 ms, which reads as an instant response -- the one interpretation
+    that is certainly wrong. The other two adapters report None when the field
+    is absent."""
+    from packages.llmkit.judges import GeminiJudge
+    assert GeminiJudge._duration_ms({}) is None
+    assert GeminiJudge._duration_ms({"duration_seconds": 2.5}) == 2500
+    assert GeminiJudge._duration_ms({"duration_seconds": 0}) == 0, (
+        "a genuinely reported zero is a measurement and must survive"
+    )

@@ -221,6 +221,16 @@ class GeminiJudge:
         self.model = model
         self.binary = binary
 
+    @staticmethod
+    def _duration_ms(payload: dict) -> int | None:
+        """None, not 0. A missing duration is UNKNOWN, and 0 ms reads as an
+        instant response -- the one interpretation that is certainly false. The
+        other two adapters already report None when the field is absent; this
+        one defaulted to 0 and then multiplied. A genuinely reported zero still
+        survives."""
+        seconds = payload.get("duration_seconds")
+        return None if seconds is None else int(seconds * 1000)
+
     def __call__(self, prompt: str, timeout: int = 600) -> JudgeResult:
         with tempfile.TemporaryDirectory(prefix="celeb-judge-") as jail:
             try:
@@ -270,7 +280,11 @@ class GeminiJudge:
                 # implying a check that did not happen.
                 "served_model": self.model,
                 "served_model_verified": False,
-                "duration_ms": int(payload.get("duration_seconds", 0) * 1000),
+                # None, not 0. A missing duration is UNKNOWN, and 0 ms reads
+                # as instant -- the one reading that is certainly false. The
+                # other two adapters already report None when the field is
+                # absent; this one defaulted and then multiplied.
+                "duration_ms": self._duration_ms(payload),
                 "input_tokens": usage.get("input_tokens"),
                 "output_tokens": usage.get("output_tokens"),
                 "thinking_tokens": usage.get("thinking_tokens"),
