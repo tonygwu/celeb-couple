@@ -97,11 +97,29 @@ read-only against Wikidata and Wikipedia. The last three spend model quota.
 |---|---|---|
 | `scripts/fetch_records.py` | relationship candidates + birth dates for the cohort | no |
 | `scripts/build_episodes.py` | merges progressions, flags defects, applies the adult window | no |
-| `scripts/fetch_observations.py` | award observations from Wikipedia tables | no |
+| `scripts/fetch_observations.py` | list/award observations from Wikipedia tables, for cohort **and** partners | no |
+| `scripts/merge_prose_mentions.py` | folds prose mentions in, deduping on person+year+publisher | no |
+| `scripts/joint_coverage.py` | are BOTH sides scorable in the same period, and is the pairing comparable | no |
+| `scripts/evidence_density.py` | observations per person-period — the actual bottleneck | no |
+| `scripts/alignment_gap.py` | what the nearby-period bound costs, per pairing | no |
+| `scripts/partner_eligibility.py` | splits "no evidence found" from "never rate" | no |
+| `scripts/shape_confound.py` | how much of the estimate is evidence format | no |
+| `scripts/offset_diagnostic.py` | cross-gender offset sensitivity; exits non-zero if the identity breaks | no |
+| `scripts/grounding_audit.py` | automated grounding checks + the human review sheet | no |
 | `scripts/write_m0_report.py` | renders `docs/M0-REPORT.md` from the JSON artifacts | no |
 | `scripts/run_stress.py --out data/pilot/stress` | the eight measurement stress cases | **yes** |
 | `scripts/score_evidenced.py` | scores person-periods that have evidence | **yes** |
+| `scripts/classify_romance.py` | is a co-starring pair actually a romance in the film | **yes** |
+| `scripts/extract_prose_mentions.py` | list memberships from biographical prose | **yes** |
+| `scripts/measure_rater_noise.py` | repeat-scores unchanged dossiers | **yes** |
 | `scripts/run_pilot.py` | bounded pairing selection and coverage | **yes** |
+
+The quota-spending scripts take `CELEB_JUDGES` (default `fable,astra`) and
+`CELEB_MAX_CALLS`, or equivalent flags. Run the whole chain in this order after
+changing any source: `fetch_observations` → `merge_prose_mentions` (once per
+mentions file) → `score_evidenced` → `joint_coverage` → `evidence_density` →
+`alignment_gap` → `shape_confound` → `grounding_audit` → `offset_diagnostic` →
+`write_m0_report`.
 
 Quota rules for the three that spend:
 
@@ -117,12 +135,26 @@ Quota rules for the three that spend:
 - Every runner takes `--max-calls` style caps and **halts at the cap**, reporting
   the halt and the work it did not reach.
 
-## What M0 measured
+## What has been measured
 
-`docs/M0-REPORT.md`, generated from `data/pilot/`. Short version: the rubric
-reads substance rather than counting documents, but the permitted sources
-yielded 7 observations for 14 people, and award-shaped evidence compresses every
-winner into a half-point band. Read it before proposing M1.
+`docs/M0-REPORT.md`, generated from `data/pilot/`. Read it before proposing
+anything. The four findings that should shape any next step:
+
+1. **The rubric is not the problem.** On synthetic dossiers it spans 63 to 92
+   and produces ten distinct values.
+2. **Evidence density was the bottleneck.** Every real dossier once carried
+   exactly one observation, so the corpus produced two distinct values. Adding
+   prose mentions took it to six.
+3. **Evidence SHAPE explains 42% of the estimate.** An editorial award pins
+   near 92 by construction; ranked placements spread lower. Three of four
+   jointly covered pairings pit one against the other, so their gaps are
+   substantially about publication format.
+4. **The one comparable gap is 0.0**, against a least significant difference of
+   about 1.2 points. There is no leaderboard here yet, and adding more
+   award-shaped sources will not create one.
+
+Do not treat a bigger confounded number as progress over a smaller comparable
+one.
 
 ## New shared tooling
 
