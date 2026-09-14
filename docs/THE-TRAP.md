@@ -65,6 +65,20 @@ women's list. Every one of the mismatched pairings above is a man with an award
 and a woman with a rank. A men's equivalent of FHM, over the same period, is the
 missing piece — not more women's lists and certainly not more awards.
 
+## The missing piece, searched for and not found
+
+Searched specifically on 2026-09-14 for a men's ranked list on a permitted
+route. Wikipedia has none: eight query formulations returned a women's list, a
+music chart, and a roster of underwear models.
+
+They exist off the permitted surface. GLAMOUR UK ran ranked Sexiest Men results
+for 2010, 2011 and 2012, to 50, 70 and 100 places. Condé Nast blocks the AI
+agents and `archive.org_bot` alike, so neither the live page nor the archive is
+usable here.
+
+That is the whole trap in one sentence: **the evidence that would break it is
+published, and every route to it is closed.**
+
 ## What it does not mean
 
 It does not mean the measurement is broken. The rubric spans 63 to 92 on

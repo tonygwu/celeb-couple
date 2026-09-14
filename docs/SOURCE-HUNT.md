@@ -39,6 +39,29 @@ covers nothing, and beyond a hundred there is no further gain.
 | maxim.com, glamourmagazine.co.uk | full lists exist | **AI crawlers disallowed** |
 | Wayback captures of the above | some editions exist | archiving conveys no reuse permission |
 
+## The men's ranked list, specifically
+
+`docs/THE-TRAP.md` narrowed the requirement further: the ranked depth has to
+exist on BOTH sides of a pairing, and for male-female pairings that means a
+men's ranked list over the same years as the women's one. Every mismatched
+pairing in the corpus is a man with an award and a woman with a rank, because
+FHM's list is a women's list.
+
+Searched specifically for one on 2026-09-14, across eight query formulations.
+Wikipedia has no men's equivalent: the only list-shaped articles returned were
+a women's list (FHM), a music chart (Triple J Hottest 100), and a
+non-ranking roster (List of male underwear models).
+
+Men's ranked lists do exist. GLAMOUR UK published ranked "Sexiest Men" results
+for 2010, 2011 and 2012, running to 50, 70 and 100 places. Condé Nast blocks the
+AI agents **and** `archive.org_bot`, so neither the live pages nor the archive
+is a route this project may use.
+
+So the two halves of the requirement fail in different ways. Women's ranked
+depth exists and is truncated on the permitted surface (Wikipedia carries FHM's
+top ten of a hundred). Men's ranked depth exists and is not on the permitted
+surface at all.
+
 ## The conclusion
 
 **The source this product needs exists, and is not reachable.**
