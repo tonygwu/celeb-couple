@@ -47,8 +47,22 @@ def estimates(payload: dict) -> dict[tuple[str, str], float]:
                 # `*_from` is the period the estimate was actually made for,
                 # which differs from the pairing period under nearby reuse.
                 period = pr.get(f"{side}_from")
-                if est is not None and period is not None:
-                    out[(pr[side], period)] = est
+                if est is None or period is None:
+                    continue
+                key = (pr[side], period)
+                # One person-period has one estimate. A pairings file lists the
+                # same person under several pairings, so a plain assignment
+                # would keep whichever came last and report a stability figure
+                # built on it. Two different values for one person-period means
+                # the artifact is inconsistent, which is not something to
+                # average or pick from.
+                if key in out and out[key] != est:
+                    raise ValueError(
+                        f"{key[0]} {key[1]} carries two different estimates in "
+                        f"one run: {out[key]} and {est}. A stability comparison "
+                        f"cannot pick between them."
+                    )
+                out[key] = est
         return out
     raise ValueError(
         "unrecognised score artifact: expected 'person_periods' or 'pairings'")

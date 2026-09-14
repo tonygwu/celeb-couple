@@ -127,3 +127,48 @@ def test_the_real_corpus_still_satisfies_the_capstone():
     assert not broken, (
         "docs/THE-TRAP.md states these as absolute:\n"
         + "\n".join(f"  {r['claim']}: {r['exceptions']}" for r in broken))
+
+
+# -- cross-run estimate extraction -------------------------------------------
+
+def _xrun():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "cross_run_stability", REPO / "scripts/cross_run_stability.py")
+    m = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = m
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_two_estimates_for_one_person_period_are_refused():
+    """A pairings file lists the same person under several pairings. A plain
+    assignment kept whichever came last, so an inconsistent artifact would have
+    produced a stability figure built on an arbitrary pick."""
+    mod = _xrun()
+    payload = {"pairings": [
+        {"a": "X", "a_from": "2000", "a_estimate": 92.0,
+         "b": "Y", "b_from": "2000", "b_estimate": 80.0},
+        {"a": "X", "a_from": "2000", "a_estimate": 88.0,
+         "b": "Z", "b_from": "2001", "b_estimate": 70.0},
+    ]}
+    with pytest.raises(ValueError, match="two different estimates"):
+        mod.estimates(payload)
+
+
+def test_the_same_estimate_repeated_is_fine():
+    mod = _xrun()
+    payload = {"pairings": [
+        {"a": "X", "a_from": "2000", "a_estimate": 92.0,
+         "b": "Y", "b_from": "2000", "b_estimate": 80.0},
+        {"a": "X", "a_from": "2000", "a_estimate": 92.0,
+         "b": "Z", "b_from": "2001", "b_estimate": 70.0},
+    ]}
+    assert mod.estimates(payload)[("X", "2000")] == 92.0
+
+
+def test_an_unrecognised_score_artifact_raises_rather_than_returning_empty():
+    """An empty dict here reads as 'the two runs agree perfectly'."""
+    mod = _xrun()
+    with pytest.raises(ValueError, match="unrecognised"):
+        mod.estimates({"something_else": []})
