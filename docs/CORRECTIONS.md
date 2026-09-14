@@ -100,6 +100,26 @@ identity-swapped arms. Its stored verdict said "identity moved the score". A
 spread of 0.5 is below every floor this project has measured; identity did NOT
 move the score.
 
+### "Every comparable pairing will be 0.0" → most of them
+
+Five sentences across the report and the capstone claimed that an award-shaped
+estimate can only produce one value: *can only land in one band*, *produces the
+same number every time*, *every one of those dossiers still lands in a single
+band*, *cannot discriminate between winners*, and *every one of them will be
+0.0*.
+
+Each was exactly true when every award-shaped estimate was 92. Three of the
+eighteen now are not — 78, 91 and 94 — and none of the five sentences was
+revisited when the corpus grew.
+
+Measured rather than assumed: of the 153 possible award-versus-award pairs in
+this corpus, 105 are exactly equal, which is 68.6%. So a comparable pairing is
+0.0 about seven times in ten, not always.
+
+The conclusion is unchanged. Seven in ten comparable pairings landing on zero
+still makes a board larger and very little more informative, which is the whole
+argument. It never needed the absolute.
+
 ## What this record does not cover
 
 Defects in code that never produced a published number, corrections to prose
