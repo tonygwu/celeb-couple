@@ -383,10 +383,29 @@ def main() -> int:
     n_people = cov["cohort_people_total"]
     w(f"**The measurement works. The evidence supply does not.**")
     w("")
-    w(f"The rubric behaves as intended under adversarial testing: "
-      f"{stress['succeeded']} of {stress['attempted']} stress scorings succeeded and "
-      f"every construct check passed. Two model families independently agreed on "
-      f"the calibration anchor.")
+    # "every construct check passed" was typed. S2's 4-point format spread is
+    # above the measured floor, so it does not pass, and the sentence had to
+    # stop asserting it.
+    _f = (stress.get("findings") or {})
+    _fl = noise_floor(noise)
+    _spreads = {k: v.get("spread") for k, v in _f.items()
+                if isinstance(v, dict) and v.get("spread") is not None}
+    _over = sorted(k for k, s in _spreads.items() if _fl is not None and s > _fl)
+    _checked = len(_spreads)
+    w(f"The rubric behaves largely as intended under adversarial testing: "
+      f"{stress['succeeded']} of {stress['attempted']} stress scorings "
+      f"succeeded"
+      + (f", and of the {_checked} cases that report a spread, "
+         f"{_checked - len(_over)} fall within the measured noise floor"
+         if _checked else "")
+      + (f". The exception is **{', '.join(_over)}**, discussed below"
+         if _over else ". No case exceeded it")
+      + ".")
+    w("")
+    w("Both model families ran on the STRESS corpus and agreed on the "
+      "calibration anchor. They did not both run on the real dossiers: every "
+      "estimate in this report comes from one family, for the reason given in "
+      "the scoring section.")
     w("")
     w(f"But across the {n_people}-person cohort, the permitted sources yielded "
       f"**{cov['total_observations']} attractiveness observations total**, covering "
@@ -617,6 +636,24 @@ def main() -> int:
           f"person-periods scored, using {rec['model_calls']} model calls, "
           f"{rec['failed_calls']} failed.")
         w("")
+        # How many judges actually produced each estimate. The plan decided
+        # J = 2 and the table has an astra column; if that column is empty the
+        # reader has to be told before reading the numbers, not in a caveat
+        # three sections later.
+        _contrib = sorted({j for r in scored["person_periods"] for j in r["judges"]})
+        _both = sum(1 for r in scored["person_periods"] if len(r["judges"]) > 1)
+        if len(_contrib) < 2 or _both == 0:
+            w(f"**Every estimate below rests on ONE judge "
+              f"({', '.join(_contrib) or 'none'}).** The plan decided J = 2 so "
+              f"that two model families would score each dossier independently "
+              f"and disagreement would be visible. Codex reached 0% of its "
+              f"7-day quota window during the run, so the second family "
+              f"contributed to {_both} of {len(scored['person_periods'])} "
+              f"person-periods. The `astra` column and the `judge gap` column "
+              f"are empty for that reason and not because the judges agreed. "
+              f"Cross-family agreement in this report is established only on "
+              f"the stress corpus, where both families did run.")
+            w("")
         w("| Person | Period | Obs | Estimate | fable | astra | judge gap | support |")
         w("|---|---|---|---|---|---|---|---|")
         for r in scored["person_periods"]:

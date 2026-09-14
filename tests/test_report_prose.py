@@ -440,3 +440,30 @@ def test_the_near_misses_are_listed_not_narrated():
     assert "has none in range" in text, (
         "each near-miss must name which side is missing"
     )
+
+
+def test_the_opening_does_not_claim_every_construct_check_passed():
+    """It was typed, and S2's 4-point format spread is above the measured
+    floor, so it does not pass. A summary that asserts a clean sweep while the
+    table three screens down shows a failure is the worst place to be wrong."""
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "The answer first" not in text:
+        pytest.skip("report not generated in this clone")
+    assert "every construct check passed" not in text
+
+
+def test_the_opening_scopes_the_two_family_claim():
+    """"Two model families independently agreed" is true of the STRESS corpus
+    and false of the real dossiers, where one family scored everything. Left
+    unscoped it reads as cross-validation of the estimates."""
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "The answer first" not in text:
+        pytest.skip("report not generated in this clone")
+    assert "did not both run on the real dossiers" in text
+
+
+def test_the_scores_section_says_how_many_judges_produced_them():
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "Scored person-periods" not in text:
+        pytest.skip("report not generated in this clone")
+    assert "rests on ONE judge" in text or "judge gap" not in text

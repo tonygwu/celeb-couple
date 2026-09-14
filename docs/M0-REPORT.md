@@ -16,7 +16,9 @@ This report covers the 14-person pilot. Three companion documents cover what cam
 
 **The measurement works. The evidence supply does not.**
 
-The rubric behaves as intended under adversarial testing: 25 of 27 stress scorings succeeded and every construct check passed. Two model families independently agreed on the calibration anchor.
+The rubric behaves largely as intended under adversarial testing: 25 of 27 stress scorings succeeded, and of the 4 cases that report a spread, 3 fall within the measured noise floor. The exception is **S2_format_equivalence**, discussed below.
+
+Both model families ran on the STRESS corpus and agreed on the calibration anchor. They did not both run on the real dossiers: every estimate in this report comes from one family, for the reason given in the scoring section.
 
 But across the 14-person cohort, the permitted sources yielded **41 attractiveness observations total**, covering 9 of 14 cohort people; 5 have none at all. A further 5 people outside the cohort carry observations — partners, whose evidence is what makes a pairing jointly covered.
 
@@ -127,6 +129,8 @@ Joint pairing coverage: **0 of 8** (0/4 real-life, 0/4 on-screen).
 ## 6. Scored person-periods and pairing contributions
 
 39 of 39 evidenced person-periods scored, using 39 model calls, 0 failed.
+
+**Every estimate below rests on ONE judge (fable).** The plan decided J = 2 so that two model families would score each dossier independently and disagreement would be visible. Codex reached 0% of its 7-day quota window during the run, so the second family contributed to 0 of 39 person-periods. The `astra` column and the `judge gap` column are empty for that reason and not because the judges agreed. Cross-family agreement in this report is established only on the stress corpus, where both families did run.
 
 | Person | Period | Obs | Estimate | fable | astra | judge gap | support |
 |---|---|---|---|---|---|---|---|
