@@ -49,7 +49,24 @@ def simulate(episodes, roster_qids, *, names_per_year: int, first_year: int,
              last_year: int, bound: int, trials: int, rng: random.Random) -> dict:
     covered_counts = []
     for _ in range(trials):
-        # a stable popularity ordering, so the same faces recur across years
+        # A stable popularity ordering, so the same faces recur across years.
+        #
+        # The 1/(i+3) shape is invented, and it was worth checking whether the
+        # conclusion rests on it. Measured 2026-09-14 at bound 1, median
+        # episodes jointly covered:
+        #
+        #   names/yr   1/(i+3)   uniform   1/(i+1)^2
+        #         10       4.0       6.0         1.5
+        #         25      13.0      17.0         8.0
+        #         50      23.0      25.0        17.0
+        #        100      25.0      25.0        25.0
+        #        200      25.0      25.0        25.0
+        #
+        # All three converge at 100 and stay converged, because at that depth
+        # every scheme lists the whole roster and the weights stop mattering.
+        # The headline requirement -- about a hundred names a year, saturating
+        # at 25 of 239 -- is therefore independent of this choice. The weighting
+        # only changes the shallow rungs, which no real source occupies anyway.
         order = list(roster_qids)
         rng.shuffle(order)
         weights = {q: 1.0 / (i + 3) for i, q in enumerate(order)}

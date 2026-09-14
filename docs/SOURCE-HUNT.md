@@ -29,6 +29,24 @@ So the product needs **an annual list of roughly a hundred names**, covering the
 roster's population and era, on a route this project may use. One name a year
 covers nothing, and beyond a hundred there is no further gain.
 
+**That requirement does not depend on the simulation's invented popularity
+weighting.** The model weights names as 1/(i+3) so that prominent people recur
+across years, which is a guess. Re-running at bound 1 under a uniform weighting
+and under a much steeper 1/(i+1)² gives:
+
+| Names per year | 1/(i+3) | uniform | 1/(i+1)² |
+|---|---|---|---|
+| 10 | 4 | 6 | 1.5 |
+| 25 | 13 | 17 | 8 |
+| 50 | 23 | 25 | 17 |
+| 100 | **25** | **25** | **25** |
+| 200 | **25** | **25** | **25** |
+
+All three converge at a hundred names a year and stay converged, because at
+that depth every scheme lists the whole roster and the weighting stops
+mattering. The weighting only moves the shallow rungs — which no real source
+occupies.
+
 ## Every surface checked, and what it holds
 
 | Surface | Depth found | Verdict |
