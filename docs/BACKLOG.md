@@ -164,6 +164,24 @@ fired on a downstream number. Neither would have surfaced on its own.
   `THE-TRAP.md` publishes, and those should move under review rather than
   overnight. **Difficulty: medium, and it changes published figures.**
 
+- ~~A film's release year was stored as January 1.~~ **Fixed 2026-09-14.**
+  `fetch_onscreen_candidates.py` read `wdt:P577`, which returns a time with no
+  precision, and sliced the literal to ten characters. Wikidata serialises a
+  year-precision date as `+2002-01-01T00:00:00Z`, so 11 of the pilot's 20 films
+  stored an invented January 1st -- in a project whose
+  `packages/temporal/dates.py` exists to prevent exactly that.
+
+  Every other query in the repository already used the statement path and read
+  `wikibase:timePrecision`; this was the only one that did not. A test now
+  fails on the PATTERN, not the instance: no `wdt:` path on any time-valued
+  property. The next date property someone adds would have been written the
+  same easy way.
+
+  Selection was also arbitrary -- P577 repeats per country and the first SPARQL
+  row won. A year statement now wins when one exists, otherwise the majority
+  year and the earliest date within it. No year moved and nothing downstream
+  changed.
+
 - **One Wikidata episode has an end date before its start date.** Flagged,
   excluded, left exactly as sourced. Worth reporting upstream.
   **Difficulty: easy.**

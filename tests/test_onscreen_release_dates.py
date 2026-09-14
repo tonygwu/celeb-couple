@@ -147,3 +147,43 @@ def test_every_stored_release_matches_its_declared_precision():
             continue
         assert len(r["release"]) == width[prec], (
             f"{r['title']} declares {prec} precision but stores {r['release']!r}")
+
+
+# --------------------------------------------------------------------------
+# the class of bug, not just this instance
+# --------------------------------------------------------------------------
+
+#: Wikidata time-valued properties this project reads or might read.
+DATE_PROPERTIES = ("P569", "P570", "P577", "P580", "P582", "P585")
+
+
+def test_no_query_fetches_a_date_through_the_bare_wdt_path():
+    """`wdt:` returns a time with no precision, and that is the whole bug.
+
+    Every other query in this repository already uses the statement path --
+    `psv:P569 [ wikibase:timePrecision ?prec ]` -- and reads the precision.
+    `fetch_onscreen_candidates.py` used `wdt:P577` and eleven of twenty films
+    got an invented January 1st.
+
+    This fails on the PATTERN rather than on the one file, because the next
+    date property someone adds will be written the same easy way. A `wdt:`
+    path is right for a Q-id and wrong for a time.
+    """
+    import re
+    offenders = []
+    for path in sorted((REPO / "scripts").glob("*.py")) + \
+            sorted((REPO / "modules").rglob("*.py")):
+        text = path.read_text()
+        for prop in DATE_PROPERTIES:
+            for m in re.finditer(rf"wdt:{prop}\b", text):
+                line = text[: m.start()].count("\n") + 1
+                # A mention inside a comment or docstring is explanation, not a
+                # query. Only flag it where it is part of SPARQL.
+                stmt = text.splitlines()[line - 1].strip()
+                if stmt.startswith("#") or stmt.startswith("The old code"):
+                    continue
+                offenders.append(f"{path.relative_to(REPO)}:{line} {stmt[:70]}")
+    assert offenders == [], (
+        "these fetch a time-valued property through wdt:, which drops the "
+        "precision and turns a year into January 1:\n  " + "\n  ".join(offenders)
+    )
