@@ -181,6 +181,10 @@ def main() -> int:
         requested = sorted({j for row in targets for j in row["runs"]})
         blob["headline"] = summarise(targets, requested)
         blob["headline"]["recomputed_from_stored_runs"] = True
+        # Backfill for artifacts written before total_runs existed, so the
+        # clobber guard has something to compare against.
+        blob["total_runs"] = sum(len(v) for row in targets
+                                 for v in row["runs"].values())
         f.write_text(json.dumps(blob, indent=2))
         print(json.dumps(blob["headline"], indent=2))
         print(f"\nrewrote {f} from {len(targets)} stored targets; no model calls")
@@ -227,7 +231,11 @@ def main() -> int:
 
     # After the dry run, which writes nothing, and before spending anything:
     # refuse a run that would replace a richer result.
-    guard_output(REPO / args.out, field="repeats", value=args.repeats,
+    # Guard on total measurement effort, not repeats alone. Once the target
+    # count became a flag, `--ranked 1 --award 1 --repeats 4` carried the same
+    # `repeats` as a six-target run and would have replaced it silently.
+    _total_runs = len(targets) * args.repeats * len(_wanted)
+    guard_output(REPO / args.out, field="total_runs", value=_total_runs,
                  force=args.force)
 
     _kept = archive_previous(REPO / args.out)
@@ -291,7 +299,9 @@ def main() -> int:
     out = REPO / args.out
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"contract": contract.as_dict(),
-                               "repeats": args.repeats, "headline": headline,
+                               "repeats": args.repeats,
+                               "total_runs": _total_runs,
+                               "headline": headline,
                                "targets": per_target}, indent=2))
     mpath = manifest.write(REPO / "data/pilot/manifests")
     print("\n" + json.dumps(headline, indent=2))

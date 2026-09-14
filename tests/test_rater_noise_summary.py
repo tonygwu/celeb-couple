@@ -103,3 +103,49 @@ def test_the_committed_artifact_carries_the_per_shape_breakdown():
         pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
     h = json.loads(f.read_text())["headline"]
     assert "by_shape" in h, "re-run: measure_rater_noise.py --recompute"
+
+
+# --------------------------------------------------------------------------
+# Clobber protection across BOTH dimensions of the measurement
+# --------------------------------------------------------------------------
+
+def test_a_smaller_target_set_cannot_replace_a_larger_one(tmp_path):
+    """`guard_output` was given `repeats` as its quality field, when repeats was
+    the only thing that varied. Making the target count a flag added a second
+    dimension the guard could not see: `--ranked 1 --award 1 --repeats 4` has
+    the same repeats as a six-target run and would have replaced it, turning a
+    24-call measurement into an 8-call one with no warning.
+
+    The guarded field is now total_runs = targets x repeats x judges, which is
+    still ONE explicit field and covers both dimensions.
+    """
+    import json
+    from packages.llmkit.outputs import ClobberRefused, guard_output
+
+    p = tmp_path / "rater_noise.json"
+    p.write_text(json.dumps({"repeats": 4, "total_runs": 24, "targets": [1] * 6}))
+
+    with pytest.raises(ClobberRefused):
+        guard_output(p, field="total_runs", value=8)
+
+
+def test_an_equal_or_richer_measurement_is_still_allowed(tmp_path):
+    import json
+    from packages.llmkit.outputs import guard_output
+
+    p = tmp_path / "rater_noise.json"
+    p.write_text(json.dumps({"repeats": 4, "total_runs": 24}))
+    guard_output(p, field="total_runs", value=24)     # a re-run
+    guard_output(p, field="total_runs", value=48)     # a wider run
+
+
+def test_the_committed_artifact_records_its_total_runs():
+    """Optional: needs the artifact."""
+    import json
+    f = REPO / "data/pilot/run/rater_noise.json"
+    if not f.exists():
+        pytest.skip("data/ is gitignored; nothing to check in a fresh clone")
+    blob = json.loads(f.read_text())
+    assert "total_runs" in blob, "re-run measure_rater_noise.py --recompute"
+    judges = {j for t in blob["targets"] for j in t["runs"]}
+    assert blob["total_runs"] == len(blob["targets"]) * blob["repeats"] * len(judges)
