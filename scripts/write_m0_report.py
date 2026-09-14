@@ -167,6 +167,7 @@ def main() -> int:
     elig = load("data/pilot/records/partner_eligibility.json")
     shape_conf = load("data/pilot/run/shape_confound.json")
     gsc = load("data/pilot/run/gender_shape_confound.json")
+    xrun = load("data/pilot/run/cross_run_stability.json")
 
     L: list[str] = []
     w = L.append
@@ -608,10 +609,24 @@ def main() -> int:
         h = noise["headline"]
         w("## 6b. Rater noise")
         w("")
-        w(f"{noise['repeats']} repeats of each unchanged dossier. Mean within-judge "
-          f"SD **{h['mean_within_judge_sd']}**, least significant difference at 95% "
-          f"about **{h['least_significant_difference_95pct']}** points "
-          f"({h['lsd_multiplier']} x SD).")
+        w(f"{noise['repeats']} repeats of each unchanged dossier.")
+        w("")
+        for shape, s in (h.get("by_shape") or {}).items():
+            if s["least_significant_difference_95pct"] is None:
+                w(f"- `{shape}`: SD **{s['mean_within_judge_sd']}** over "
+                  f"{s['n_targets']} dossier(s). No LSD quoted -- {s['note']}.")
+            else:
+                w(f"- `{shape}`: SD **{s['mean_within_judge_sd']}**, least "
+                  f"significant difference at 95% about "
+                  f"**{s['least_significant_difference_95pct']}** points "
+                  f"({h['lsd_multiplier']} x SD).")
+        w("")
+        w(f"The POOLED figure is SD {h['mean_within_judge_sd']} and LSD "
+          f"{h['least_significant_difference_95pct']}. It is reported only for "
+          f"continuity with earlier documents. Pooling averages a shape with "
+          f"measured variance against one with none, which halves the number "
+          f"and understates the noise floor for exactly the rank-shaped "
+          f"estimates the LSD gets applied to.")
         w("")
         w("| Dossier | Shape | Runs | SD |")
         w("|---|---|---|---|")
@@ -664,11 +679,43 @@ def main() -> int:
         w(f"*{grounding['limitation']}*")
         w("")
 
+    # ---------- cross-run stability ----------
+    if xrun and xrun.get("rows"):
+        w("## 6c-bis. The same dossier, scored in two separate runs")
+        w("")
+        w(f"`{'` and `'.join(xrun['runs'].values())}` were scored in separate "
+          f"runs. {xrun['comparable_person_periods']} person-periods carry a "
+          f"byte-identical dossier in both -- the same observation ids, the "
+          f"same contract id, the same judge family -- so any difference is "
+          f"run-to-run variance and nothing else.")
+        w("")
+        names = list(xrun["runs"].keys())
+        w(f"| Person | Period | Shape | {names[0]} | {names[1]} | Delta |")
+        w("|---|---|---|---|---|---|")
+        for r in xrun["rows"]:
+            w(f"| {r['person']} | {r['period']} | `{r['shape']}` | "
+              f"{r[names[0]]} | {r[names[1]]} | **{r['delta']:+.1f}** |")
+        w("")
+        w(xrun["reading"])
+        w("")
+        w("This is independent of section 6b and agrees with it. The repeats "
+          "there were deliberate re-invocations inside one run; these two runs "
+          "did not know about each other. Both say the award shape holds still "
+          "and the ranked shape does not.")
+        w("")
+
     # ---------- bottom line ----------
     if joint and noise:
         comp = [j for j in joint.get("jointly_covered", [])
                 if j.get("comparability") == "comparable"]
-        lsd = noise["headline"].get("least_significant_difference_95pct")
+        # Use the LSD for the shape the comparable pairings actually carry, not
+        # the pooled one. Falls back to pooled only if no shape figure exists.
+        _by_shape = noise["headline"].get("by_shape") or {}
+        _shape_lsds = [s["least_significant_difference_95pct"]
+                       for s in _by_shape.values()
+                       if s["least_significant_difference_95pct"] is not None]
+        lsd = (max(_shape_lsds) if _shape_lsds
+               else noise["headline"].get("least_significant_difference_95pct"))
         w("## 6g. The bottom line, stated plainly")
         w("")
         n_comp = len(comp)

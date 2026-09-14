@@ -100,7 +100,7 @@ RULES: tuple[Rule, ...] = (
         artifact="data/pilot/run/gender_shape_confound.json",
         extract=lambda d: d["mean_offset_male_minus_female"],
         render=lambda v: f"{v:g}",
-        pattern=r"male mean sits ([\d.]+) points above",
+        pattern=r"male mean sits (\d+(?:\.\d+)?) points above",
         why="the gender-aligned confound, the project's most consequential finding",
     ),
     Rule(
@@ -110,6 +110,21 @@ RULES: tuple[Rule, ...] = (
         render=str,
         pattern=r"[Ww]omen hold (\d+)",
         why="one half of the ranked-observation imbalance",
+    ),
+    Rule(
+        name="ranked_lsd",
+        artifact="data/pilot/run/rater_noise.json",
+        extract=lambda d: (d["headline"]["by_shape"]["ranked"]
+                           ["least_significant_difference_95pct"]),
+        render=lambda v: f"{v:g}",
+        # The alternation is narrow on purpose. docs/THE-TRAP.md deliberately
+        # quotes the OLD pooled figure ("the published least significant
+        # difference of 1.2 points was too small"), and a looser pattern would
+        # report that correct historical sentence as stale.
+        pattern=(r"(?:least significant difference (?:at|of) about"
+                 r"|LSD of"
+                 r"|rank-shaped LSD is \*\*)\s*(\d+(?:\.\d+)?)"),
+        why="the noise floor a gap has to clear to mean anything",
     ),
     Rule(
         name="real_distinct_values",

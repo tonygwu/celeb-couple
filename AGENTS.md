@@ -113,6 +113,7 @@ read-only against Wikidata and Wikipedia. The last three spend model quota.
 | `scripts/offset_diagnostic.py` | cross-gender offset sensitivity; exits non-zero if the identity breaks | no |
 | `scripts/grounding_audit.py` | automated grounding checks + the human review sheet | no |
 | `scripts/write_m0_report.py` | renders `docs/M0-REPORT.md` from the JSON artifacts | no |
+| `scripts/cross_run_stability.py` | do two separate runs score an identical dossier the same | no |
 | `scripts/audit_doc_numbers.py` | cross-checks measured numbers typed into any tracked Markdown against the artifacts; exits 1 on a stale one | no |
 | `scripts/run_stress.py --out data/pilot/stress` | the eight measurement stress cases | **yes** |
 | `scripts/score_evidenced.py` | scores person-periods that have evidence | **yes** |
@@ -128,7 +129,7 @@ changing any source: `fetch_records` → `build_episodes` → `build_partner_uni
 `fetch_observations` → `merge_prose_mentions` (once per
 mentions file) → `score_evidenced` → `joint_coverage` → `evidence_density` →
 `alignment_gap` → `shape_confound` → `grounding_audit` → `offset_diagnostic` →
-`write_m0_report` → `audit_doc_numbers`.
+`cross_run_stability` → `write_m0_report` → `audit_doc_numbers`.
 
 Run the free stages and the reports with the chain script, which encodes the
 dependency order so a stage cannot run before the one it needs:
@@ -191,8 +192,10 @@ anything. The four findings that should shape any next step:
    jointly covered pairings pit one against the other, so their gaps are
    substantially about publication format.
 4. **The one comparable gap is 0.0**, against a least significant difference of
-   about 1.2 points. There is no leaderboard here yet, and adding more
-   award-shaped sources will not create one.
+   about 2.4 points for rank-shaped estimates. There is no leaderboard here
+   yet, and adding more award-shaped sources will not create one. The LSD is
+   quoted PER SHAPE: pooling the award dossier's zero measured variance with
+   the ranked dossier's halved it to 1.2, which several documents published.
 
 Do not treat a bigger confounded number as progress over a smaller comparable
 one.

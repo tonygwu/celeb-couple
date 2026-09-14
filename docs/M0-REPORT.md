@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `dcd8eb39bff5`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `2159d3787983`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged findings produces an identical file. A diff means the numbers moved, not that the chain ran again.
 
@@ -309,7 +309,12 @@ Three results worth naming. *Being John Malkovich* came back `cannot_tell` for B
 
 ## 6b. Rater noise
 
-4 repeats of each unchanged dossier. Mean within-judge SD **0.433**, least significant difference at 95% about **1.2** points (2.77 x SD).
+4 repeats of each unchanged dossier.
+
+- `award`: SD **0.0** over 1 dossier(s). No LSD quoted -- every repeat returned the same value; this sample cannot distinguish low variance from none, so no LSD is quoted.
+- `ranked`: SD **0.866**, least significant difference at 95% about **2.4** points (2.77 x SD).
+
+The POOLED figure is SD 0.433 and LSD 1.2. It is reported only for continuity with earlier documents. Pooling averages a shape with measured variance against one with none, which halves the number and understates the noise floor for exactly the rank-shaped estimates the LSD gets applied to.
 
 | Dossier | Shape | Runs | SD |
 |---|---|---|---|
@@ -338,12 +343,26 @@ A constant cross-gender offset shifts every PAW rate by exactly delta, so rate r
 
 *These checks prove a rationale does not assert MORE than its evidence carries. They do not prove it is a fair reading. Only the human sheet can establish that.*
 
+## 6c-bis. The same dossier, scored in two separate runs
+
+`data/pilot/run/evidenced_scores.json` and `data/roster100/run/joint_scores.json` were scored in separate runs. 3 person-periods carry a byte-identical dossier in both -- the same observation ids, the same contract id, the same judge family -- so any difference is run-to-run variance and nothing else.
+
+| Person | Period | Shape | pilot | roster100 | Delta |
+|---|---|---|---|---|---|
+| Brad Pitt | 2000 | `editorial_award` | 92.0 | 92.0 | **+0.0** |
+| Jennifer Aniston | 1999 | `ordered_rank` | 86.0 | 84.0 | **+2.0** |
+| Jennifer Aniston | 2000 | `ordered_rank` | 78.0 | 80.0 | **-2.0** |
+
+3 person-periods carry a byte-identical dossier in both runs under the same contract id. 1 returned the same estimate and 2 did not, with a largest move of 2.0 points. A move here is pure run-to-run variance: the evidence, the rubric and the judge family were identical.
+
+This is independent of section 6b and agrees with it. The repeats there were deliberate re-invocations inside one run; these two runs did not know about each other. Both say the award shape holds still and the ranked shape does not.
+
 ## 6g. The bottom line, stated plainly
 
 Of 4 jointly covered pairing-periods, **1** compares two people judged by the same kind of evidence. The rest compare an award against a list placement, where format explains much of the gap.
 
 - **Daredevil (2003)**: gap **+0.0**
-  - Repeat-scoring puts the least significant difference at about **1.2** points, so this gap is **not distinguishable from zero**.
+  - Repeat-scoring puts the least significant difference at about **2.4** points, so this gap is **not distinguishable from zero**.
 
 So the project can now produce a signed, exactly mirrored, evidence-backed gap for a real couple. It cannot yet produce one that is both comparable and larger than its own measurement noise. That is a much better place than this run started, and it is not a leaderboard.
 

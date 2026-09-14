@@ -25,7 +25,7 @@ not. So the imbalance shows up directly in the estimates:
 | female | 31 | **87.1** | 6.49 | 64.0–94.0 |
 
 **The male mean sits 3.65 points above the female mean before any fact about
-any individual enters**, and the male estimates are compressed (SD 4.89 against 6.49) because six of the eight are exactly 92.
+any individual enters**, and the male estimates are compressed (SD 4.89 against 6.49) because five of the eight are exactly 92.
 
 A four-view product compares a man against a woman in every row. With shapes
 distributed this unevenly, the sign of a typical gap is decided by which sex
@@ -33,7 +33,7 @@ somebody is rather than by what the judgments said. That is not a subtle
 statistical caveat; it is the measurement reporting a property of how magazines
 publish as though it were a finding about couples.
 
-It is also why the Brad Pitt and Jennifer Aniston gaps of −8 and −12 must not be
+It is also why the Brad Pitt and Jennifer Aniston gaps of −6 and −14 must not be
 read as results. He is judged by an award, she by ranked placements, and that
 alone accounts for a large part of the sign and the size.
 
@@ -53,21 +53,58 @@ project can produce falls into exactly two groups.
 
 | Pairing | A | B | Gap |
 |---|---|---|---|
-| Brad Pitt + Jennifer Aniston, 1999 | `editorial_award`, 92.0 | `ordered_rank`, 84.0 | −8.0 |
-| Brad Pitt + Jennifer Aniston, 2000 | `editorial_award`, 92.0 | `ordered_rank`, 80.0 | −12.0 |
+| Brad Pitt + Jennifer Aniston, 1999 | `editorial_award`, 92.0 | `ordered_rank`, 86.0 | −6.0 |
+| Brad Pitt + Jennifer Aniston, 2000 | `editorial_award`, 92.0 | `ordered_rank`, 78.0 | −14.0 |
+| Brad Pitt + Jennifer Aniston, 2001 | `editorial_award`, 92.0 | `ordered_rank`, 78.0 (reused from 2000) | −14.0 |
 | Scarlett Johansson + Ryan Reynolds, 2009 | `ordered_rank`, 84.0 | `editorial_award`, 92.0 | +8.0 |
+
+The Johansson–Reynolds row comes from the 100-name roster run and the rest from
+the pilot. Those are two separate scoring runs, which matters: see "The numbers
+in this table are not stable to two points" below.
 
 Every comparable gap is **exactly zero**. Every non-zero gap is
 **shape-mismatched**. There are no exceptions in the corpus.
+
+### The numbers in this table are not stable to two points
+
+The Pitt–Aniston rows come from the pilot run and the Johansson–Reynolds row
+from the roster run. Three person-periods were scored in BOTH runs, on
+byte-identical dossiers, under the same contract id, by the same judge family.
+One returned the same estimate and two moved by 2.0 points:
+
+| Person | Period | Shape | pilot | roster | Delta |
+|---|---|---|---|---|---|
+| Brad Pitt | 2000 | `editorial_award` | 92.0 | 92.0 | +0.0 |
+| Jennifer Aniston | 1999 | `ordered_rank` | 86.0 | 84.0 | +2.0 |
+| Jennifer Aniston | 2000 | `ordered_rank` | 78.0 | 80.0 | −2.0 |
+
+The award held still and both ranks moved, which is the same split the repeat
+measurement found. It also means the published least significant difference of
+1.2 points was too small: it pooled the award dossier's zero measured variance
+with the ranked dossier's, halving it. Quoted per shape, the rank-shaped LSD is
+**2.4 points**, and a 2.0-point run-to-run move is consistent with that rather
+than with 1.2.
+
+None of this changes the conclusion below. The comparable gap is 0.0 and the
+noise floor is now known to be higher, so it is even less distinguishable from
+zero. What it changes is how any single gap in the table above should be read:
+a −6 could have been a −4.
 
 ## Why that happens, and why more data will not fix it
 
 Three facts combine into a trap.
 
-1. **A one-winner award is superlative by construction.** The rubric correctly
-   places every winner in band 90–100, and in practice every single one lands
-   at 92. Repeat-scoring confirms this is not noise: an award dossier returns
-   92 four times out of four, SD 0.0.
+1. **A one-winner award is superlative by construction**, so it concentrates
+   on one value. Of 18 award-shaped estimates, **15 land at exactly 92**; the
+   other three are 78, 91 and 94. The 16 rank-shaped estimates spread across
+   **nine** distinct values from 64 to 93. That contrast is the mechanism:
+   awards agree with each other because there is only one thing an award can
+   say, and ranks disagree because a rank carries a degree.
+
+   Repeat-scoring is consistent with this. An award dossier returned 92 four
+   times out of four. That is **not** proof of zero variance — four identical
+   draws from a low-variance process look exactly like four draws from a
+   zero-variance one — and the report no longer claims it is.
 2. **The award shape is the only one common enough to match.** It is what the
    freely available sources publish — Sexiest Man Alive, People's Most
    Beautiful cover, Maxim's number one, Esquire's pick. All one name a year.

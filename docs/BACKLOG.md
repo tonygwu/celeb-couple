@@ -51,7 +51,7 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 
 ## Measurement (added late 2026-09-14)
 
-- **The one comparable gap is 0.0 against an LSD of 1.2.** Daredevil 2003,
+- **The one comparable gap is 0.0 against a rank-shaped LSD of 2.4.** Daredevil 2003,
   Affleck and Garner, both judged by an editorial award. Everything larger is
   shape-mismatched. **Difficulty: blocked on evidence.**
 - **Shape confound is unmitigated.** 39% of the estimate is evidence type.
@@ -62,6 +62,13 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 - **Rater noise rests on one judge and two dossiers.** Codex hit 0% quota
   mid-run. Re-run with both families when it resets in ~5 days.
   **Difficulty: easy, blocked on quota.**
+- **The award shape's noise is unmeasured, not zero.** Four repeats all returned
+  92, which cannot distinguish low variance from none, so no LSD is quoted for
+  it. More repeats would settle it. **Difficulty: easy, blocked on quota.**
+- **`measure_rater_noise.py --account` hardcodes `/Users/tonygwu/.claude-e`.**
+  The account list should be derived from `quotapick status`, not typed: the
+  operator's own notes record four separate places that broke when an account
+  was added. **Difficulty: easy.**
 - **Nearby-period bound costs 2 pairings.** Widening +/-1 to +/-2 would take
   joint coverage from 2 to 3 distinct pairings, saturating at 6. Not done,
   because a wider bound reuses an estimate further from the period it describes.

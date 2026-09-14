@@ -27,8 +27,11 @@ The measurement works. The evidence does not support the product as specified.
 
 - The rubric discriminates across a 29-point range on synthetic dossiers and
   produces ten distinct values.
-- Two model families agree closely on real dossiers, and repeat-scoring puts the
-  least significant difference at about 1.2 points.
+- Two model families agree closely on real dossiers. Repeat-scoring puts the
+  least significant difference at about 2.4 points for rank-shaped estimates.
+  The award shape did not move at all across four repeats, which is a sample too
+  small to call zero, so no figure is quoted for it. Scoring the same dossier in
+  two separate runs moved two of three estimates by 2.0 points.
 - Evidence **density** was the first bottleneck: every dossier once held exactly
   one observation, so the corpus produced 2 distinct values across a 5.5-point
   range. It now produces 12 across a range of 30.0

@@ -99,6 +99,7 @@ def test_every_rule_matches_the_text_it_claims_to_match():
         "gender_offset": "the male mean sits 99.9 points above the female mean",
         "female_ranked_observations": "Women hold 99 ranked observations",
         "real_distinct_values": "It now produces 99 across a range of 30.0",
+        "ranked_lsd": "against an LSD of 99.9",
     }
     assert set(samples) == {r.name for r in mod.RULES}, (
         "a new rule was added without a sample proving its pattern matches"
@@ -123,3 +124,24 @@ def test_the_repository_currently_passes_the_audit():
                         str(REPO / "scripts/audit_doc_numbers.py")],
                        capture_output=True, text=True, cwd=REPO)
     assert r.returncode == 0, f"stale numbers in the docs:\n{r.stdout}"
+
+
+def test_a_number_at_the_end_of_a_sentence_is_captured_without_the_period():
+    """`[\\d.]+` is greedy: "LSD of 2.4." captured "2.4." and never equalled the
+    artifact's "2.4", so a correct document was reported stale. A guard that
+    reports false positives is worse than no guard."""
+    mod = _mod()
+    assert mod.find_mismatches(
+        _rule(mod, "ranked_lsd"), "2.4",
+        {"docs/X.md": "The one comparable gap is 0.0 against an LSD of 2.4."}) == []
+
+
+def test_the_historical_pooled_figure_is_not_reported_as_stale():
+    """docs/THE-TRAP.md deliberately quotes the old pooled LSD to explain why
+    it was wrong. A looser pattern would flag that correct sentence."""
+    mod = _mod()
+    historical = ("It also means the published least significant difference of\n"
+                  "1.2 points was too small: it pooled the award dossier's zero "
+                  "measured variance with the ranked dossier's.")
+    assert mod.find_mismatches(
+        _rule(mod, "ranked_lsd"), "2.4", {"docs/THE-TRAP.md": historical}) == []

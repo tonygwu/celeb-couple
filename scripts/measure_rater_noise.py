@@ -65,6 +65,87 @@ def _rebuild(blob):
     return editions, by_pp
 
 
+def summarise(per_target: list[dict], all_judges: list[str]) -> dict:
+    """Build the headline from the per-target repeats.
+
+    Reports the least significant difference PER EVIDENCE SHAPE. The pooled
+    figure is kept, and named as pooled, because it is what earlier documents
+    quoted -- but it must not be the number anyone reaches for.
+
+    Why: the first version averaged the within-judge SDs across every target
+    and published one LSD. Of the two dossiers measured, the rank-shaped one
+    varied (86, 86, 88, 86) and the award-shaped one did not (92 four times).
+    Averaging 0.866 with 0.0 gives 0.433 and an LSD of 1.2, which was then
+    applied to gaps between rank-shaped estimates -- the shape holding all of
+    the measured variance. The pooled figure understated the noise floor for
+    exactly the estimates it was used on.
+
+    A shape whose every repeat returned the same value gets no LSD at all. Four
+    identical draws from a low-variance process are indistinguishable from four
+    draws from a zero-variance one, so publishing 0.0 would state as a finding
+    something the sample cannot show.
+    """
+    contributing = sorted({j for row in per_target
+                           for j, v in row["runs"].items() if v})
+    missing = [j for j in all_judges if j not in contributing]
+
+    sds = [s for row in per_target
+           for s in row["per_judge_sd"].values() if s is not None]
+
+    by_shape_sds: dict[str, list[float]] = {}
+    for row in per_target:
+        for s in row["per_judge_sd"].values():
+            if s is not None:
+                by_shape_sds.setdefault(row["shape"], []).append(s)
+
+    by_shape, degenerate = {}, []
+    for shape, vals in sorted(by_shape_sds.items()):
+        mean_sd = statistics.mean(vals)
+        all_flat = all(v == 0 for v in vals)
+        if all_flat:
+            degenerate.append(shape)
+        by_shape[shape] = {
+            "n_targets": len(vals),
+            "mean_within_judge_sd": round(mean_sd, 3),
+            "least_significant_difference_95pct": (
+                None if all_flat else round(LSD_MULTIPLIER * mean_sd, 2)),
+            "note": ("every repeat returned the same value; this sample cannot "
+                     "distinguish low variance from none, so no LSD is quoted"
+                     if all_flat else None),
+        }
+
+    caveat = (
+        "Measured on a handful of dossiers, each carrying ONE observation. "
+        "This is rater variance only. Task variance across different people "
+        "and different evidence is larger and is not measured here. "
+        "`mean_within_judge_sd` and `least_significant_difference_95pct` are "
+        "POOLED across evidence shapes and are kept only for continuity with "
+        "earlier documents: use `by_shape`, because the shapes do not have the "
+        "same noise and pooling hides that."
+    )
+    if len(contributing) < 2:
+        caveat += (f" MEASURED ON ONE JUDGE "
+                   f"({', '.join(contributing) or 'none'}), so this figure "
+                   f"describes one model family and not a panel.")
+        if missing:
+            caveat += (f" {', '.join(missing)} was requested and produced "
+                       f"no runs.")
+
+    return {
+        "judges_requested": all_judges,
+        "judges_that_contributed": contributing,
+        "judges_with_no_runs": missing,
+        "single_judge": len(contributing) < 2,
+        "mean_within_judge_sd": round(statistics.mean(sds), 3) if sds else None,
+        "least_significant_difference_95pct": (
+            round(LSD_MULTIPLIER * statistics.mean(sds), 2) if sds else None),
+        "lsd_multiplier": LSD_MULTIPLIER,
+        "by_shape": by_shape,
+        "shapes_with_degenerate_sample": degenerate,
+        "caveat": caveat,
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description='Repeat-score unchanged dossiers to measure rater spread. SPENDS MODEL QUOTA.')
     ap.add_argument("--repeats", type=int, default=4)
@@ -75,7 +156,24 @@ def main() -> int:
     ap.add_argument("--force", action="store_true",
                     help="overwrite an artifact that holds more repeats than this run")
     ap.add_argument("--out", default="data/pilot/run/rater_noise.json")
+    ap.add_argument("--recompute", metavar="ARTIFACT", default=None,
+                    help=("Re-derive the headline from the stored judge runs in "
+                          "an existing artifact and rewrite it in place. Spends "
+                          "NO quota: the plan's reproducibility mechanism is "
+                          "replaying stored responses, not re-invoking a model."))
     args = ap.parse_args()
+
+    if args.recompute:
+        f = REPO / args.recompute
+        blob = json.loads(f.read_text())
+        targets = blob["targets"]
+        requested = sorted({j for row in targets for j in row["runs"]})
+        blob["headline"] = summarise(targets, requested)
+        blob["headline"]["recomputed_from_stored_runs"] = True
+        f.write_text(json.dumps(blob, indent=2))
+        print(json.dumps(blob["headline"], indent=2))
+        print(f"\nrewrote {f} from {len(targets)} stored targets; no model calls")
+        return 0
 
     blob = json.loads((REPO / "data/pilot/observations/observations.json").read_text())
     cohort = json.loads((REPO / "docs/pilot-cohort.json").read_text())
@@ -158,30 +256,7 @@ def main() -> int:
         print(f"  {row['person']:22} {period} [{shape}] runs={runs} "
               f"sd={row['per_judge_sd']}")
 
-    sds = [s for row in per_target for s in row["per_judge_sd"].values() if s is not None]
-    contributing = sorted({j for row in per_target for j, v in row["runs"].items() if v})
-    all_judges = sorted(n for n, _ in judges)
-    missing = [j for j in all_judges if j not in contributing]
-    headline = {
-        "judges_requested": all_judges,
-        "judges_that_contributed": contributing,
-        "judges_with_no_runs": missing,
-        "single_judge": len(contributing) < 2,
-        "mean_within_judge_sd": round(statistics.mean(sds), 3) if sds else None,
-        "least_significant_difference_95pct": (
-            round(LSD_MULTIPLIER * statistics.mean(sds), 2) if sds else None),
-        "lsd_multiplier": LSD_MULTIPLIER,
-        "caveat": (
-            "Measured on a handful of dossiers, each carrying ONE observation. "
-            "This is rater variance only. Task variance across different people "
-            "and different evidence is larger and is not measured here."
-            + ("" if len(contributing) > 1 else
-               f" MEASURED ON ONE JUDGE ({', '.join(contributing) or 'none'}), so "
-               "this figure describes one model family and not a panel."
-               + (f" {', '.join(missing)} was requested and produced no runs."
-                  if missing else ""))
-        ),
-    }
+    headline = summarise(per_target, sorted(n for n, _ in judges))
     stage.notes = headline
     out = REPO / args.out
     out.parent.mkdir(parents=True, exist_ok=True)
