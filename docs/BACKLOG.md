@@ -82,6 +82,15 @@ See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
   defaulted, and an unknown must keep that person out of a gendered view rather
   than into a guess.
 
+- **`contract_id` concatenates its parts with no separator.** Moving text from
+  the end of the rubric to the start of the schema leaves the contract id
+  unchanged, so two genuinely different contracts could share an identity. Not
+  fixed now: the corpus records `ab015c99ad3e`, the plan forbids pooling
+  estimates across contract ids, and a length-prefixed hash would make every
+  existing estimate look like it came from a different contract. **Do it at the
+  next rubric version bump, when the id changes anyway.**
+  **Difficulty: easy, but must be bundled.**
+
 ## Tooling
 
 - ~~Smoke tests can clobber production artifacts.~~ **Fixed 2026-09-14.**
