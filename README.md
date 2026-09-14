@@ -13,6 +13,7 @@ awards actually said, on sources this project is permitted to use.
 
 | Document | What it tells you |
 |---|---|
+| [`docs/THE-TRAP.md`](docs/THE-TRAP.md) | **Start here.** Why this design cannot produce a board with the available evidence |
 | [`docs/M0-REPORT.md`](docs/M0-REPORT.md) | The pilot, end to end, every number generated from an artifact |
 | [`docs/SCALING.md`](docs/SCALING.md) | Whether growing the roster helps. It does not, and by how much |
 | [`docs/SOURCE-HUNT.md`](docs/SOURCE-HUNT.md) | Every source surface checked, and the negative result |
@@ -40,9 +41,15 @@ The measurement works. The evidence does not support the product as specified.
 - The source that would fix it — about a hundred ranked names a year — exists
   and is not reachable on any permitted route.
 
-The one comparable pairing gap this project can produce is **0.0**, against a
-noise floor of 1.2. That is a working measurement apparatus and it is not a
-leaderboard.
+**Every comparable pairing the project can produce is exactly 0.0, and every
+non-zero gap is confounded by publication format.** That is structural, not a
+shortage of data: a one-winner award is superlative by construction and pins at
+92, the award shape is the only one the free sources publish often enough to
+match, and comparability requires matching shapes. So the pairings that qualify
+as comparable are exactly the ones pinned at 92 on both sides.
+[`docs/THE-TRAP.md`](docs/THE-TRAP.md) sets it out in full.
+
+This is a working measurement apparatus and it is not a leaderboard.
 
 ## Running it
 

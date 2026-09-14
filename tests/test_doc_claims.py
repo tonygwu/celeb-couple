@@ -107,11 +107,33 @@ def test_the_readme_headline_numbers_match_the_measurements():
     )
 
 
+def test_the_trap_doc_matches_the_roster_joint_scores():
+    """Every comparable pairing must still be 0.0, and every non-zero gap must
+    still be shape-mismatched. If that ever stops being true the document is
+    wrong and the finding has changed."""
+    blob = _artifact("data/roster100/run/joint_scores.json")
+    md = _doc("docs/THE-TRAP.md")
+    for p in blob["pairings"]:
+        if p["comparability"] == "comparable":
+            assert p["gap_a_view"] == 0.0, (
+                f"{p['a']} + {p['b']} is comparable with gap {p['gap_a_view']}; "
+                "THE-TRAP.md claims every comparable gap is exactly zero"
+            )
+        elif p["gap_a_view"] != 0.0:
+            assert p["comparability"] == "shape_mismatched", (
+                f"{p['a']} + {p['b']} has a non-zero gap and is not "
+                f"shape-mismatched ({p['comparability']}); THE-TRAP.md claims "
+                "every non-zero gap is shape-confounded"
+            )
+    assert "0.0 by construction" in md
+
+
 def test_no_document_claims_a_test_count():
     """AGENTS.md once said 134 while the suite reported 127. The rule is that a
     count belongs in the runner's output, not in prose."""
     for rel in ("README.md", "AGENTS.md", "docs/SCALING.md",
-                "docs/SOURCE-HUNT.md", "docs/REACHABLE-PRODUCTS.md"):
+                "docs/SOURCE-HUNT.md", "docs/REACHABLE-PRODUCTS.md",
+                "docs/THE-TRAP.md"):
         text = _doc(rel)
         hits = re.findall(r"\b(\d{2,4})\s+tests?\b", text)
         assert not hits, (
