@@ -126,7 +126,10 @@ def _render_observation(o: Observation, edition: ListEdition, n: int) -> str:
         else:
             body += " The published placement is not available, so the share alone is known."
     else:
-        body = "Dated commentary."
+        # The excerpt carries the substance, on the `quoted:` line below, but
+        # saying so makes the judge's job explicit rather than implied.
+        body = ("Dated commentary about the person's appearance. The quoted text "
+                "below is the whole of the judgment.")
 
     return (
         f"{head}{body}\n"

@@ -194,3 +194,16 @@ def test_an_unstated_list_size_does_not_render_as_zero_names():
     text = build_dossier("p_1", "Ada", "2004", [o], EDITIONS).text
     assert "a set of 0 names" not in text
     assert "a set whose size the source does not state" in text
+
+
+def test_qualitative_commentary_points_the_judge_at_the_quote():
+    o = Observation(
+        observation_id="obs_q", person_id="p_1", list_edition_id="le_1",
+        evidence_type=EvidenceType.QUALITATIVE_COMMENTARY, observed={},
+        concerns_period=_pd("2012"), published_at=_pd("2012"),
+        lineage=Lineage(original_source="le_1"),
+        excerpt="the most beautiful face in the room", excerpt_locator="paragraph 3",
+    )
+    text = build_dossier("p_1", "Ada", "2012", [o], EDITIONS).text
+    assert "the quoted text below is the whole of the judgment" in text.lower()
+    assert "the most beautiful face in the room" in text
