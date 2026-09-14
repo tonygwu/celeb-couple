@@ -266,3 +266,35 @@ def test_an_ordinary_integer_estimate_is_accepted():
     from modules.consensus.score import parse_verdict
     v = parse_verdict(_reply(estimate=78), _dossier(), "fable", {}, "raw")
     assert v.estimate == 78
+
+
+# -- the model-identity assertion --------------------------------------------
+
+def test_a_model_name_without_the_expected_shape_is_refused_at_construction():
+    """The served-model check was `self.model.split("-")[1] not in served`.
+
+    On a name with no dash -- `ClaudeJudge("fable", "fable")` -- that raises
+    IndexError, and it does so AFTER the subprocess has run and the call has
+    been paid for. The failure would arrive as a traceback in the middle of a
+    batch rather than as a refusal before it started.
+
+    The operator's standing rule for external tools is to assert the response
+    telemetry NAMES what was requested. A check that cannot compute what to
+    look for has to say so up front.
+    """
+    import pytest
+    from packages.llmkit.judges import ClaudeJudge, JudgeError
+    with pytest.raises(JudgeError, match="model name"):
+        ClaudeJudge("fable", "fable")
+
+
+def test_an_ordinary_model_name_constructs():
+    from packages.llmkit.judges import ClaudeJudge
+    j = ClaudeJudge("fable", "claude-fable-5-1")
+    assert j.family_token == "fable"
+
+
+def test_the_family_token_is_what_the_telemetry_must_name():
+    from packages.llmkit.judges import ClaudeJudge
+    assert ClaudeJudge("o", "claude-opus-5").family_token == "opus"
+    assert ClaudeJudge("h", "claude-haiku-4-5-20251001").family_token == "haiku"

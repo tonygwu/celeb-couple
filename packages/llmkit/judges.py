@@ -113,8 +113,25 @@ class ClaudeJudge:
                 "refusing to run the judge through `cl`: it injects "
                 "--dangerously-skip-permissions",
             )
+        # Work out NOW what the telemetry will have to name, rather than
+        # inside the response handler. The check used to be
+        # `self.model.split("-")[1] not in served`, which raises IndexError on
+        # a name with no dash -- and does it after the subprocess has run and
+        # the call has been paid for, so the failure arrives as a traceback
+        # mid-batch instead of a refusal before it starts.
+        parts = model.split("-")
+        if len(parts) < 2 or not parts[1]:
+            raise JudgeError(
+                E_MODEL_MISMATCH,
+                f"cannot verify served identity for model name {model!r}: "
+                "expected a name like 'claude-fable-5-1', whose second segment "
+                "is the family token the response telemetry must name. Without "
+                "one there is nothing to assert the response against.",
+            )
         self.name = name
         self.model = model
+        #: The token the served-model telemetry must contain.
+        self.family_token = parts[1]
         self.config_dir = config_dir
         self.binary = binary
         self.effort = effort
@@ -163,7 +180,7 @@ class ClaudeJudge:
             raise JudgeError(E_EMPTY, f"{self.name} returned non-JSON envelope") from exc
 
         served, verified = self._served_model(payload)
-        if verified and self.model.split("-")[1] not in served:
+        if verified and self.family_token not in served:
             raise JudgeError(
                 E_MODEL_MISMATCH,
                 f"asked for {self.model}, telemetry names {served!r}",
