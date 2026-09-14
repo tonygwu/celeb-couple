@@ -37,6 +37,73 @@ def _fingerprint() -> str:
     return h.hexdigest()[:12]
 
 
+def decisive_measurement(shape_conf: dict, n_scored: int) -> str:
+    """Compare award-shaped against rank-shaped evidence, from the artifact.
+
+    The earlier version counted estimates at or above 90 and called them
+    "person-periods resting on a one-winner editorial award". That is a score
+    threshold wearing the name of an evidence shape, and the two stopped
+    agreeing as soon as the corpus grew. It also asserted "every single one
+    scored exactly 92.0" and "the ONE person-period resting on an ORDERED
+    rank", both of which the re-score falsified.
+    """
+    by_shape = (shape_conf or {}).get("by_shape") or {}
+    award = by_shape.get("editorial_award")
+    rank = by_shape.get("ordered_rank")
+    if not (award and rank):
+        return ("**The decisive measurement** needs both award-shaped and "
+                "rank-shaped person-periods to compare, and this corpus does "
+                "not hold both.")
+    return (
+        f"**The decisive measurement**: of {n_scored} scored person-periods, "
+        f"{award['n']} rest on a one-winner editorial award and {rank['n']} on "
+        f"an ordered rank. The award-shaped ones cluster at mean "
+        f"{award['mean']} with sd **{award['sd']}**; the rank-shaped ones sit "
+        f"lower, at mean {rank['mean']}, and spread more than twice as wide, "
+        f"sd **{rank['sd']}**. A one-winner award is superlative by "
+        f"construction, so it can only land in one band. Ranked evidence "
+        f"carries a degree, so it can tell people apart.")
+
+
+def shape_paragraph(shape_conf: dict, density: dict) -> str:
+    """Describe the corpus's evidence shapes FROM the artifacts.
+
+    This used to be a typed sentence: "Every scored person-period carries
+    exactly one observation, and every one of those observations is a
+    one-winner editorial award." It was true of a 34-person-period corpus and
+    false of the 39-person-period one that replaced it, and nothing recomputed
+    it. Derive it instead.
+    """
+    by_shape = (shape_conf or {}).get("by_shape") or {}
+    if not by_shape:
+        return "No scored person-period carries a classified observation shape."
+
+    dist = {int(k): v for k, v in ((density or {}).get("distribution") or {}).items()}
+    total = sum(dist.values())
+    multi = sum(v for k, v in dist.items() if k > 1)
+
+    if multi == 0:
+        density_clause = ("Every scored person-period carries exactly one "
+                          "observation")
+    else:
+        density_clause = (f"{multi} of {total} scored person-periods carry more "
+                          f"than one observation; the rest carry exactly one")
+
+    ordered = sorted(by_shape.items(), key=lambda kv: -kv[1]["n"])
+    if len(ordered) == 1:
+        name, s = ordered[0]
+        shape_clause = (f"and every one of those observations is of a single "
+                        f"shape, `{name}` ({s['n']} person-periods, "
+                        f"{s['min']}-{s['max']})")
+    else:
+        parts = [f"`{name}` (n={s['n']}, {s['min']}-{s['max']}, sd {s['sd']})"
+                 for name, s in ordered]
+        shape_clause = ("and the observations behind them fall into "
+                        f"{len(ordered)} shapes: " + ", ".join(parts))
+
+    return density_clause + ", " + shape_clause + "."
+
+
 def main() -> int:
     import argparse
     argparse.ArgumentParser(
@@ -116,14 +183,7 @@ def main() -> int:
     if scored:
         vals = [r["estimate"] for r in scored["person_periods"]
                 if r["estimate"] is not None]
-        award = [r for r in scored["person_periods"]
-                 if r["estimate"] is not None and r["estimate"] >= 90]
-        w(f"**The decisive measurement**: {len(award)} of {len(vals)} scored "
-          f"person-periods rest on a one-winner editorial award, and every single "
-          f"one scored exactly 92.0 — both model families, to the digit. The one "
-          f"person-period resting on an ORDERED rank (5th of 100) scored "
-          f"{min(vals)}. Award-shaped evidence cannot tell winners apart. Ranked "
-          f"evidence can.")
+        w(decisive_measurement(shape_conf, len(vals)))
     w("")
 
     # ---------- cohort ----------
@@ -290,10 +350,11 @@ def main() -> int:
         if vals:
             w("### Score compression — the most consequential measurement result")
             w("")
-            w(f"Every scored person-period carries exactly one observation, and every "
-              f"one of those observations is a one-winner editorial award. All "
-              f"{len(vals)} estimates land between **{min(vals)}** and **{max(vals)}**, "
-              f"a spread of **{max(vals) - min(vals)}** points on a 0-100 scale.")
+            w(shape_paragraph(shape_conf, density))
+            w("")
+            w(f"All {len(vals)} estimates land between **{min(vals)}** and "
+              f"**{max(vals)}**, a spread of **{max(vals) - min(vals)}** points "
+              f"on a 0-100 scale.")
             w("")
             gaps = [r["across_judges_gap"] for r in scored["person_periods"]
                     if r["across_judges_gap"] is not None]

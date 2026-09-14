@@ -31,10 +31,10 @@ The measurement works. The evidence does not support the product as specified.
   least significant difference at about 1.2 points.
 - Evidence **density** was the first bottleneck: every dossier once held exactly
   one observation, so the corpus produced 2 distinct values across a 5.5-point
-  range. It now produces 10 across a range of 27.0
-  (66.0–93.0), against the synthetic stress corpus's 29.
+  range. It now produces 12 across a range of 30.0
+  (64.0–94.0), against the synthetic stress corpus's 29.
   The measurement apparatus is no longer the limiting factor.
-- Evidence **shape** explains 46% of the estimate. An award pins near 92 by
+- Evidence **shape** explains 39% of the estimate. An award pins near 92 by
   construction; ranked placements spread lower.
 - **Coverage does not scale.** Going from 14 people to 100 gave 3.7x the
   observations and left the count of comparable pairings at one.
@@ -42,7 +42,7 @@ The measurement works. The evidence does not support the product as specified.
   and is not reachable on any permitted route.
 
 **The confound is aligned with gender.** Men in the corpus hold zero ranked
-observations and women hold twelve, so the male mean sits 3.65 points above the
+observations and women hold 17, so the male mean sits 3.65 points above the
 female mean before any fact about any individual enters. In a product that
 compares a man against a woman in every row, the sign of a typical gap is
 decided by which sex somebody is rather than by what the judgments said.

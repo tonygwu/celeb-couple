@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `60e740e8a7d9`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `5759dd5e8463`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: regenerating it over unchanged artifacts produces an identical file, so a diff means the numbers moved.
 
@@ -22,7 +22,7 @@ But across the 14-person cohort, the permitted sources yielded **41 attractivene
 
 Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **4** pairings are jointly covered.
 
-**The decisive measurement**: 21 of 34 scored person-periods rest on a one-winner editorial award, and every single one scored exactly 92.0 — both model families, to the digit. The one person-period resting on an ORDERED rank (5th of 100) scored 66.0. Award-shaped evidence cannot tell winners apart. Ranked evidence can.
+**The decisive measurement**: of 39 scored person-periods, 18 rest on a one-winner editorial award and 16 on an ordered rank. The award-shaped ones cluster at mean 91.28 with sd **3.263**; the rank-shaped ones sit lower, at mean 84.56, and spread more than twice as wide, sd **6.727**. A one-winner award is superlative by construction, so it can only land in one band. Ranked evidence carries a degree, so it can tell people apart.
 
 ## 1. Cohort
 
@@ -116,48 +116,55 @@ Both are reused estimates flagged `nearby_period`. Any simulation must give each
 
 ## 6. Scored person-periods and pairing contributions
 
-34 of 34 evidenced person-periods scored, using 34 model calls, 0 failed.
+39 of 39 evidenced person-periods scored, using 39 model calls, 0 failed.
 
 | Person | Period | Obs | Estimate | fable | astra | judge gap | support |
 |---|---|---|---|---|---|---|---|
 | Michelle Pfeiffer | 1990 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Michelle Pfeiffer | 1995 | 1 | 86.0 | 86.0 | – | – | single_source |
-| Brad Pitt | 1995 | 2 | 93.0 | 93.0 | – | – | multi |
-| Jennifer Aniston | 1996 | 1 | 84.0 | 84.0 | – | – | single_source |
+| Brad Pitt | 1995 | 2 | 94.0 | 94.0 | – | – | multi |
+| Jennifer Aniston | 1996 | 1 | 86.0 | 86.0 | – | – | single_source |
 | Denzel Washington | 1996 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Liv Tyler | 1997 | 1 | 72.0 | 72.0 | – | – | single_source |
+| Liv Tyler | 1997 | 1 | 76.0 | 76.0 | – | – | single_source |
 | Jennifer Aniston | 1997 | 1 | 90.0 | 90.0 | – | – | single_source |
 | Jennifer Aniston | 1998 | 1 | 88.0 | 88.0 | – | – | single_source |
 | Harrison Ford | 1998 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Michelle Pfeiffer | 1999 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Aniston | 1999 | 1 | 84.0 | 84.0 | – | – | single_source |
-| Jennifer Aniston | 2000 | 1 | 80.0 | 80.0 | – | – | single_source |
+| Jennifer Aniston | 1999 | 1 | 86.0 | 86.0 | – | – | single_source |
+| Jennifer Aniston | 2000 | 1 | 78.0 | 78.0 | – | – | single_source |
 | Brad Pitt | 2000 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Lopez | 2000 | 1 | 93.0 | 93.0 | – | – | single_source |
-| Jennifer Lopez | 2001 | 1 | 93.0 | 93.0 | – | – | single_source |
+| Jennifer Lopez | 2001 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Garner | 2002 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Lopez | 2002 | 1 | 88.0 | 88.0 | – | – | single_source |
 | Ben Affleck | 2002 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Lopez | 2003 | 1 | 84.0 | 84.0 | – | – | single_source |
-| Michelle Pfeiffer | 2004 | 1 | 80.0 | 80.0 | – | – | single_source |
+| Jennifer Lopez | 2003 | 1 | 86.0 | 86.0 | – | – | single_source |
+| Angelina Jolie | 2004 | 1 | 82.0 | 82.0 | – | – | single_source |
+| Michelle Pfeiffer | 2004 | 1 | 86.0 | 86.0 | – | – | single_source |
 | Jennifer Aniston | 2004 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Lopez | 2004 | 1 | 86.0 | 86.0 | – | – | single_source |
+| Jennifer Lopez | 2004 | 1 | 82.0 | 82.0 | – | – | single_source |
+| Angelina Jolie | 2005 | 1 | 90.0 | 90.0 | – | – | single_source |
+| Angelina Jolie | 2006 | 2 | 94.0 | 94.0 | – | – | multi |
+| Angelina Jolie | 2007 | 1 | 82.0 | 82.0 | – | – | single_source |
+| Angelina Jolie | 2008 | 1 | 80.0 | 80.0 | – | – | single_source |
 | Kate Beckinsale | 2009 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Aniston | 2011 | 1 | 93.0 | 93.0 | – | – | single_source |
+| Jennifer Aniston | 2011 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Lopez | 2011 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Aniston | 2012 | 1 | 66.0 | 66.0 | – | – | single_source |
+| Jennifer Aniston | 2012 | 1 | 64.0 | 64.0 | – | – | single_source |
 | Idris Elba | 2013 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Gwyneth Paltrow | 2013 | 1 | 92.0 | 92.0 | – | – | single_source |
 | Jennifer Aniston | 2016 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Idris Elba | 2017 | 1 | 83.0 | 83.0 | – | – | single_source |
-| Idris Elba | 2018 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Idris Elba | 2017 | 1 | 78.0 | 78.0 | – | – | single_source |
+| Idris Elba | 2018 | 1 | 94.0 | 94.0 | – | – | single_source |
 | Jennifer Garner | 2019 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Michelle Pfeiffer | 2020 | 1 | 84.0 | 84.0 | – | – | single_source |
-| Melissa McCarthy | 2023 | 1 | 92.0 | 92.0 | – | – | single_source |
+| Michelle Pfeiffer | 2020 | 1 | 80.0 | 80.0 | – | – | single_source |
+| Melissa McCarthy | 2023 | 1 | 91.0 | 91.0 | – | – | single_source |
 
 ### Score compression — the most consequential measurement result
 
-Every scored person-period carries exactly one observation, and every one of those observations is a one-winner editorial award. All 34 estimates land between **66.0** and **93.0**, a spread of **27.0** points on a 0-100 scale.
+2 of 39 scored person-periods carry more than one observation; the rest carry exactly one, and the observations behind them fall into 5 shapes: `editorial_award` (n=18, 78.0-94.0, sd 3.263), `ordered_rank` (n=16, 64.0-93.0, sd 6.727), `unordered_inclusion` (n=3, 76.0-86.0, sd 4.11), `editorial_award+ordered_rank` (n=1, 94.0-94.0, sd 0.0), `editorial_award+unordered_inclusion` (n=1, 94.0-94.0, sd 0.0).
+
+All 39 estimates land between **64.0** and **94.0**, a spread of **30.0** points on a 0-100 scale.
 
 The judges agree almost perfectly: 0 of 0 person-periods came back identical from both families, and the largest disagreement was 0 point. So the compression is not rater noise. It is the evidence.
 
@@ -177,23 +184,23 @@ This was predicted in the plan's worked example A and is now measured. It is the
 **relationship** (1999, real_life) — co-appearance only; ROMANCE UNVERIFIED
 
 - Brad Pitt: 92.0 (estimate from 2000)
-- Jennifer Aniston: 84.0 (estimate from 1999)
+- Jennifer Aniston: 86.0 (estimate from 1999)
 - covered share 1, period support `nearby_period`
-- gap in the men's view **-8.0**, in the women's view **+8.0**, mirrors exactly: True
+- gap in the men's view **-6.0**, in the women's view **+6.0**, mirrors exactly: True
 
 **relationship** (2000, real_life) — co-appearance only; ROMANCE UNVERIFIED
 
 - Brad Pitt: 92.0 (estimate from 2000)
-- Jennifer Aniston: 80.0 (estimate from 2000)
+- Jennifer Aniston: 78.0 (estimate from 2000)
 - covered share 1, period support `contemporaneous`
-- gap in the men's view **-12.0**, in the women's view **+12.0**, mirrors exactly: True
+- gap in the men's view **-14.0**, in the women's view **+14.0**, mirrors exactly: True
 
 **relationship** (2001, real_life) — co-appearance only; ROMANCE UNVERIFIED
 
 - Brad Pitt: 92.0 (estimate from 2000)
-- Jennifer Aniston: 80.0 (estimate from 2000)
+- Jennifer Aniston: 78.0 (estimate from 2000)
 - covered share 1, period support `nearby_period`
-- gap in the men's view **-12.0**, in the women's view **+12.0**, mirrors exactly: True
+- gap in the men's view **-14.0**, in the women's view **+14.0**, mirrors exactly: True
 
 ## 6. Evidence density — the actual bottleneck
 
@@ -201,7 +208,7 @@ Coverage asks whether a person-year has any evidence. Density asks how much. Mea
 
 | Corpus | n | range | distinct values | SD |
 |---|---|---|---|---|
-| Real | 34 | 27.0 | **10** | 6.239 |
+| Real | 39 | 30.0 | **12** | 6.367 |
 | Synthetic stress | 23 | 29 | 10 | 9.183 |
 
 The rubric discriminates; the corpus does not let it. A lone one-winner award is superlative by construction and can only land in one band, so a person-period carrying exactly that produces the same number every time. What the board needs is not more sources covering more people, but sources landing on the SAME person-year as an existing observation.
@@ -243,8 +250,8 @@ Two things follow. Widening the bound from ±1 to ±2 would triple joint coverag
 
 | Gender | n | mean | SD | range |
 |---|---|---|---|---|
-| male | 8 | **91.0** | 3.04 | 83.0–93.0 |
-| female | 26 | **87.35** | 6.7 | 66.0–93.0 |
+| male | 8 | **90.75** | 4.89 | 78.0–94.0 |
+| female | 31 | **87.1** | 6.49 | 64.0–94.0 |
 
 Men hold 0 ranked observations and women 17. Because an award pins near the top of the scale and a ranked placement does not, that imbalance puts the male mean 3.65 points above the female mean before any fact about any individual enters. Every mixed-gender pairing therefore carries roughly that offset built in, in the same direction, and a signed gap that size is a statement about publishing rather than about the couple.
 
@@ -252,14 +259,15 @@ Men hold 0 ranked observations and women 17. Because an award pins near the top 
 
 ## 5b. Evidence shape drives the estimate
 
-**Evidence type alone explains 46% of the variance in the estimates** (eta-squared 0.46).
+**Evidence type alone explains 39% of the variance in the estimates** (eta-squared 0.389).
 
 | Evidence shape | n | mean | range | SD |
 |---|---|---|---|---|
-| `editorial_award` | 18 | 91.56 | 83.0–93.0 | 2.088 |
-| `editorial_award+unordered_inclusion` | 1 | 93.0 | 93.0–93.0 | 0.0 |
-| `ordered_rank` | 12 | 85.17 | 66.0–93.0 | 6.841 |
-| `unordered_inclusion` | 3 | 78.67 | 72.0–84.0 | 4.989 |
+| `editorial_award` | 18 | 91.28 | 78.0–94.0 | 3.263 |
+| `editorial_award+ordered_rank` | 1 | 94.0 | 94.0–94.0 | 0.0 |
+| `editorial_award+unordered_inclusion` | 1 | 94.0 | 94.0–94.0 | 0.0 |
+| `ordered_rank` | 16 | 84.56 | 64.0–93.0 | 6.727 |
+| `unordered_inclusion` | 3 | 80.67 | 76.0–86.0 | 4.11 |
 
 **3 of 4 jointly covered pairings have MISMATCHED evidence shapes on the two sides.**
 
@@ -326,7 +334,7 @@ A constant cross-gender offset shifts every PAW rate by exactly delta, so rate r
 
 ## 6d. Grounding audit
 
-34 rationales checked: **34** passed the automated checks, 0 failed, 28 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
+39 rationales checked: **39** passed the automated checks, 0 failed, 34 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
 
 *These checks prove a rationale does not assert MORE than its evidence carries. They do not prove it is a fair reading. Only the human sheet can establish that.*
 
@@ -342,9 +350,9 @@ So the project can now produce a signed, exactly mirrored, evidence-backed gap f
 ## 7. Cost and budget
 
 - Stress tests: 27 model calls ({"fable": 17, "astra": 10}).
-- Scoring: 34 model calls ({"fable": 34, "astra": 0}).
+- Scoring: 39 model calls ({"fable": 39, "astra": 0}).
 - First pilot pass: 0 model calls — all 32 dossiers were empty and short-circuited.
-- **Total: 61 model calls**, against a cap of 300.
+- **Total: 66 model calls**, against a cap of 300.
 - Subscription quota only. API billing was asserted off at start-up.
 - Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and inventing a figure for the other arm would be a fabricated number.
 

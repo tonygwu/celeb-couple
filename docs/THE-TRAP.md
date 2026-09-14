@@ -12,21 +12,20 @@ are almost perfectly separated.
 | | `editorial_award` | `ordered_rank` | `unordered_inclusion` |
 |---|---|---|---|
 | **male** | 8 | **0** | 1 |
-| **female** | 11 | **12** | 3 |
+| **female** | 12 | **17** | 3 |
 
-**Men in this corpus hold zero ranked observations. Women hold twelve.**
+**Men in this corpus hold zero ranked observations. Women hold 17.**
 
 An award pins near the top of the scale by construction; a ranked placement does
 not. So the imbalance shows up directly in the estimates:
 
 | | n | mean | SD | range |
 |---|---|---|---|---|
-| male | 8 | **91.0** | 3.04 | 83.0–93.0 |
-| female | 26 | **87.35** | 6.70 | 66.0–93.0 |
+| male | 8 | **90.75** | 4.89 | 78.0–94.0 |
+| female | 31 | **87.1** | 6.49 | 64.0–94.0 |
 
 **The male mean sits 3.65 points above the female mean before any fact about
-any individual enters**, and the male estimates are compressed (SD 3.04 against
-6.70) because six of the eight are exactly 92.
+any individual enters**, and the male estimates are compressed (SD 4.89 against 6.49) because six of the eight are exactly 92.
 
 A four-view product compares a man against a woman in every row. With shapes
 distributed this unevenly, the sign of a typical gap is decided by which sex
@@ -117,8 +116,8 @@ published, and every route to it is closed.**
 ## What it does not mean
 
 It does not mean the measurement is broken. The rubric spans 63 to 92 on
-synthetic dossiers and 66 to 93 on real ones, ten distinct values each, and two
-model families agree closely. The apparatus works. The evidence available to it
+synthetic dossiers and 64 to 94 on real ones, ten distinct values on the
+synthetic corpus and twelve on the real one, and two model families agree closely. The apparatus works. The evidence available to it
 cannot exercise it on both halves of a couple at once.
 
 It also does not mean the pilot was wasted. Every one of these conclusions rests

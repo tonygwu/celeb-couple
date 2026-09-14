@@ -8,7 +8,8 @@ dependencies = []
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "-q"
+# No -q here: the documented entrypoint already passes -q, and -qq
+# suppresses the "N passed" line that AGENTS.md tells agents to read.
 
 [tool.setuptools.packages.find]
 include = ["packages*"]
