@@ -187,6 +187,16 @@ RULES: tuple[Rule, ...] = (
         why="how many cohort members carry any evidence",
     ),
     Rule(
+        name="mismatched_pairings",
+        artifact="data/pilot/run/shape_confound.json",
+        extract=lambda d: d["pairings_with_mismatched_shapes"],
+        render=str,
+        # Was written out as "Three of four", which no numeric rule can see.
+        # Digits here are worth more than the prose reads slightly better.
+        pattern=r"(\d+) of \d+ jointly covered pairings",
+        why="how many covered pairings compare two different evidence shapes",
+    ),
+    Rule(
         name="partners_total",
         artifact="data/pilot/records/partner_eligibility.json",
         extract=lambda d: d["partners"],

@@ -101,6 +101,7 @@ def test_every_rule_matches_the_text_it_claims_to_match():
         "real_distinct_values": "It now produces 99 across a range of 30.0",
         "ranked_lsd": "against an LSD of 99.9",
         "partners_total": "Of 99 partners, 7 are people the plan forbids rating",
+        "mismatched_pairings": "99 of 4 jointly covered pairings pit an award",
         "pilot_person_periods": "of 99 person-periods, 18 rest on an award",
         "cohort_coverage": "covering 99 of 14 cohort people",
         "roster_observations": "Corpus: 99 observations over 49 of 100 roster people",

@@ -214,7 +214,7 @@ anything. The findings that should shape any next step:
    prose mentions took it to twelve.
 3. **Evidence SHAPE explains 31% of the estimate** (omega-squared,
    unbiased; the biased eta-squared that earlier documents quoted reads 39%). An editorial award pins
-   near 92 by construction; ranked placements spread lower. Three of four
+   near 92 by construction; ranked placements spread lower. 3 of 4
    jointly covered pairings pit one against the other, so their gaps are
    substantially about publication format.
 4. **The one comparable gap is 0.0**, against a least significant difference of
