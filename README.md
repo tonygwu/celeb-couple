@@ -18,6 +18,7 @@ awards actually said, on sources this project is permitted to use.
 | [`docs/SCALING.md`](docs/SCALING.md) | Whether growing the roster helps. It does not, and by how much |
 | [`docs/SOURCE-HUNT.md`](docs/SOURCE-HUNT.md) | Every source surface checked, and the negative result |
 | [`docs/REACHABLE-PRODUCTS.md`](docs/REACHABLE-PRODUCTS.md) | What *can* be built with the evidence that exists |
+| [`docs/GROUNDING-AUDIT.md`](docs/GROUNDING-AUDIT.md), [`docs/RELATIONSHIP-REVIEW.md`](docs/RELATIONSHIP-REVIEW.md) | **The two things only a person can do.** Load-bearing entries first in both |
 | [`docs/BACKLOG.md`](docs/BACKLOG.md), [`docs/BACKLOG-roster.md`](docs/BACKLOG-roster.md) | Known defects and scope not yet covered |
 | [`AGENTS.md`](AGENTS.md) | How to run it, what spends quota, fleet git rules |
 
