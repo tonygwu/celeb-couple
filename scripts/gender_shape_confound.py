@@ -23,6 +23,21 @@ sys.path.insert(0, str(REPO))
 from packages.llmkit.artifacts import require  # noqa: E402
 
 
+#: DESCRIPTIVE statistics use `statistics.pstdev`, deliberately, and that is
+#: not an oversight to be harmonised with `measure_rater_noise.py`, which uses
+#: the sample SD. The difference is what the number is FOR:
+#:
+#:   - Here the question is "how spread out are the estimates this corpus
+#:     holds", and the corpus is the whole of what is being described. The
+#:     population formula answers exactly that.
+#:   - There the question is "what is the standard deviation of the rating
+#:     PROCESS", inferred from four repeat draws that are a sample of it. The
+#:     population formula underestimates that by 13% at n = 4, which understated
+#:     the published noise floor.
+#:
+#: Same function name, two different questions, two different right answers.
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="data/pilot/run/gender_shape_confound.json")
