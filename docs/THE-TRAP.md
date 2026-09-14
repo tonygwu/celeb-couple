@@ -113,10 +113,10 @@ Three facts combine into a trap.
    awards agree with each other because there is only one thing an award can
    say, and ranks disagree because a rank carries a degree.
 
-   Repeat-scoring is consistent with this. An award dossier returned 92 four
-   times out of four. That is **not** proof of zero variance — four identical
-   draws from a low-variance process look exactly like four draws from a
-   zero-variance one — and the report no longer claims it is.
+   Repeat-scoring is consistent with this. Two award dossiers returned 92 on
+   every one of eight repeats. That is **not** proof of zero variance —
+   identical draws from a low-variance process look exactly like draws from a
+   zero-variance one — and no figure is quoted for that shape.
 2. **The award shape is the only one common enough to match.** It is what the
    freely available sources publish — Sexiest Man Alive, People's Most
    Beautiful cover, Maxim's number one, Esquire's pick. All one name a year.
@@ -142,7 +142,7 @@ ranked names a year. This sharpens it in a way that matters:
 male-female pairings, means ranked lists covering men AND women over the same
 years.**
 
-The corpus currently has 12 `ordered_rank` observations for the pilot and 65 at
+The corpus currently has 17 `ordered_rank` observations for the pilot and 65 at
 roster scale, and they are overwhelmingly women, because FHM's list is a
 women's list. Every one of the mismatched pairings above is a man with an award
 and a woman with a rank. A men's equivalent of FHM, over the same period, is the
@@ -166,8 +166,11 @@ published, and every route to it is closed.**
 
 It does not mean the measurement is broken. The rubric spans 63 to 92 on
 synthetic dossiers and 64 to 94 on real ones, ten distinct values on the
-synthetic corpus and twelve on the real one, and two model families agree closely. The apparatus works. The evidence available to it
-cannot exercise it on both halves of a couple at once.
+synthetic corpus and twelve on the real one. Two model families agree closely
+on the SYNTHETIC corpus; on the real dossiers only one family ran, because
+codex reached 0% of its quota window mid-run, so cross-family agreement there
+is unmeasured. The apparatus works. The evidence available to it cannot
+exercise it on both halves of a couple at once.
 
 It also does not mean the pilot was wasted. Every one of these conclusions rests
 on measurements that did not exist twelve hours ago, and the trap is only

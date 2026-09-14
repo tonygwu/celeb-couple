@@ -104,6 +104,8 @@ def test_every_rule_matches_the_text_it_claims_to_match():
         "roster_people_with_evidence": "131 observations over 99 of 100 roster people",
         "scorable_episodes": "and 99 scorable relationship episodes",
         "coverage_saturation": "is about 99 of 239 episodes",
+        "pilot_ordered_rank_observations":
+            "has 99 `ordered_rank` observations for the pilot",
     }
     assert set(samples) == {r.name for r in mod.RULES}, (
         "a new rule was added without a sample proving its pattern matches"

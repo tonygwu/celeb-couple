@@ -150,6 +150,14 @@ RULES: tuple[Rule, ...] = (
         why="the ceiling this design reaches even with a perfect source",
     ),
     Rule(
+        name="pilot_ordered_rank_observations",
+        artifact="data/pilot/run/evidence_density.json",
+        extract=lambda d: d["observation_shapes"]["ordered_rank"],
+        render=str,
+        pattern=r"(\d+) `ordered_rank` observations for the pilot",
+        why="how much rank-shaped evidence the pilot corpus holds",
+    ),
+    Rule(
         name="ranked_lsd",
         artifact="data/pilot/run/rater_noise.json",
         extract=lambda d: (d["headline"]["by_shape"]["ranked"]
