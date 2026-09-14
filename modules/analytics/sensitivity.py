@@ -77,6 +77,14 @@ class SensitivityResult:
     interval: str
     assumptions: dict
     mirror_checked: bool = False
+    #: Share of individual estimate draws that hit the 0-100 scale boundary and
+    #: were clamped. A clamp is not a draw: it puts a point mass on the
+    #: boundary and compresses the interval on that side. The estimates this
+    #: project cares most about sit at 92-94, where a support band of 5 points
+    #: clamps 5-12% of draws, so the upward uncertainty on exactly those is
+    #: understated. Reported rather than corrected: the scale really is bounded
+    #: at 100, and a truncated normal would be a different declared assumption.
+    clamped_share: float = 0.0
 
     def as_dict(self) -> dict:
         return {
@@ -173,6 +181,7 @@ def simulate(
     totals: list[float] = []
     rates: list[float] = []
     mirror_ok = False
+    clamped = total_draws = 0
 
     for i in range(draws):
         pub_effect: dict[str, float] = {}
@@ -185,7 +194,11 @@ def simulate(
             else:
                 shift = 0.0
             # ONE draw per estimate, reused everywhere that estimate appears
-            drawn[eid] = min(100.0, max(0.0, rng.gauss(spec.value, spec.sd) + shift))
+            raw = rng.gauss(spec.value, spec.sd) + shift
+            if raw > 100.0 or raw < 0.0:
+                clamped += 1
+            total_draws += 1
+            drawn[eid] = min(100.0, max(0.0, raw))
 
         perturbed = _redraw(pairings, drawn)
         if i == 0 and check_mirror:
@@ -225,6 +238,13 @@ def simulate(
                 "missing relationships", "missing list editions",
                 "publisher selection bias",
             ],
+            "scale_clamping": (
+                "draws are clamped to the 0-100 scale. A clamp is not a draw: "
+                "it places a point mass on the boundary and compresses the "
+                "interval on that side, so upward uncertainty on estimates "
+                "near 100 is understated. See clamped_share."
+            ),
         },
         mirror_checked=mirror_ok,
+        clamped_share=(round(clamped / total_draws, 4) if total_draws else 0.0),
     )

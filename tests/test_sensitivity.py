@@ -165,3 +165,41 @@ def test_the_error_names_every_missing_estimate_not_just_the_first():
     assert "se_a" in str(e.value) and "se_b" in str(e.value), (
         "naming one at a time turns a two-line fix into two runs"
     )
+
+
+# -- clamping at the scale boundary ------------------------------------------
+
+def test_clamping_at_the_ceiling_is_reported():
+    """Draws are clamped to 0-100. A clamp is not a draw: it puts a point mass
+    on the boundary and compresses the interval on that side.
+
+    This matters for exactly the estimates the project cares about. An award
+    estimate of 94 with a 5-point support band has about 11.5% of its draws
+    above 100, so the upward uncertainty on the highest estimates — the ones
+    every comparable pairing is made of — is the most understated.
+
+    Reported rather than corrected: the scale really is bounded at 100, and a
+    truncated normal would be a different declared assumption, not a bug fix.
+    """
+    ks = [_pair("k", "a", "b", [_exp("2016", F(1), 94.0, 94.0, "se_a", "se_b")])]
+    specs = {"se_a": EstimateSpec("se_a", 94.0, 5.0),
+             "se_b": EstimateSpec("se_b", 94.0, 5.0)}
+    r = simulate(ks, specs, draws=4000, seed=3)
+    assert r.clamped_share > 0.05, r.clamped_share
+    assert "clamped_share" in r.assumptions["scale_clamping"]
+
+
+def test_estimates_far_from_the_boundary_clamp_nothing():
+    ks = [_pair("k", "a", "b", [_exp("2016", F(1), 70.0, 60.0, "se_a", "se_b")])]
+    specs = {"se_a": EstimateSpec("se_a", 70.0, 3.0),
+             "se_b": EstimateSpec("se_b", 60.0, 3.0)}
+    assert simulate(ks, specs, draws=2000, seed=3).clamped_share == 0.0
+
+
+def test_the_clamping_assumption_travels_with_the_result():
+    """The module's header promises the assumption set travels with every
+    result. A bounded scale is an assumption."""
+    ks = [_pair("k", "a", "b", [_exp("2016", F(1), 80.0, 80.0, "se_a", "se_b")])]
+    specs = {"se_a": EstimateSpec("se_a", 80.0, 2.0),
+             "se_b": EstimateSpec("se_b", 80.0, 2.0)}
+    assert "scale_clamping" in simulate(ks, specs, draws=100).assumptions
