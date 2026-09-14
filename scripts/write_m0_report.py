@@ -301,8 +301,11 @@ def main() -> int:
     w("")
     w(f"But across the {n_people}-person cohort, the permitted sources yielded "
       f"**{cov['total_observations']} attractiveness observations total**, covering "
-      f"{cov['cohort_people_with_any_observation']} of {n_people} people. "
-      f"{len(cov['people_with_none'])} people have none at all.")
+      f"{cov['cohort_people_with_any_observation']} of {n_people} cohort "
+      f"people; {len(cov['people_with_none'])} have none at all. A further "
+      f"{cov.get('people_with_observations_including_partners', 0) - cov['cohort_people_with_any_observation']} "
+      f"people outside the cohort carry observations — partners, whose "
+      f"evidence is what makes a pairing jointly covered.")
     w("")
     n_eps = len(episodes["episodes"])
     n_films = len(films["candidates"])

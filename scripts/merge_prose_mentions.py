@@ -135,7 +135,14 @@ def main() -> int:
     cov = obs.setdefault("coverage", {})
     cov["total_observations"] = len(obs["observations"])
     cov["per_person"] = dict(per_person.most_common())
-    cov["cohort_people_with_any_observation"] = len(per_person)
+    # Cohort-only, same correction as fetch_observations. `per_person` counts
+    # partners too, and against a cohort denominator that read as full
+    # coverage while five cohort members had nothing.
+    _cohort_total = cov.get("cohort_people_total")
+    _cohort_none = set(cov.get("people_with_none") or [])
+    if _cohort_total is not None:
+        cov["cohort_people_with_any_observation"] = _cohort_total - len(_cohort_none)
+    cov["people_with_observations_including_partners"] = len(per_person)
     cov["recomputed_after_merge"] = True
 
     _abs(args.out).write_text(json.dumps(obs, indent=2))

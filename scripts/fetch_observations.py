@@ -183,6 +183,11 @@ def main() -> int:
     per_person = Counter(o.person_id for o in all_obs)
     by_gender = Counter(gender.get(o.person_id, "?") for o in all_obs)
     people_with = {o.person_id for o in all_obs}
+    # Cohort-only. `people_with` includes PARTNERS, and pairing it with a
+    # cohort-only denominator produced "covering 14 of 14 people" in the same
+    # block that listed 5 cohort members with none.
+    cohort_qids = {p["wikidata_qid"] for p in cohort["people"]}
+    cohort_with = people_with & cohort_qids
 
     out = REPO / args.out
     out.mkdir(parents=True, exist_ok=True)
@@ -219,7 +224,8 @@ def main() -> int:
         ],
         "coverage": {
             "total_observations": len(all_obs),
-            "cohort_people_with_any_observation": len(people_with),
+            "cohort_people_with_any_observation": len(cohort_with),
+            "people_with_observations_including_partners": len(people_with),
             "cohort_people_total": len(cohort["people"]),
             "by_gender": dict(by_gender),
             "per_person": {k: v for k, v in per_person.most_common()},

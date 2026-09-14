@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `f0805907f922`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `1856ee8b4a47`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -18,7 +18,7 @@ This report covers the 14-person pilot. Three companion documents cover what cam
 
 The rubric behaves as intended under adversarial testing: 25 of 27 stress scorings succeeded and every construct check passed. Two model families independently agreed on the calibration anchor.
 
-But across the 14-person cohort, the permitted sources yielded **41 attractiveness observations total**, covering 14 of 14 people. 5 people have none at all.
+But across the 14-person cohort, the permitted sources yielded **41 attractiveness observations total**, covering 9 of 14 cohort people; 5 have none at all. A further 5 people outside the cohort carry observations — partners, whose evidence is what makes a pairing jointly covered.
 
 Across all 31 relationship episodes and 20 co-starring films — **51 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **4** pairings are jointly covered.
 

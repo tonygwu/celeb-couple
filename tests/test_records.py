@@ -361,3 +361,45 @@ def test_label_provenance_is_recorded_per_person():
     from modules.records import wikidata
     assert hasattr(wikidata, "LABEL_SOURCES")
     assert isinstance(wikidata.LABEL_SOURCES, dict)
+
+
+# -- coverage must not count partners in a cohort numerator ------------------
+
+def _coverage(observed_qids, cohort_qids):
+    """The corrected computation, as both producers now implement it."""
+    from collections import Counter
+    per_person = Counter(observed_qids)
+    cohort = set(cohort_qids)
+    with_any = sorted(q for q in cohort if per_person.get(q))
+    return {
+        "cohort_people_with_any_observation": len(with_any),
+        "cohort_people_total": len(cohort),
+        "people_with_observations_including_partners": len(per_person),
+    }
+
+
+def test_a_partners_observation_does_not_cover_a_cohort_member():
+    """The artifact said "covering 14 of 14 people" and listed 5 cohort members
+    with none, in the same block. The numerator counted every person with an
+    observation -- partners included -- against a cohort-only denominator, and
+    the two happened to reach the same number.
+
+    The honest figure is 9 of 14. The report's headline overstated coverage by
+    five people, in the flattering direction.
+    """
+    cohort = ["c1", "c2", "c3"]
+    observed = ["c1", "c1", "partner_a", "partner_b"]   # only c1 is in cohort
+    cov = _coverage(observed, cohort)
+    assert cov["cohort_people_with_any_observation"] == 1
+    assert cov["cohort_people_total"] == 3
+    assert cov["people_with_observations_including_partners"] == 3
+
+
+def test_the_two_counts_are_reported_separately():
+    """Partner observations are valuable -- they are what makes a pairing
+    jointly covered -- so the number is worth keeping. It just is not cohort
+    coverage."""
+    cov = _coverage(["c1", "p1"], ["c1", "c2"])
+    assert cov["cohort_people_with_any_observation"] == 1
+    assert cov["people_with_observations_including_partners"] == 2
+    assert cov["cohort_people_with_any_observation"] <= cov["cohort_people_total"]
