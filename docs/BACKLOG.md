@@ -99,21 +99,31 @@ fired on a downstream number. Neither would have surfaced on its own.
   primary view rather than a scenario, or a within-shape calibration that would
   have to be disclosed as a modelling convention. **Difficulty: hard, and it is
   a methodology decision rather than a coding one.**
-- **Rater noise rests on one judge and two dossiers.** Codex hit 0% quota
-  mid-run. Re-run with both families when it resets in ~5 days.
-  **Difficulty: easy, blocked on quota.**
+- **Rater noise rests on ONE judge family.** Six dossiers now, four repeats
+  each, but codex hit 0% quota mid-run so all of it is `fable`. The plan chose
+  two families specifically so a one-family idiosyncrasy could be told from a
+  property of the rubric, and that check has never run on real evidence. Re-run
+  with both when codex resets. **Difficulty: easy, blocked on quota.**
 - **The award shape's noise is unmeasured, not zero.** Two dossiers, four
   repeats each, returned 92 eight times out of eight. That is much stronger
   than the original four-of-four but still cannot distinguish low variance from
   none, so no LSD is quoted for the shape. More dossiers would settle it.
   **Difficulty: easy, blocked on quota.**
-- **`measure_rater_noise.py --account` hardcodes `/Users/tonygwu/.claude-e`.**
-  The account list should be derived from `quotapick status`, not typed: the
-  operator's own notes record four separate places that broke when an account
-  was added. **Difficulty: easy.**
-- **Nearby-period bound costs 2 pairings.** Widening +/-1 to +/-2 would take
-  joint coverage from 2 to 3 distinct pairings, saturating at 6. Not done,
-  because a wider bound reuses an estimate further from the period it describes.
+- ~~`measure_rater_noise.py --account` hardcodes a config-dir path.~~
+  **Fixed 2026-09-14.** All six quota-spending scripts defaulted `--account` to
+  `/Users/tonygwu/.claude-e`, which that night was at 0% on its 5-hour window
+  while another account had 66% fable headroom — a wrong default is worse than
+  none, because the run fails as `auth_or_quota` and reads like a broken judge.
+  There is no default now: `packages/llmkit/accounts.py` takes `--account` or
+  `CELEB_ACCOUNT`, and otherwise refuses while naming the config directories it
+  can see. Discovery globs rather than enumerating letters, so a new account
+  needs no code change.
+- **Nearby-period bound costs 2 pairing-periods.** Widening +/-1 to +/-2
+  would take joint coverage from 2 to 4, and the count reaches 9 at +/-8 and
+  goes no higher over the range measured — see the table in the M0 report's
+  "Why joint coverage does not move". Not done, because a wider bound reuses an
+  estimate further from the period it is supposed to describe, which is the
+  manufactured precision the bound exists to prevent.
   **Difficulty: a decision, not a task.**
 - ~~Partner gender is `unknown` for the whole partner universe.~~ **Fixed
   2026-09-14.** Sourced from Wikidata P21, which is a public-identity statement
