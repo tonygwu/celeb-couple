@@ -1,0 +1,50 @@
+{
+  "head" : {
+    "vars" : [ "seed", "other", "otherLabel", "g", "sl" ]
+  },
+  "results" : {
+    "bindings" : [ {
+      "seed" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q47664"
+      },
+      "other" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q5084390"
+      },
+      "g" : {
+        "type" : "uri",
+        "value" : "http://ww
+...
+www.wikidata.org/entity/Q483118"
+      },
+      "other" : {
+        "type" : "uri",
+        "value" : "http://www.wikidata.org/entity/Q14752155"
+      },
+      "g" : {
+        "type" : "uri",
+        "valSPARQL-QUERY: queryStr=
+SELECT DISTINCT ?seed ?other ?otherLabel ?g ?sl WHERE {
+  VALUES ?seed { wd:Q47664 wd:Q483118 wd:Q483907 wd:Q48410 wd:Q49004 }
+  ?film wdt:P31/wdt:P279* wd:Q11424 .
+  ?film wdt:P161 ?seed , ?other .
+  FILTER(?other != ?seed)
+  ?other wdt:P31 wd:Q5 ; wdt:P21 ?g ; wikibase:sitelinks ?sl .
+  FILTER(?sl >= 40)
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+} LIMIT 20000
+
+java.util.concurrent.TimeoutException
+	at java.util.concurrent.FutureTask.get(FutureTask.java:205)
+	at com.bigdata.rdf.sail.webapp.BigdataServlet.submitApiTask(BigdataServlet.java:292)
+	at com.bigdata.rdf.sail.webapp.QueryServlet.doSparqlQuery(QueryServlet.java:678)
+	at com.bigdata.rdf.sail.webapp.QueryServlet.doGet(QueryServlet.java:290)
+	at com.bigdata.rdf.sail.webapp.RESTServlet.doGet(RESTServlet.java:240)
+	at com.bigdata.rdf.sail.webapp.MultiTenancyServlet.doGet(MultiTenancyServlet.java:273)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:687)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:790)
+	at org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:865)
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1655)
+	at org.wikidata.query.rdf.blazegraph.throttling.ThrottlingFilter.doFilter(ThrottlingFilter.java:339)
+	at org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler

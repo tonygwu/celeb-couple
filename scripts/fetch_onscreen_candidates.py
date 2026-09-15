@@ -18,13 +18,21 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-from packages.llmkit.artifacts import require       # noqa: E402
-from modules.records.wikidata import _query, _val   # noqa: E402
+from packages.llmkit.artifacts import require                       # noqa: E402
+from modules.records import wikidata as wdmod                       # noqa: E402
+from modules.records.wikidata import (                              # noqa: E402
+    TruncatedResult, _val, batched_query)
 
 #: Films where both a male and a female roster member are credited cast (P161).
 #: Q11424 is "film"; the subclass walk catches documentary, animated film, etc.
+#:
+#: DISTINCT is load-bearing, not tidiness. A film with several P31 values that
+#: each reach Q11424 -- "film" AND "romantic comedy film", say -- yields one
+#: SOLUTION PER PATH, and P577 repeats per country on top of that. On the
+#: 100-name roster the duplicates inflated 2473 real rows to 2570, and every
+#: one of them counted against the LIMIT below.
 QUERY = """
-SELECT ?film ?filmLabel ?pub ?prec ?m ?f WHERE {
+SELECT DISTINCT ?film ?filmLabel ?pub ?prec ?m ?f WHERE {
   VALUES ?m { %s }
   VALUES ?f { %s }
   ?film wdt:P31/wdt:P279* wd:Q11424 .
@@ -36,6 +44,32 @@ SELECT ?film ?filmLabel ?pub ?prec ?m ?f WHERE {
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 } LIMIT %d
 """
+
+
+def fetch_rows(men: list[str], women: list[str], limit: int,
+               chunk_size: int) -> tuple[list[dict], int]:
+    """Query in batches of `chunk_size` men, each against every woman.
+
+    Batching is what makes the LIMIT guard meaningful. One query over 50x50
+    people is both slow and close enough to any cap that a guard would fire on
+    a legitimate result; a batch of ten men is not. `batched_query` owns the
+    guard, halves a batch the service times out on, and raises
+    `TruncatedResult` on a batch that comes back at its cap.
+
+    A man the service cannot answer for even alone is NOT tolerated here, so no
+    `on_unreachable` handler is passed and the timeout propagates. The roster
+    expander can afford to record an unreachable seed and carry on, because a
+    missing seed only makes the snowball smaller. A missing man here means
+    every film he is in is absent from the candidate set, which is the exact
+    defect this guard exists for.
+    """
+    w_values = " ".join(f"wd:{q}" for q in women)
+    rows = batched_query(
+        lambda chunk: QUERY % (" ".join(f"wd:{q}" for q in chunk), w_values, limit),
+        men, chunk_size, limit, label="batch")
+    batches = -(-len(men) // chunk_size)
+    return rows, batches
+
 
 #: Wikidata time precision codes, as used everywhere else in this project.
 _YEAR, _MONTH, _DAY = 9, 10, 11
@@ -95,12 +129,27 @@ def choose_release(values: list[tuple[str, int]]) -> tuple[str, int] | None:
     return min(v for v in values if v[0][:4] == best)
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
+    """Separate from main() so the defaults can be asserted without a run.
+
+    The default `--limit` is the number this script's bug was made of, so a
+    test has to be able to read it.
+    """
     ap = argparse.ArgumentParser()
     ap.add_argument("--cohort", default="docs/pilot-cohort.json")
-    ap.add_argument("--limit", type=int, default=400)
+    # Per BATCH, not per run. 20000 sits far above the ~600 rows a ten-man
+    # batch produces on the 100-name roster, so the guard below fires on a
+    # real truncation rather than on a big honest answer.
+    ap.add_argument("--limit", type=int, default=20000,
+                    help="row cap per batch; a batch that reaches it is refused")
+    ap.add_argument("--chunk-size", type=int, default=10,
+                    help="men per batch; every batch queries all the women")
     ap.add_argument("--out", default="data/pilot/records/onscreen_candidates.json")
-    args = ap.parse_args()
+    return ap
+
+
+def main() -> int:
+    args = build_parser().parse_args()
 
     people = require(REPO, args.cohort)["people"]
     names = {p["wikidata_qid"]: p["display_name"] for p in people}
@@ -111,8 +160,7 @@ def main() -> int:
               "an on-screen pairing needs one of each")
         return 1
 
-    rows = _query(QUERY % (" ".join(f"wd:{q}" for q in men),
-                           " ".join(f"wd:{q}" for q in women), args.limit))
+    rows, batches = fetch_rows(men, women, args.limit, args.chunk_size)
     seen: dict[tuple, dict] = {}
     pubs: dict[tuple, set] = {}
     rows_missing_ids = 0
@@ -166,6 +214,11 @@ def main() -> int:
         "cohort": args.cohort,
         "status": "UNVERIFIED CANDIDATES",
         "rows_missing_ids": rows_missing_ids,
+        "rows_fetched": len(rows),
+        "batches": batches,
+        "row_limit_per_batch": args.limit,
+        "chunk_size": args.chunk_size,
+        "transient_retries": list(wdmod.RETRIES),
         "labels_unresolved": unresolved,
         "caveat": ("Co-appearance in a cast list proves only that both were in "
                    "the film. A qualifying on-screen pairing needs an established "

@@ -22,8 +22,9 @@ from packages.ids.keys import pair_key, stable_id
 from packages.temporal.dates import Censoring, Interval, PreciseDate, from_wikidata
 
 __all__ = ["RelationshipCandidate", "fetch_relationships", "fetch_birth_dates",
-           "fetch_gender", "fetch_labels", "SPARQL",
-           "LOOKUP_FAILURES", "LABEL_SOURCES"]
+           "fetch_gender", "fetch_labels", "query_with_retry", "SPARQL",
+           "TRANSIENT_HTTP_STATUS", "WikidataQueryTimeout", "TruncatedResult",
+           "batched_query", "LOOKUP_FAILURES", "LABEL_SOURCES"]
 
 SPARQL = "https://query.wikidata.org/sparql"
 #: Imported, not copied. See packages/wiki/fetch.py.
@@ -97,13 +98,171 @@ def fetch_labels(qids: list[str], timeout: int = 45) -> dict[str, str]:
     return out
 
 
+class WikidataQueryTimeout(RuntimeError):
+    """The query service gave up part-way and said so INSIDE a 200 response.
+
+    Measured 2026-09-15 and worth stating plainly, because it is the exact
+    shape of failure that looks like success. The Wikidata Query Service caps
+    a query at about sixty seconds. It does not answer with a 503. It streams
+    result rows, and when the cap hits it stops mid-JSON and appends its own
+    log to the same body:
+
+        "valSPARQL-QUERY: queryStr=
+        SELECT DISTINCT ?seed ...
+        java.util.concurrent.TimeoutException
+
+    The status line stays 200 and the body is 595 KB, so every liveness check
+    passes. What arrives is a truncated result set with a Java stack trace
+    glued to the end of it.
+
+    `json.loads` happens to reject this, which is the only reason it was ever
+    noticed. That is luck, not a guard. This exception makes the diagnosis
+    explicit so the caller can do the one thing that actually helps, which is
+    ask for less in one query.
+    """
+
+
+#: The strings the service leaves in a timed-out body. Two of them, because a
+#: check on the Java class name alone would miss a differently worded abort,
+#: and one on the query echo alone would fire on a query about SPARQL itself.
+_TIMEOUT_MARKERS = ("java.util.concurrent.TimeoutException",
+                    "QueryTimeoutException",
+                    "SPARQL-QUERY: queryStr=")
+
+
 def _query(sparql: str, timeout: int = 60) -> list[dict]:
     url = SPARQL + "?" + urllib.parse.urlencode({"query": sparql})
     req = urllib.request.Request(
         url, headers={"User-Agent": USER_AGENT, "Accept": "application/sparql-results+json"}
     )
     with urllib.request.urlopen(req, timeout=timeout) as fh:
-        return json.load(fh)["results"]["bindings"]
+        body = fh.read().decode("utf-8", errors="replace")
+    try:
+        return json.loads(body)["results"]["bindings"]
+    except json.JSONDecodeError:
+        # Order matters. The markers are only consulted once the body has
+        # already failed to parse, so a legitimate result that happens to
+        # quote one of them is never mistaken for a timeout. A body that is
+        # unparseable for any OTHER reason re-raises unchanged rather than
+        # being relabelled into a diagnosis nobody verified.
+        if any(marker in body for marker in _TIMEOUT_MARKERS):
+            raise WikidataQueryTimeout(
+                f"the query service aborted after {len(body)} bytes of a 200 "
+                "response and appended its own timeout log. The query asks for "
+                "too much at once; split it.") from None
+        raise
+
+
+class TruncatedResult(RuntimeError):
+    """A batch came back at its LIMIT, so rows were dropped with nothing said.
+
+    Measured 2026-09-15. `fetch_onscreen_candidates.py` ran ONE query with
+    `LIMIT 400` against a 100-name roster that produces 2570 rows. Wikidata
+    returned the first 400 and dropped 2170 in silence, and the artifact
+    recorded 136 co-starring pairs across 74 films as if that were the answer.
+    The real figure is 808 pairs across 502 films, and 25 of the 100 roster
+    members had NO pair at all, so Gigli, Armageddon and Ghosted each looked
+    like a gap in Wikidata rather than a gap in the query.
+
+    A short result set nobody can see is worse than a crash. This raises.
+    """
+
+
+def batched_query(build, items: list, chunk_size: int, limit: int,
+                  label: str = "batch", timeout: int = 180,
+                  on_unreachable=None, log=print) -> list[dict]:
+    """Run one query per chunk of `items`, guarding both silent-loss modes.
+
+    `build(chunk)` returns the SPARQL for that chunk. Two different failures
+    are refused rather than absorbed, and they are not the same failure:
+
+    AT THE LIMIT. The service answered fully and the answer was capped, so
+    rows were dropped. Nothing can rescue that from here, and it raises.
+
+    TIMED OUT. The service answered 200, streamed part of the result and glued
+    a Java stack trace to the end of the body. Retrying the same query is
+    pointless because the query is what is too big, so the chunk is HALVED and
+    each half tried again, down to a single item. An item that still times out
+    alone is handed to `on_unreachable` and is never quietly skipped; with no
+    handler the timeout propagates.
+    """
+    rows: list[dict] = []
+    queue = [list(items[i:i + chunk_size])
+             for i in range(0, len(items), chunk_size)]
+    done = 0
+    while queue:
+        chunk = queue.pop(0)
+        try:
+            got = query_with_retry(build(chunk), timeout=timeout)
+        except WikidataQueryTimeout as exc:
+            if len(chunk) == 1:
+                if on_unreachable is None:
+                    raise
+                log(f"    {label}: {chunk[0]} times out on its own; "
+                    "recorded as unreachable")
+                on_unreachable(chunk[0], exc)
+                continue
+            half = len(chunk) // 2
+            log(f"    {label}: chunk of {len(chunk)} timed out, splitting into "
+                f"{half} + {len(chunk) - half}")
+            queue[:0] = [chunk[:half], chunk[half:]]
+            time.sleep(PACE_SECONDS)
+            continue
+        if len(got) >= limit:
+            raise TruncatedResult(
+                f"{label} chunk of {len(chunk)} returned {len(got)} rows, at or "
+                f"over its LIMIT of {limit}. Wikidata dropped the rest silently. "
+                "Use a smaller chunk size or a larger limit.")
+        done += 1
+        log(f"    {label} {done}: {len(chunk)} item(s) -> {len(got)} rows")
+        rows += got
+        time.sleep(PACE_SECONDS)
+    return rows
+
+
+#: Statuses the Wikidata Query Service returns when it is momentarily
+#: unavailable rather than when the query is wrong. Measured 2026-09-15: a
+#: batched co-star query got a plain 502 on its third batch, which crashed the
+#: whole fetch after two batches of good work. A 400 is a bad query and must
+#: never be retried, because retrying it hides the error behind a delay.
+TRANSIENT_HTTP_STATUS = frozenset({429, 500, 502, 503, 504})
+
+#: Retries are COUNTED, not swallowed. The caller reads this and records it in
+#: the artifact, so a run that only succeeded on the fourth attempt does not
+#: look identical to one that succeeded first time.
+RETRIES: list[dict] = []
+
+
+def query_with_retry(sparql: str, timeout: int = 60, attempts: int = 4,
+                     backoff: float = 3.0) -> list[dict]:
+    """`_query` with bounded retries on a transient endpoint failure.
+
+    This is NOT a permissive wrapper. A 400 (bad query) raises on the first
+    attempt, and running out of attempts raises the last error rather than
+    returning a short list, because a silently short result set is exactly the
+    defect this module was fixed for.
+    """
+    import urllib.error
+
+    last: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return _query(sparql, timeout=timeout)
+        except urllib.error.HTTPError as exc:
+            if exc.code not in TRANSIENT_HTTP_STATUS:
+                raise
+            last = exc
+        except (urllib.error.URLError, TimeoutError) as exc:
+            last = exc
+        RETRIES.append({"attempt": attempt, "error": f"{type(last).__name__}: {last}"})
+        # Printed as well as recorded. A silent retry makes a run that is
+        # backing off look identical to a run that has hung, which is the
+        # confusion AGENTS.md's "arm a watcher" note is about.
+        print(f"    wikidata retry {attempt}/{attempts}: {type(last).__name__}: {last}",
+              flush=True)
+        if attempt < attempts:
+            time.sleep(backoff * attempt)
+    raise last
 
 
 def _val(row: dict, key: str) -> str | None:
