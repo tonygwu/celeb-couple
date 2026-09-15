@@ -112,3 +112,34 @@ def test_negative_paw_is_representable_and_is_the_point():
              "work": None, "gap": "-0.6", "centrality": "1.0",
              "male_qid": "M", "female_qid": "W", "male": "m", "female": "w"}]
     assert paw_total(contributions_for(recs, "M")) == Fraction(-3, 5)
+
+
+def test_someone_with_only_zero_centrality_pairings_is_not_on_the_board():
+    """They have no romance to score. Listing them at +0.00 reads as
+    "measured, and came out even", which is the confusion paw_rate returns None
+    to avoid. Caught on a dry run: 8 of 20 rows on the partial board were
+    people whose only pairings were cast-list co-appearances."""
+    from modules.pairing.boards import build_board
+    recs = [{"pairing_id": "p", "domain": "on_screen", "period": "2000",
+             "work": "Ensemble", "gap": "1.0", "centrality": "0.0",
+             "male_qid": "M", "female_qid": "W", "male": "Man", "female": "Woman"}]
+    assert build_board(recs, gender="male", domain="on_screen",
+                       names={"M": "Man"}, min_pairings=1) == []
+
+
+def test_a_person_with_one_real_romance_among_co_appearances_still_qualifies():
+    from modules.pairing.boards import build_board
+    recs = [
+        {"pairing_id": "p1", "domain": "on_screen", "period": "2000", "work": "A",
+         "gap": "1.0", "centrality": "0.0", "male_qid": "M", "female_qid": "W",
+         "male": "Man", "female": "Woman"},
+        {"pairing_id": "p2", "domain": "on_screen", "period": "2001", "work": "B",
+         "gap": "0.4", "centrality": "1.0", "male_qid": "M", "female_qid": "W2",
+         "male": "Man", "female": "Woman2"},
+    ]
+    rows = build_board(recs, gender="male", domain="on_screen",
+                       names={"M": "Man"}, min_pairings=1)
+    assert len(rows) == 1
+    # The zero-weight pairing must not inflate the pairing count either.
+    assert rows[0]["pairings"] == 1
+    assert abs(rows[0]["paw_total"] - 0.4) < 1e-9

@@ -104,8 +104,16 @@ def build_board(records: list[dict], *, gender: str, domain: str,
     rows = []
     for qid in people:
         cs = [c for c in contributions_for(records, qid) if c.domain == domain]
-        if len(cs) < min_pairings:
+        # QUALIFYING pairings are those with non-zero weight. A person whose
+        # only pairings are cast-list co-appearances has no romance to score,
+        # and listing them at +0.00 reads as "measured, and came out even" --
+        # the same confusion paw_rate returns None to avoid. Counting every
+        # contribution here while excluding zero-weight ones there was
+        # inconsistent: the board said nothing and zero were the same thing.
+        scoring = [c for c in cs if c.weight != 0]
+        if len(scoring) < min_pairings:
             continue
+        cs = scoring
         rate = paw_rate(cs)
         rows.append({
             "qid": qid, "name": names.get(qid, qid),
