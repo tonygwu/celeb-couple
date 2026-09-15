@@ -238,6 +238,7 @@ that drift is the only reason `modules/analytics/comparability.py` exists.
 |---|---|---|
 | `scripts/select_m1_slice.py` | picks the M1 focal actors and their pairings by a fixed rule, before any judging | no |
 | `scripts/score_pairings.py` | judges each pairing once and returns the gap | **yes** |
+| `scripts/build_boards.py` | renders the four leaderboards from judged gaps, and refuses to call a ranking established without measured spread | no |
 
 The v4 rubric is `rubrics/pairing/`. `modules/pairing/judge.py` parses a verdict
 and REFUSES one whose two absolute scores contradict its own gap.

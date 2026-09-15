@@ -143,6 +143,10 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   run scripts/conclusion_robustness.py
   run scripts/verify_trap.py
   run scripts/cross_run_stability.py
+  # Plan v4. Gated on the artifact existing, like the other roster-scale
+  # stages: most clones have no judged pairings and the boards are not part of
+  # the v3 report.
+  [ -f data/roster100/run/pairing_scores.json ] && run scripts/build_boards.py
   run scripts/write_m0_report.py
   # Last, because it checks the prose against the artifacts every stage above
   # just rewrote. Running it earlier would audit the previous run's numbers.
