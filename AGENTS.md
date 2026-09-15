@@ -85,6 +85,33 @@ Your checkout name is your **handle**. Use it when you claim work.
 9. **One session, one terminal.** Never resume the same session id from two
    checkouts at once. Concurrent appends corrupt the transcript.
 
+## Staging by name is not enough: check the index
+
+`git add <names>` stages those names. **`git commit` then commits the WHOLE
+INDEX**, including anything another agent staged and had not yet committed. In a
+shared clone that is a real and easy mistake, and rule 3 above does not prevent
+it.
+
+It happened on 2026-09-15. A commit meant to carry two files carried eight: 502
+lines of `expand_roster.py`, 270 of its tests, `modules/records/wikidata.py` and
+three more, all another agent's in-flight work sitting staged in the index.
+
+**Treat a populated index in this clone as somebody else's work in progress.**
+Before every commit:
+
+```sh
+git diff --cached --name-only        # is anything here not yours?
+git commit -- path/one path/two      # commits ONLY these paths, index or not
+```
+
+`git commit -- <paths>` is the safe form: it ignores the rest of the index
+entirely, so a foreign staged file cannot ride along.
+
+The same incident showed a second thing worth knowing: because the commit took
+the index, it took the INDEX's copy of a file that was also dirty in the working
+tree. The two differed. Check `git show HEAD:<file>` after committing a file two
+agents are editing, rather than assuming your version is the one that landed.
+
 ## Git identity
 
 Every checkout is configured with the GitHub noreply author address:
