@@ -19,7 +19,7 @@ sys.path.insert(0, str(REPO))
 from packages.ids.keys import stable_id                               # noqa: E402
 from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted            # noqa: E402
-from packages.llmkit.contract import load_contract                    # noqa: E402
+from packages.llmkit.contract import MENTIONS_RUBRIC_VERSION, load_contract                    # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, JudgeError            # noqa: E402
 from packages.llmkit.manifest import RunManifest                      # noqa: E402
 
@@ -67,7 +67,7 @@ def main() -> int:
               f"{len(cohort)} model calls, cap {args.max_calls}")
         return 0
 
-    contract = load_contract(RUBRIC, SCHEMA, "mentions-1.0")
+    contract = load_contract(RUBRIC, SCHEMA, MENTIONS_RUBRIC_VERSION)
     rubric, schema = RUBRIC.read_text(), SCHEMA.read_text()
     judge = ClaudeJudge("fable", "claude-fable-5-1", config_dir=resolve_account(args.account))
     budget = Budget(max_calls=args.max_calls)

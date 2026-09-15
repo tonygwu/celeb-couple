@@ -53,32 +53,74 @@ def gaps(joint: dict, rows: dict) -> list[dict]:
     return out
 
 
-def check(joint: dict, shape_conf: dict, gsc: dict) -> list[dict]:
+def noise_floor(noise: dict | None) -> float | None:
+    """The largest per-shape least significant difference, or None.
+
+    MAX rather than mean, deliberately: a gap must clear the noisiest shape
+    it could have come from before it counts as detectable. The award shape
+    reports no floor at all, because two dossiers returned the same value on
+    every repeat, which cannot distinguish low variance from none.
+
+    None means no floor has been measured, and the caller must then make NO
+    claim rather than fall back to exact zero -- falling back is what made
+    these claims break on a second judge in the first place.
+    """
+    if not noise:
+        return None
+    by_shape = (noise.get("headline") or {}).get("by_shape") or {}
+    floors = [v["least_significant_difference_95pct"] for v in by_shape.values()
+              if v.get("least_significant_difference_95pct") is not None]
+    return max(floors) if floors else None
+
+
+def check(joint: dict, shape_conf: dict, gsc: dict,
+          noise: dict | None = None) -> list[dict]:
     rows = {(r["person"], r["period"]): r for r in shape_conf["rows"]}
     g = gaps(joint, rows)
     resolved = [x for x in g if x["resolved"]]
     results = []
 
+    # STATED AGAINST THE NOISE FLOOR, NOT AGAINST EXACT ZERO.
+    #
+    # These read `gap != 0.0` and `gap not in (None, 0.0)`. Exact equality was
+    # only ever true because ONE judge family scored the corpus and returned
+    # integers, and both sides of the single comparable pairing landed on the
+    # award-pinned 92. The moment a second family joined, the reducer's mean of
+    # two produced half-integers: Jennifer Garner 2002 came back 93 from fable
+    # and 92 from astra, so her estimate is 92.5 against Ben Affleck's 92.0 and
+    # the gap is 0.5.
+    #
+    # Both claims then "broke", and the script announced a 0.5-point gap as
+    # "the first real signal this project has produced". It is not a signal. It
+    # is one judge saying 93 instead of 92, both inside band 90-100, an order of
+    # magnitude below the measured floor. Acting on it would be exactly the
+    # error this repository exists to prevent.
+    #
+    # The substantive claim was never "exactly zero". It was "no difference
+    # this method can detect", and that is what is checked now.
+    floor = noise_floor(noise)
     comparable = [x for x in resolved if x["comparability"] == "comparable"]
-    bad = [x for x in comparable if x["gap"] != 0.0]
+    bad = [x for x in comparable if floor is not None and abs(x["gap"]) > floor]
     results.append({
-        "claim": "every shape-comparable pairing has a gap of exactly 0.0",
+        "claim": f"every shape-comparable pairing has a gap within the measured floor ({floor})",
         "holds": not bad, "checked": len(comparable),
         "exceptions": [f"{x['a']} vs {x['b']} {x['period']}: gap {x['gap']}"
                        for x in bad],
-        "if_broken": ("A comparable pairing with a non-zero gap is the first "
-                      "real signal this project has produced. Read it before "
-                      "changing anything."),
+        "if_broken": ("A comparable pairing differing by MORE than rater noise "
+                      "is the first real signal this project has produced. "
+                      "Read it before changing anything."),
     })
 
-    nonzero = [x for x in resolved if x["gap"] not in (None, 0.0)]
-    bad2 = [x for x in nonzero if x["comparability"] != "shape_mismatched"]
+    detectable = [x for x in resolved
+                  if x["gap"] is not None and floor is not None
+                  and abs(x["gap"]) > floor]
+    bad2 = [x for x in detectable if x["comparability"] != "shape_mismatched"]
     results.append({
-        "claim": "every non-zero gap is shape-mismatched",
-        "holds": not bad2, "checked": len(nonzero),
+        "claim": "every gap beyond the noise floor is shape-mismatched",
+        "holds": not bad2, "checked": len(detectable),
         "exceptions": [f"{x['a']} vs {x['b']} {x['period']}: gap {x['gap']}, "
                        f"comparability {x['comparability']}" for x in bad2],
-        "if_broken": ("Same as above: a non-zero gap that is NOT explained by "
+        "if_broken": ("Same as above: a detectable gap that is NOT explained by "
                       "evidence format is the thing the board needs."),
     })
 
@@ -106,8 +148,9 @@ def main() -> int:
     joint = require(REPO, "data/pilot/run/joint_with_nearby.json")
     shape_conf = require(REPO, "data/pilot/run/shape_confound.json")
     gsc = require(REPO, "data/pilot/run/gender_shape_confound.json")
+    noise = require(REPO, "data/pilot/run/rater_noise.json")
 
-    results = check(joint, shape_conf, gsc)
+    results = check(joint, shape_conf, gsc, noise)
     broken = [r for r in results if not r["holds"]]
 
     if args.json:

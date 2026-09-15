@@ -463,10 +463,36 @@ def test_the_opening_scopes_the_two_family_claim():
 
 
 def test_the_scores_section_says_how_many_judges_produced_them():
+    """A per-judge column obliges the report to say who produced it.
+
+    This asserted the literal phrase "rests on ONE judge", which was the honest
+    caveat while codex was out of quota and fable scored everything. Both
+    families scored the corpus on 2026-09-15, so the caveat became false and the
+    test failed for the RIGHT reason. The obligation survives; its wording does
+    not.
+    """
     text = (REPO / "docs/M0-REPORT.md").read_text()
     if "Scored person-periods" not in text:
         pytest.skip("report not generated in this clone")
-    assert "rests on ONE judge" in text or "judge gap" not in text
+    if "judge gap" not in text:
+        return          # no per-judge column, nothing to account for
+    assert "rests on ONE judge" in text or "from both families" in text, (
+        "the report shows a per-judge gap column without saying how many judge "
+        "families produced it")
+
+
+def test_the_agreement_rate_is_not_reported_without_its_confound():
+    """18 of 40 identical was rendered as "the judges agree almost perfectly".
+
+    It is 45%, and the rate is nearly collinear with astra's effort flag, so
+    quoting it bare invites a conclusion this corpus cannot support.
+    """
+    text = (REPO / "docs/M0-REPORT.md").read_text()
+    if "came back identical from both families" not in text:
+        pytest.skip("report not generated, or only one family scored")
+    assert "agree almost perfectly" not in text
+    assert "effort_took_effect" in text, (
+        "the agreement rate is stated without the confound that explains most of it")
 
 
 def test_the_bound_paragraph_agrees_with_the_bound_table():
@@ -567,7 +593,11 @@ def test_the_limitations_section_still_names_the_real_gaps():
     tail = text[text.index("What M0 did not establish"):]
     assert "grounding audit is not done" in tail
     assert "Human verification has not happened" in tail
-    assert "unmeasured" in tail, "the single-family gap must survive"
+    # Was `"unmeasured" in tail`, guarding the single-family gap. Both families
+    # have now scored, so rater noise is measured -- thinly. The limitation
+    # changed; the obligation to state one did not.
+    assert "Rater noise is measured but thin" in tail or "unmeasured" in tail, (
+        "the rater-noise limitation was dropped rather than updated")
 
 
 def test_a_list_valued_artifact_field_is_not_rendered_raw():

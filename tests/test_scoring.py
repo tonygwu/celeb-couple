@@ -8,7 +8,9 @@ from pathlib import Path
 import pytest
 
 from packages.llmkit.budget import Budget, BudgetExhausted
-from packages.llmkit.contract import load_contract, refuse_mixed_contracts, MixedContractError
+from packages.schema.records import band_for  # noqa: E402
+from packages.llmkit.contract import (STANDING_RUBRIC_VERSION, load_contract,
+                                      refuse_mixed_contracts, MixedContractError)
 from packages.llmkit.judges import FakeJudge, JudgeError, assert_subscription_only
 from packages.llmkit.taxonomy import (
     ALL_ERROR_TYPES, E_AUTH_QUOTA, E_CITES_NOTHING, E_SCHEMA, classify_cli_failure,
@@ -22,7 +24,11 @@ REPO = Path(__file__).resolve().parent.parent
 CONTRACT = load_contract(
     REPO / "rubrics/standing/RUBRIC.md",
     REPO / "rubrics/standing/estimate.schema.json",
-    "standing-rubric-2.0",
+    # The constant, not a literal. This hashed the CURRENT rubric bytes while
+    # labelling them `standing-rubric-2.0`, so after the 2.1 bump the fixture
+    # carried a contract id and a version string that disagreed -- the exact
+    # state docs/CONTRACT-BUMP.md calls the worst outcome of a bump.
+    STANDING_RUBRIC_VERSION,
 )
 RUBRIC = (REPO / "rubrics/standing/RUBRIC.md").read_text()
 SCHEMA = (REPO / "rubrics/standing/estimate.schema.json").read_text()
@@ -58,9 +64,17 @@ def _dossier(obs=None):
 
 
 def _reply(**over):
+    """A judge reply whose band matches its estimate unless told otherwise.
+
+    The band used to be hardcoded to "90-100" while `over` could change the
+    estimate, so `_judge("astra", estimate=60)` produced a judge stating
+    "90-100" and returning 60. Once escalation started reading the band, that
+    inconsistency made real verdicts look like agreement. Pass `band=` when a
+    test wants the contradiction on purpose.
+    """
     body = {
         "schema_version": "standing-estimate-2.0", "dossier_id": "d",
-        "scored": True, "estimate": 91, "band": "90-100",
+        "scored": True, "estimate": 91, "band": None,
         "rationale": "obs_1 records a headline award concerning this period.",
         "evidence_ids": ["obs_1"],
         "support": {"reliability": "major_publication",
@@ -69,6 +83,8 @@ def _reply(**over):
                     "source_disagreement": "none"},
     }
     body.update(over)
+    if body.get("band") is None and isinstance(body.get("estimate"), (int, float)):
+        body["band"] = band_for(body["estimate"])
     return json.dumps(body)
 
 
@@ -86,15 +102,31 @@ def _score(judges, dossier, tmp_path, budget=None):
 # -- the happy path ---------------------------------------------------------
 
 def test_two_judges_reduce_to_a_mean_and_keep_both_scores(tmp_path):
+    # Both inside 90-100, so this exercises the MEAN and nothing else. It used
+    # to use 91 and 89, which straddle the 90 boundary -- once escalation moved
+    # from gap size to band, that fixture was a band-crossing case and escalated
+    # correctly, which is tested on its own below.
     est, verdicts, failures = _score(
-        [_judge("fable", estimate=91), _judge("astra", estimate=89)], _dossier(), tmp_path
+        [_judge("fable", estimate=91), _judge("astra", estimate=93)], _dossier(), tmp_path
     )
     assert failures == []
-    assert est.estimate == 90.0
-    assert est.judges == {"fable": 91.0, "astra": 89.0}
+    assert est.estimate == 92.0
+    assert est.judges == {"fable": 91.0, "astra": 93.0}
     assert est.reducer == "mean_of_2"
-    assert est.support.across_judges_gap == 2.0
     assert est.needs_adjudication is False
+
+
+def test_judges_either_side_of_a_band_boundary_escalate_however_small_the_gap(tmp_path):
+    """91 and 89 differ by 2 and disagree about which description applies:
+    "among the most strikingly attractive" against "notably attractive". The
+    mean of 90 asserts the first, which only one judge said."""
+    est, _, _ = _score(
+        [_judge("fable", estimate=91), _judge("astra", estimate=89)], _dossier(), tmp_path
+    )
+    assert est.estimate == 90.0
+    assert est.needs_adjudication is True
+    # The raw gap is still recorded. It is no longer what decides escalation.
+    assert est.support.across_judges_gap == 2.0
 
 
 def test_a_single_source_award_can_reach_the_top_band(tmp_path):
@@ -331,14 +363,19 @@ def test_records_all_lacking_a_contract_id_are_still_one_unknown_version():
     refuse_mixed_contracts([{"estimate": 90}, {"estimate": 80}])
 
 
-def test_the_schema_nullable_enum_landmine_is_still_only_a_landmine():
-    """`missingness_reason` and `band` are declared nullable by `type` while
-    their `enum` omits null. JSON Schema keywords are conjunctive, so null is
-    invalid for both — and every scored record sets missingness_reason to null.
+def test_the_schema_nullable_enum_landmine_was_defused_not_disarmed():
+    """The landmine is gone, and the check that replaced it is a real gate.
 
-    Nothing validates against the schema today, so nothing is broken. This
-    test fails the moment a validator is introduced without fixing the enums,
-    which is the sequence that would reject the entire corpus in one go.
+    This used to guard a defect: `missingness_reason` and `band` were declared
+    nullable by `type` while their `enum` omitted null, so introducing a
+    validator would have rejected all 52 stored verdicts at once. It could only
+    ever return early, because nothing validated.
+
+    The enums were fixed at the 2026-09-14 contract bump and jsonschema is now
+    a dependency, so the real assertions live in
+    tests/test_schema_validates_corpus.py, which validates the corpus rather
+    than reasoning about whether it would pass. This keeps the invariant
+    asserted from here too, so deleting that file cannot silently drop it.
     """
     import json
     from pathlib import Path as _P
@@ -349,17 +386,8 @@ def test_the_schema_nullable_enum_landmine_is_still_only_a_landmine():
         if isinstance(spec.get("type"), list) and "null" in spec["type"]
         and "enum" in spec and None not in spec["enum"]
     ]
-    if not nullable_but_not_in_enum:
-        return          # fixed at a contract bump; nothing to guard
-
-    try:
-        import jsonschema        # noqa: F401
-    except ImportError:
-        return          # the landmine is inert
-
-    raise AssertionError(
-        "jsonschema is now installed and these fields are declared nullable "
-        f"while their enum forbids null: {nullable_but_not_in_enum}. Add null "
-        "to both enums before validating anything, or every scored record in "
-        "the corpus will be rejected. See docs/BACKLOG.md."
+    assert not nullable_but_not_in_enum, (
+        f"these fields are nullable by type and not by enum: {nullable_but_not_in_enum}. "
+        "JSON Schema keywords are conjunctive, so every scored record would be "
+        "rejected. This was fixed once already; see docs/CORRECTIONS.md."
     )

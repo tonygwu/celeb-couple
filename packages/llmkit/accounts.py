@@ -19,7 +19,21 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-__all__ = ["AccountNotChosen", "discover_accounts", "resolve_account"]
+__all__ = ["AccountNotChosen", "discover_accounts", "resolve_account",
+           "DEFAULT_ACCOUNT"]
+
+#: How to ask for the DEFAULT account, the one Claude Code uses when no
+#: config dir is set.
+#:
+#: It cannot be named by a path. Its config file is `~/.claude.json`, which
+#: sits OUTSIDE `~/.claude/`, so pointing CLAUDE_CONFIG_DIR at `~/.claude`
+#: makes Claude Code look inside, find nothing, and scaffold a brand-new
+#: EMPTY account. The run then fails as `auth_or_quota`, which reads as a
+#: broken judge rather than a wrong account.
+#:
+#: The default account is therefore the ABSENCE of a config dir, and
+#: `resolve_account` returns None for it so `ClaudeJudge` pops the variable.
+DEFAULT_ACCOUNT = "default"
 
 #: Read when `--account` is not passed. Lets a chain script set the account
 #: once for several stages without every stage growing a flag.
@@ -49,14 +63,23 @@ def discover_accounts(home: Path | None = None) -> list[Path]:
     return sorted(real or found)
 
 
-def resolve_account(flag: str | None, *, home: Path | None = None) -> str:
-    """Return the config dir to run under, or raise naming the alternatives."""
-    if flag:
-        return flag
-    from_env = os.environ.get(ENV_VAR)
-    if from_env:
-        return from_env
-    seen = discover_accounts(home)
+def resolve_account(flag: str | None, *, home: Path | None = None) -> str | None:
+    """Return the config dir to run under, or raise naming the alternatives.
+
+    Returns **None** for the default account, which is a choice and not a
+    failure to choose: None means "unset CLAUDE_CONFIG_DIR", which is the only
+    way to reach it. Raising still happens when nothing was chosen at all.
+    """
+    chosen = flag or os.environ.get(ENV_VAR)
+    if chosen and chosen.strip().lower() == DEFAULT_ACCOUNT:
+        return None
+    if chosen:
+        return chosen
+    h = Path(home) if home is not None else Path.home()
+    # The default account's directory is NOT offered as a path. Passing it
+    # scaffolds an empty account; see DEFAULT_ACCOUNT. It is listed by its
+    # keyword instead, so following this message cannot produce that failure.
+    seen = [p for p in discover_accounts(home) if p != h / ".claude"]
     listed = ("\n  ".join(str(p) for p in seen) if seen
               else "(none found; is Claude Code installed for this user?)")
     raise AccountNotChosen(
@@ -64,6 +87,11 @@ def resolve_account(flag: str | None, *, home: Path | None = None) -> str:
         "moves between accounts, and the account that was right yesterday can "
         "be at 0% today.\n\n"
         "Run `quotapick status` and pass the one with fable headroom:\n\n"
-        f"  --account <config dir>      or   {ENV_VAR}=<config dir>\n\n"
-        f"Config directories visible here:\n  {listed}\n"
+        f"  --account <config dir>      or   {ENV_VAR}=<config dir>\n"
+        f"  --account {DEFAULT_ACCOUNT}           the account bare `claude` uses\n\n"
+        f"Config directories visible here:\n  {listed}\n\n"
+        f"`{DEFAULT_ACCOUNT}` is deliberately a keyword and not a path: the\n"
+        f"default account's config is {h / '.claude.json'}, OUTSIDE\n"
+        f"{h / '.claude'}, so passing that directory scaffolds an empty\n"
+        f"account and the run fails as auth_or_quota.\n"
     )

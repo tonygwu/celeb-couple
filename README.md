@@ -54,7 +54,7 @@ The measurement works. The evidence does not support the product as specified.
 - Two model families agree closely on the SYNTHETIC stress corpus. On the real
   dossiers only one family ran — codex reached 0% of its quota window mid-run —
   so cross-family agreement there is unmeasured. Repeat-scoring puts the
-  least significant difference at about 2.56 points for rank-shaped estimates,
+  least significant difference at about 1.03 points for rank-shaped estimates,
   over four dossiers repeated four times each. All four moved. The two award
   dossiers returned the same number eight times out of eight, which is still a
   sample too small to call zero, so no figure is quoted for that shape. Scoring
@@ -62,10 +62,10 @@ The measurement works. The evidence does not support the product as specified.
   points, which is what this noise floor predicts.
 - Evidence **density** was the first bottleneck: every dossier once held exactly
   one observation, so the corpus produced 2 distinct values across a 5.5-point
-  range. It now produces 12 across a range of 30.0
+  range. It now produces 17 across a range of 30.0
   (64.0–94.0), against the synthetic stress corpus's 29.
   The measurement apparatus is no longer the limiting factor.
-- Evidence **shape** explains 31% of the estimate — omega-squared, the
+- Evidence **shape** explains 40% of the estimate — omega-squared, the
   unbiased estimator. Earlier documents quoted 39%, which is eta-squared and
   biased upward by the five shape groups. An award pins near 92 by
   construction; ranked placements spread lower.
@@ -76,7 +76,7 @@ The measurement works. The evidence does not support the product as specified.
   and is not reachable on any permitted route.
 
 **The confound is aligned with gender.** Men in the corpus hold zero ranked
-observations and women hold 17, so the male mean sits 3.65 points above the
+observations and women hold 17, so the male mean sits 4.23 points above the
 female mean before any fact about any individual enters. In a product that
 compares a man against a woman in every row, the sign of a typical gap is
 decided by which sex somebody is rather than by what the judgments said.

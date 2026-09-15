@@ -4,7 +4,7 @@ Generated from the artifacts by `scripts/scaling_report.py`. The pilot ran 14 pe
 
 ## The answer
 
-**Coverage does not scale with roster size. A 7-fold larger roster produced 3.2x the observations and 8.8x the episodes, and the number of COMPARABLE jointly covered pairings went from 1 to 1.**
+**Coverage does not scale with roster size. A 7-fold larger roster produced 3.1x the observations and 8.8x the episodes, and the number of COMPARABLE jointly covered pairings went from 1 to 1.**
 
 Joint coverage is a conjunction of independently rare conditions: both people judged, near the same year, by the same kind of evidence. Each is uncommon, so the conjunction is rarer than any of them, and growing the roster multiplies the numerator and the denominator together.
 
@@ -14,11 +14,11 @@ Joint coverage is a conjunction of independently rare conditions: both people ju
 |---|---|---|
 | Roster size | 14 | 100 |
 | Relationship episodes (scorable) | 26 | 228 |
-| Observations | 41 | 131 |
+| Observations | 42 | 131 |
 | People with any observation (incl. partners) | 14 | 61 |
 | ...of those, on the roster itself | 10 | 49 |
-| Person-periods | 39 | 127 |
-| Mean observations per person-period | 1.051 | 1.031 |
+| Person-periods | 40 | 127 |
+| Mean observations per person-period | 1.05 | 1.031 |
 | Person-periods with 2+ publishers | 2 | 4 |
 | Episodes with evidence on BOTH sides anywhere | — | 20 |
 | Jointly covered within ±1 year | 4 | 5 |

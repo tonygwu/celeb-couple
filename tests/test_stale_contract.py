@@ -143,23 +143,99 @@ def test_require_can_be_told_to_read_a_stale_artifact_anyway(tmp_path):
 
 
 def test_every_scored_artifact_in_this_repo_is_current():
-    """If this fails, a rubric was edited without re-scoring."""
-    ids = set(current_contract_ids(REPO))
-    checked = 0
-    for rel in ("data/pilot/run/evidenced_scores.json",
-                "data/pilot/stress/stress_report.json",
-                "data/pilot/records/romance.json",
-                "data/pilot/observations/prose_mentions.json",
-                "data/roster100/run/joint_scores.json"):
-        path = REPO / rel
-        if not path.exists():
+    """If this fails, a rubric was edited without re-scoring.
+
+    GLOBBED, not listed. The list this replaced named five artifacts and missed
+    `data/pilot/run/pilot_report.json` and `data/pilot/run/rater_noise.json`,
+    both of which carry a contract block. The 2026-09-14 bump found them with a
+    shell preflight that globbed, which is the second time in this repo a
+    hardcoded set of paths went stale after the set grew.
+
+    `history/` is excluded on purpose: an archived artifact is SUPPOSED to
+    record the contract it was scored under, and that contract is expected to be
+    gone. Refusing it would make keeping history impossible.
+    """
+    stale, checked = [], 0
+    for path in sorted((REPO / "data").glob("**/*.json")):
+        if "history" in path.parts:
             continue
-        stored = json.loads(path.read_text()).get("contract") or {}
-        if not stored.get("contract_id"):
+        try:
+            data = json.loads(path.read_text()) or {}
+        except (ValueError, OSError):
+            continue
+        stored = data.get("contract")
+        if not isinstance(stored, dict) or not stored.get("contract_id"):
             continue
         checked += 1
-        assert stored["contract_id"] in ids, (
-            f"{rel} was scored under {stored['contract_id']}, which no rubric "
-            "on disk produces")
+        # Calls the REAL guard rather than reimplementing its rule. The
+        # reimplementation drifted the moment the guard gained its zero-call
+        # exemption: this test kept failing on an artifact production correctly
+        # allows. A test that copies the logic it checks tests the copy.
+        try:
+            refuse_stale_contract(REPO, str(path.relative_to(REPO)), data)
+        except SystemExit:
+            stale.append(f"{path.relative_to(REPO)} ({stored['contract_id']}, "
+                         f"{stored.get('rubric_version', '?')})")
     if checked == 0:
         pytest.skip("data/ is gitignored; no scored artifacts in this clone")
+    assert not stale, (
+        "these artifacts were scored under a contract no rubric on disk "
+        "produces:\n  " + "\n  ".join(stale)
+        + "\nRe-score before reporting. See docs/CONTRACT-BUMP.md.")
+
+
+def test_the_scored_artifacts_carry_a_contract_block_at_all():
+    """A missing block makes BOTH provenance guards silent no-ops.
+
+    `refuse_stale_contract` returns early when there is no block, and
+    `refuse_mixed_contracts` keys on a per-record id that this pipeline never
+    writes. `person_period_scores.json` carried 39 estimates and no block, so
+    neither guard could say anything about it.
+    """
+    must_carry = ("data/pilot/run/evidenced_scores.json",
+                  "data/pilot/run/person_period_scores.json")
+    present = [rel for rel in must_carry if (REPO / rel).exists()]
+    if not present:
+        pytest.skip("data/ is gitignored; no scored artifacts in this clone")
+    missing = [rel for rel in present
+               if not ((json.loads((REPO / rel).read_text()) or {})
+                       .get("contract") or {}).get("contract_id")]
+    assert not missing, (
+        f"scored artifacts with no contract block: {missing}. Both provenance "
+        "guards are no-ops on a file without one.")
+
+
+def test_an_artifact_whose_run_called_no_judge_is_not_refused():
+    """A zero-call run has no estimate for a rubric to have produced.
+
+    `data/pilot/run/pilot_report.json` records sent_to_judges 0, scored 0, and
+    calls_made 0 on both judges: every dossier was empty and short-circuited
+    before any judge ran. It still carries a contract block, because the script
+    stamps which bytes WOULD have been sent, so after the 2026-09-15 rubric bump
+    it read as stale and blocked the whole report pass.
+
+    Refusing it is a false positive. The guard already skips an artifact with no
+    contract block at all, for exactly this reason; this one happens to have one.
+    """
+    data = {"contract": {"contract_id": "gone-forever", "rubric_version": "x"},
+            "budgets": {"fable": {"calls_made": 0}, "astra": {"calls_made": 0}}}
+    refuse_stale_contract(REPO, "zero_call.json", data)     # must not raise
+
+
+def test_a_stale_artifact_that_DID_call_a_judge_is_still_refused():
+    """The exemption must be narrow. One call made is one estimate that came
+    from a rubric, and a rubric that is gone cannot be read as current."""
+    data = {"contract": {"contract_id": "gone-forever", "rubric_version": "x"},
+            "budgets": {"fable": {"calls_made": 1}, "astra": {"calls_made": 0}}}
+    with pytest.raises(SystemExit):
+        refuse_stale_contract(REPO, "one_call.json", data)
+
+
+def test_an_empty_budgets_block_does_not_buy_an_exemption():
+    """`budgets: {}` says nothing about whether a judge ran. `all()` over an
+    empty dict is True, which would have silently exempted every artifact
+    carrying an empty budgets block."""
+    data = {"contract": {"contract_id": "gone-forever", "rubric_version": "x"},
+            "budgets": {}}
+    with pytest.raises(SystemExit):
+        refuse_stale_contract(REPO, "empty_budgets.json", data)

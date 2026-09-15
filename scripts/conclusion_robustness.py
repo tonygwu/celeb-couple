@@ -28,7 +28,7 @@ from modules.consensus.nearby import resolve_period  # noqa: E402
 
 
 def evaluate(obs, scores, eps, films, romance, *, bound: int,
-             romance_filter: bool) -> dict:
+             romance_filter: bool, floor: float | None = None) -> dict:
     """Joint coverage and comparability at one setting of the dials."""
     shape_of: dict[tuple[str, str], set[str]] = {}
     for o in obs["observations"]:
@@ -73,11 +73,25 @@ def evaluate(obs, scores, eps, films, romance, *, bound: int,
         for y in [str(v) for v in e.get("adult_years") or []]:
             _add(e["subject_qid"], e["partner_qid"], y, "relationship")
 
+    # DETECTABLE, not merely non-zero. `gap != 0.0` was written when one judge
+    # family scored the corpus and returned integers. The mean-of-two reducer
+    # produces half-integers, so a 0.5 gap -- one judge saying 93 where the
+    # other said 92, both inside band 90-100 -- counted as a comparable pairing
+    # with a real difference and broke the capstone claim. It is an order of
+    # magnitude under the measured floor.
+    #
+    # With no measured floor the counts fall back to `!= 0`, and the artifact
+    # says so in `floor_used` rather than letting a reader assume one was
+    # applied.
+    def detectable(r) -> bool:
+        return abs(r["gap"]) > floor if floor is not None else r["gap"] != 0.0
+
     comparable = [r for r in rows if r["comparable"]]
-    nonzero_comparable = [r for r in comparable if r["gap"] != 0.0]
-    nonzero_any = [r for r in rows if r["gap"] != 0.0]
+    nonzero_comparable = [r for r in comparable if detectable(r)]
+    nonzero_any = [r for r in rows if detectable(r)]
     return {
         "bound": bound, "romance_filter": romance_filter,
+        "floor_used": floor,
         "jointly_covered": len(rows),
         "comparable": len(comparable),
         "comparable_with_a_nonzero_gap": len(nonzero_comparable),
@@ -102,11 +116,16 @@ def main() -> int:
     scores = require(REPO, "data/pilot/run/evidenced_scores.json")
     eps = require(REPO, "data/pilot/records/episodes.json")
     films = require(REPO, "data/pilot/records/onscreen_candidates.json")
+    noise = require(REPO, "data/pilot/run/rater_noise.json")
+    _by_shape = (noise.get("headline") or {}).get("by_shape") or {}
+    _floors = [v["least_significant_difference_95pct"] for v in _by_shape.values()
+               if v.get("least_significant_difference_95pct") is not None]
+    floor = max(_floors) if _floors else None
     romance_path = REPO / "data/pilot/records/romance.json"
     romance = json.loads(romance_path.read_text()) if romance_path.exists() else None
 
     settings = [evaluate(obs, scores, eps, films, romance,
-                         bound=b, romance_filter=rf)
+                         bound=b, romance_filter=rf, floor=floor)
                 for b in range(0, args.max_bound + 1)
                 for rf in (True, False)]
 

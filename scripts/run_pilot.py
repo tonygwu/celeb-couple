@@ -22,7 +22,7 @@ sys.path.insert(0, str(REPO))
 
 from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted             # noqa: E402
-from packages.llmkit.contract import load_contract                     # noqa: E402
+from packages.llmkit.contract import STANDING_RUBRIC_VERSION, load_contract                     # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge             # noqa: E402
 from packages.schema.records import (                                  # noqa: E402
     EvidenceType, Lineage, ListEdition, Observation,
@@ -141,7 +141,7 @@ def main() -> int:
     needed_set = set(needed)
 
     # ---- score ----
-    contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
+    contract = load_contract(RUBRIC, SCHEMA, STANDING_RUBRIC_VERSION)
     rubric_text, schema_text = RUBRIC.read_text(), SCHEMA.read_text()
     judges = []
     if "fable" in args.judges:

@@ -8,7 +8,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted            # noqa: E402
-from packages.llmkit.contract import load_contract                    # noqa: E402
+from packages.llmkit.contract import ROMANCE_RUBRIC_VERSION, load_contract                    # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, JudgeError            # noqa: E402
 from packages.llmkit.manifest import RunManifest                      # noqa: E402
 from modules.records.romance import (                                 # noqa: E402
@@ -33,7 +33,7 @@ def main() -> int:
 
     cands = json.loads(
         (REPO / "data/pilot/records/onscreen_candidates.json").read_text())["candidates"]
-    contract = load_contract(RUBRIC, SCHEMA, "romance-1.0")
+    contract = load_contract(RUBRIC, SCHEMA, ROMANCE_RUBRIC_VERSION)
     rubric, schema = RUBRIC.read_text(), SCHEMA.read_text()
     judge = ClaudeJudge("fable", args.model, config_dir=resolve_account(args.account))
     budget = Budget(max_calls=args.max_calls)

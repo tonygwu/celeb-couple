@@ -16,8 +16,9 @@
     },
     "missingness_reason": {
       "type": ["string", "null"],
-      "enum": ["no_observations", "all_rejected_in_review", "outside_adult_window",
-               "beyond_nearby_period_bound", "source_route_restricted"]
+      "enum": [null, "no_observations", "all_rejected_in_review", "outside_adult_window",
+               "beyond_nearby_period_bound", "source_route_restricted"],
+      "description": "null on a SCORED record. JSON Schema keywords are conjunctive, so null must appear in the enum as well as in the type or every scored record fails validation."
     },
     "rationale": {
       "type": "string",
@@ -27,7 +28,8 @@
     "evidence_ids": {"type": "array", "items": {"type": "string"}},
     "band": {
       "type": ["string", "null"],
-      "enum": ["90-100", "75-89", "60-74", "45-59", "25-44"]
+      "enum": [null, "90-100", "75-89", "60-74", "45-59", "25-44"],
+      "description": "null when scored is false. Listed in the enum for the same reason as missingness_reason."
     },
     "support": {
       "type": "object",

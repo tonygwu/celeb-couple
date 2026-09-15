@@ -203,7 +203,11 @@ def score_dossier(
         return est, verdicts, failures
 
     scores = {v.judge: float(v.estimate) for v in scored}
-    value, needs_adjudication = reduce_judges(scores)
+    # The judge's OWN stated band, not one inferred from its number. Escalation
+    # asks whether the two judges chose different verbal characterisations, so
+    # the characterisation each one actually gave is the right input.
+    bands = {v.judge: v.band for v in scored}
+    value, needs_adjudication = reduce_judges(scores, bands)
     gap = max(scores.values()) - min(scores.values()) if len(scores) > 1 else None
     evidence = tuple(sorted({e for v in scored for e in v.evidence_ids}))
     first = scored[0].support

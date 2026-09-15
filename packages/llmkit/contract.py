@@ -15,11 +15,30 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from packages.ids.keys import contract_id
+from packages.ids.keys import CONTRACT_ID_SCHEME, contract_id
 
 __all__ = ["GradingContract", "load_contract", "MixedContractError",
            "refuse_mixed_contracts", "StaleContractError",
-           "current_contract_ids", "refuse_stale_contract"]
+           "current_contract_ids", "refuse_stale_contract",
+           "STANDING_RUBRIC_VERSION", "MENTIONS_RUBRIC_VERSION",
+           "ROMANCE_RUBRIC_VERSION"]
+
+#: The rubric version strings, in ONE place.
+#:
+#: They used to be typed as a literal at each call site -- five of them for the
+#: standing rubric alone. docs/CONTRACT-BUMP.md says the worst outcome of a bump
+#: is "a changed contract with an unchanged version string", because the
+#: artifacts then disagree about which rubric they used, and five hand-edits is
+#: exactly how one gets missed. tests/test_rubric_version_single_source.py fails
+#: if a script types one of these again.
+#:
+#: Bump a version when the rubric or schema BYTES change. Do not bump it when
+#: only the hashing scheme changed: that moves the contract id without moving a
+#: rubric byte, and ``CONTRACT_ID_SCHEME`` records it instead. romance-1.0 is
+#: the live example -- its id changed on 2026-09-14 and its bytes did not.
+STANDING_RUBRIC_VERSION = "standing-rubric-2.1"
+MENTIONS_RUBRIC_VERSION = "mentions-1.1"
+ROMANCE_RUBRIC_VERSION = "romance-1.0"
 
 
 class MixedContractError(RuntimeError):
@@ -38,6 +57,7 @@ class GradingContract:
     def as_dict(self) -> dict:
         return {
             "contract_id": self.contract_id,
+            "contract_id_scheme": CONTRACT_ID_SCHEME,
             "rubric_sha256": self.rubric_sha256,
             "schema_sha256": self.schema_sha256,
             "rubric_bytes": self.rubric_bytes,
@@ -140,6 +160,21 @@ def refuse_stale_contract(repo: Path, artifact: str, data: dict) -> None:
     """
     stored = data.get("contract")
     if not isinstance(stored, dict) or not stored.get("contract_id"):
+        return
+    # An artifact whose run invoked NO judge has no estimate for a rubric to
+    # have produced, so its contract block records which bytes WOULD have been
+    # sent rather than which produced a number. Refusing it is a false
+    # positive, and it fired as one: data/pilot/run/pilot_report.json records
+    # sent_to_judges 0, scored 0, calls_made 0 on both judges and zero
+    # dossiers -- every dossier was empty and short-circuited before any judge
+    # ran -- yet it blocked the entire report pass after a rubric bump.
+    #
+    # This is the same principle the docstring above already states for an
+    # artifact with no contract block at all. That one happens to carry one.
+    budgets = data.get("budgets")
+    if (isinstance(budgets, dict) and budgets
+            and all(isinstance(b, dict) and b.get("calls_made") == 0
+                    for b in budgets.values())):
         return
     ids = current_contract_ids(repo)
     if not ids or stored["contract_id"] in ids:

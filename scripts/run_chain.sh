@@ -66,6 +66,55 @@ if [[ "$MODE" == "free" || "$MODE" == "all" ]]; then
   run scripts/corroborate_relationships.py
 fi
 
+# A stale grading contract is not a per-stage failure: it means every scored
+# artifact in the tree was produced by a rubric that no longer exists, so every
+# report stage below would either refuse or publish a stale number. run() records
+# a failure and CONTINUES, by design, so one broken stage does not hide the rest
+# -- which means without this preflight the chain runs to the end and reaches the
+# report renderer. That happened during the 2026-09-14 contract bump.
+#
+# Checked once here rather than trusted to each stage, and it exits rather than
+# setting fail=1, because there is nothing downstream worth running.
+if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
+  if ! "$PY" - <<'PREFLIGHT'
+import json, sys
+from pathlib import Path
+sys.path.insert(0, ".")
+# The REAL guard, not a copy of its rule. A preflight that reimplements the
+# check drifts from it: when the guard gained its zero-call exemption, a copy
+# here would have kept blocking an artifact production correctly allows.
+from packages.llmkit.contract import current_contract_ids, refuse_stale_contract
+repo = Path(".")
+ids = set(current_contract_ids(repo))
+stale = []
+for f in sorted(repo.glob("data/*/**/*.json")):
+    if "/history/" in str(f):
+        continue
+    try:
+        data = json.loads(f.read_text()) or {}
+    except (ValueError, OSError):
+        continue
+    c = data.get("contract") or {}
+    if not c.get("contract_id"):
+        continue
+    try:
+        refuse_stale_contract(repo, str(f), data)
+    except SystemExit:
+        stale.append(f"{f}  ({c['contract_id']}, {c.get('rubric_version', '?')})")
+if stale:
+    print("\nSTALE CORPUS -- not running the report stages.\n")
+    print("These artifacts were scored under a contract no rubric on disk produces:")
+    for s in stale:
+        print("  " + s)
+    print("\nRubrics present now: " + ", ".join(sorted(ids)))
+    print("Re-score before reporting. See docs/CONTRACT-BUMP.md.\n")
+    sys.exit(1)
+PREFLIGHT
+  then
+    exit 1
+  fi
+fi
+
 if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   # These read whatever scored artifacts exist. They skip nothing silently:
   # a missing input names the command that produces it and exits non-zero.

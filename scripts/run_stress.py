@@ -22,7 +22,8 @@ sys.path.insert(0, str(REPO))
 
 from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted          # noqa: E402
-from packages.llmkit.contract import load_contract                   # noqa: E402
+from packages.llmkit.contract import (STANDING_RUBRIC_VERSION, load_contract,
+                                      refuse_stale_contract)                   # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge           # noqa: E402
 from modules.consensus.dossier import build_dossier                  # noqa: E402
 from modules.consensus.score import score_dossier                    # noqa: E402
@@ -48,7 +49,12 @@ def main() -> int:
 
     out = Path(args.out)
     (out / "raw").mkdir(parents=True, exist_ok=True)
-    contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
+    # BEFORE any model call. measured_floor() is only reached from the analysis
+    # at the end, so a stale rater-noise artifact would refuse AFTER ~27 calls
+    # had already been spent. A check that fires after the spending is not a
+    # guard, it is a receipt.
+    measured_floor()
+    contract = load_contract(RUBRIC, SCHEMA, STANDING_RUBRIC_VERSION)
     rubric_text, schema_text = RUBRIC.read_text(), SCHEMA.read_text()
 
     fable = ClaudeJudge("fable", args.fable_model, config_dir=resolve_account(args.fable_account))
@@ -147,9 +153,16 @@ def measured_floor() -> float | None:
     if not f.exists():
         return None
     try:
-        by_shape = (json.loads(f.read_text()).get("headline") or {}).get("by_shape") or {}
+        blob = json.loads(f.read_text())
     except (ValueError, OSError):
         return None
+    # The floor comes from a SEPARATE scoring run. Comparing this run's spread
+    # against a floor measured under a different rubric compares two rubrics
+    # and reports it as rater noise, which is the exact confusion the contract
+    # id exists to prevent. Absent is allowed and returns None; stale is not,
+    # and is deliberately outside the try above so it cannot be swallowed.
+    refuse_stale_contract(REPO, "data/pilot/run/rater_noise.json", blob)
+    by_shape = (blob.get("headline") or {}).get("by_shape") or {}
     floors = [s["least_significant_difference_95pct"] for s in by_shape.values()
               if s.get("least_significant_difference_95pct") is not None]
     return max(floors) if floors else None

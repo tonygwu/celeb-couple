@@ -10,7 +10,13 @@ import hashlib
 import json
 from typing import Any, Iterable
 
-__all__ = ["pair_key", "json_sha256", "content_sha256", "contract_id", "stable_id"]
+__all__ = ["pair_key", "json_sha256", "content_sha256", "contract_id",
+           "CONTRACT_ID_SCHEME", "stable_id"]
+
+#: How ``contract_id`` combines its parts. Stamped into every artifact beside
+#: the id, because a scheme change moves the id without any rubric byte
+#: moving, and those two cases must not look alike afterwards.
+CONTRACT_ID_SCHEME = "v2-length-prefixed"
 
 
 def pair_key(a: str, b: str) -> str:
@@ -50,20 +56,28 @@ def contract_id(*parts: bytes) -> str:
     codebase claims it does. Reproducibility comes from replaying the stored
     responses.
 
-    KNOWN BOUNDARY AMBIGUITY, deliberately not fixed here. The parts are
+    BOUNDARY AMBIGUITY, FIXED 2026-09-14 (scheme v2). The parts used to be
     concatenated with no separator, so moving text from the end of the rubric
-    to the start of the schema leaves the id unchanged. That is a plausible
-    refactor rather than a contrived one.
+    to the start of the schema left the id unchanged. That is a plausible
+    refactor rather than a contrived one, and it would have let two different
+    contracts share an id.
 
-    It is not fixed because fixing it changes the id. The corpus records
-    contract `ab015c99ad3e`, the plan forbids pooling estimates across contract
-    ids, and a length-prefixed hash would make every existing estimate look
-    like it came from a different contract -- for a risk that requires a very
-    specific edit to realise. The right moment is the next rubric version bump,
-    when the id changes anyway. Filed in docs/BACKLOG.md.
+    Each part is now length-prefixed with its byte count, so a byte moved
+    across the boundary changes both lengths and therefore the id. The prefix
+    is the decimal length and a newline, hashed as ASCII.
+
+    This CHANGED EVERY ID. The corpus previously recorded standing
+    `ab015c99ad3e`, mentions `875ec6ad847e` and romance `7f82adbc0c79`; none of
+    those ids is produced by this function any more. That is why the fix waited
+    for a rubric version bump, and why it landed in the same commit as one.
+
+    A scheme change is not a rubric change: romance-1.0's bytes did not move
+    even though its id did. ``CONTRACT_ID_SCHEME`` is stamped alongside the id
+    in every artifact so a reader can tell those two cases apart.
     """
     h = hashlib.sha256()
     for p in parts:
+        h.update(f"{len(p)}\n".encode("ascii"))
         h.update(p)
     return h.hexdigest()[:12]
 

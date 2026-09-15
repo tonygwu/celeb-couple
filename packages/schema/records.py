@@ -31,7 +31,8 @@ __all__ = [
     "ListEdition",
     "MissingnessReason",
     "SchemaError",
-    "ADJUDICATION_GAP",
+    "BANDS",
+    "band_for",
     "reduce_judges",
 ]
 
@@ -277,23 +278,92 @@ class Support:
         return "multi_publisher" if self.distinct_publishers > 1 else "single_publisher"
 
 
-#: Two judges detect a disagreement but cannot resolve it, so a wide gap is
-#: escalated to human adjudication rather than silently averaged.
-ADJUDICATION_GAP = 10.0
+#: The rubric's verbally anchored bands, high to low.  Each one is a
+#: DESCRIPTION -- "among the most strikingly attractive figures of the period"
+#: versus "consistently presented as notably attractive" -- not just a numeric
+#: range.  That is what makes them the right unit for escalation.
+BANDS: tuple[tuple[int, int, str], ...] = (
+    (90, 100, "90-100"),
+    (75, 89, "75-89"),
+    (60, 74, "60-74"),
+    (45, 59, "45-59"),
+    (25, 44, "25-44"),
+)
 
 
-def reduce_judges(scores: dict[str, float]) -> tuple[float | None, bool]:
+def band_for(estimate: float) -> str | None:
+    """The rubric band an estimate falls in, or None if it falls outside them.
+
+    None is a real answer, not a failure to compute: the rubric has no band
+    below 25, because reaching 25-44 requires positive evidence for a modest
+    rating rather than an absence of evidence.
+    """
+    for lo, hi, name in BANDS:
+        if lo <= estimate <= hi:
+            return name
+    return None
+
+
+def reduce_judges(scores: dict[str, float],
+                  bands: dict[str, str | None] | None = None
+                  ) -> tuple[float | None, bool]:
     """Combine judge estimates.  Returns (reduced, needs_adjudication).
 
     With J = 2 the reducer is the arithmetic MEAN, and it is called a mean
     because a median of two *is* a mean; naming it a median would misdescribe
     what the number is.
+
+    ESCALATION IS BY BAND, NOT BY GAP.  It used to be ``gap > 10.0``, a
+    provisional number the plan said to set from M0's own spread.  M0 measured
+    that spread and the number turned out to be the wrong instrument, not merely
+    the wrong value.
+
+    What the flag is for, per plan v3 §1.3: two judges can detect a
+    disagreement but cannot resolve it, so a dossier goes to human review
+    rather than being "silently averaged".  The mean of two estimates is a
+    number NEITHER judge gave.  That is honest when both judges chose the same
+    verbal description and differ on degree; it is not when they chose
+    different descriptions, because the mean can then assert a characterisation
+    neither of them made.
+
+    A gap size cannot express that.  Measured on the 40 two-family
+    person-periods: judges differing by 2.0 points disagreed about which band
+    applied (90 against 88, either side of the 90 boundary), while judges
+    differing by 6.0 points agreed on the band.  Any threshold catching the
+    first flags more than half the corpus; any threshold ignoring the second
+    misses it.
+
+    Bands come from what each judge STATED where available, because that is the
+    judge's own characterisation rather than an inference from its number.
+    The two agreed in all 79 stored verdicts, so deriving is a safe fallback
+    for a judge that omitted the field.
+
+    An estimate outside every band yields None, and a None band escalates.
+    Unknown provenance is the thing this escalates, not an exemption from it --
+    the same rule ``refuse_mixed_contracts`` applies to a missing contract id.
     """
     if not scores:
         return None, False
     values = list(scores.values())
-    gap = max(values) - min(values)
-    return sum(values) / len(values), gap > ADJUDICATION_GAP
+    reduced = sum(values) / len(values)
+    if len(scores) < 2:
+        return reduced, False
+    stated = bands or {}
+    chosen: dict[str, str | None] = {}
+    for judge, estimate in scores.items():
+        derived = band_for(estimate)
+        said = stated.get(judge)
+        if said is not None and said != derived:
+            # The judge contradicted ITSELF -- it named one band and returned a
+            # number in another. Escalate rather than picking a side. Trusting
+            # the stated band here let a self-contradicting verdict SUPPRESS
+            # escalation: two judges both saying "90-100" while returning 92 and
+            # 60 looked like agreement.
+            return reduced, True
+        chosen[judge] = said or derived
+    if any(b is None for b in chosen.values()):
+        return reduced, True
+    return reduced, len(set(chosen.values())) > 1
 
 
 @dataclass(frozen=True)

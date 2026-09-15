@@ -9,10 +9,10 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.llmkit.budget import Budget, BudgetExhausted                  # noqa: E402
-from packages.llmkit.contract import load_contract                          # noqa: E402
+from packages.llmkit.contract import STANDING_RUBRIC_VERSION, load_contract                          # noqa: E402
 from packages.llmkit.outputs import archive_previous                        # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge                  # noqa: E402
-from packages.schema.records import (EvidenceType, Lineage, ListEdition,    # noqa: E402
+from packages.schema.records import (EvidenceType, Lineage, ListEdition, reduce_judges,    # noqa: E402
                                      Observation)
 from packages.temporal.dates import Precision, PreciseDate                  # noqa: E402
 from modules.analytics.metrics import (Pairing, PeriodExposure,             # noqa: E402
@@ -67,7 +67,7 @@ for o in obs_blob["observations"]:
         lineage=Lineage(o["lineage"]["original_source"], o["lineage"]["is_syndicated_copy"]),
         excerpt=o["excerpt"], excerpt_locator=o["excerpt_locator"], review_status=o["review_status"]))
 
-contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
+contract = load_contract(RUBRIC, SCHEMA, STANDING_RUBRIC_VERSION)
 rt, st = RUBRIC.read_text(), SCHEMA.read_text()
 _JUDGES = [j.strip() for j in _args.judges.split(",") if j.strip()]
 judges = []
@@ -85,6 +85,7 @@ for (person, period), observations in sorted(by_pp.items(), key=lambda kv: (kv[0
     d = build_dossier(person, names.get(person, person), period, list(observations), editions)
     per_judge, rationales = {}, {}
     effort_flags = {}
+    judge_bands = {}
     for jname, judge in judges:
         try:
             est, verdicts, fails = score_dossier(d, [judge], contract, rt, st,
@@ -101,15 +102,24 @@ for (person, period), observations in sorted(by_pp.items(), key=lambda kv: (kv[0
         for v in verdicts:
             if v.scored:
                 per_judge[jname] = float(v.estimate); rationales[jname] = v.rationale
+                judge_bands[jname] = v.band
                 effort_flags.setdefault(jname, []).append(
                     v.telemetry.get("effort_took_effect"))
-    value = sum(per_judge.values()) / len(per_judge) if per_judge else None
+    # reduce_judges, NOT a second copy of the rule. This line was
+    # `bool(gapj and gapj > 10)` -- a hardcoded threshold that duplicated
+    # packages.schema.records and bypassed it, so the artifact's flag and the
+    # library's flag could disagree and did: changing the rule in the library
+    # would not have changed a single record here.
+    value, needs_adj = reduce_judges(per_judge, judge_bands)
     estimates[(person, period)] = value
+    # Still RECORDED, because it is the raw disagreement and several analyses
+    # read it. It is no longer what decides escalation.
     gapj = (max(per_judge.values()) - min(per_judge.values())) if len(per_judge) > 1 else None
     records.append({"person": names.get(person, person), "person_id": person, "period": period,
                     "observations": len(d.observation_ids), "estimate": value,
                     "judges": per_judge, "across_judges_gap": gapj,
-                    "needs_adjudication": bool(gapj and gapj > 10),
+                    "judge_bands": judge_bands,
+                    "needs_adjudication": needs_adj,
                     "support_level": "single_source" if d.distinct_original_sources <= 1 else "multi",
                     "effort_took_effect": effort_flags,
                     "rationales": rationales})
@@ -127,8 +137,15 @@ for _name in ("person_period_scores.json", "evidenced_scores.json"):
     _kept = archive_previous(out / _name)
     if _kept is not None:
         print(f"  [archive] previous {_name} kept at {_kept.relative_to(out)}")
+# The contract block goes on the CHECKPOINT too, not just on the final
+# artifact. Without it both provenance guards are no-ops on this file --
+# refuse_stale_contract returns early when there is no contract block, and
+# refuse_mixed_contracts sees no per-row id -- so 39 estimates sat here with no
+# way to tell which rubric produced them. Nothing read it, which was the only
+# reason that was harmless.
 (out / "person_period_scores.json").write_text(json.dumps(
-    {"person_periods": records, "failures": failures, "halted": halted}, indent=2))
+    {"contract": contract.as_dict(), "person_periods": records,
+     "failures": failures, "halted": halted}, indent=2))
 print(f"\n  [checkpoint] wrote {len(records)} person-period scores before pairings")
 
 pairings = []

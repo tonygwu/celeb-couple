@@ -104,6 +104,11 @@ uv pip install --python .venv/bin/python -r requirements.txt
 .venv/bin/python -m pytest tests -q      # offline; spends no model quota
 ```
 
+`requirements.txt` gained `jsonschema` on 2026-09-14. It validates every stored
+judge verdict against `rubrics/standing/estimate.schema.json`, which was only
+safe once the schema's nullable enums were fixed: before that, the first thing a
+validator did was reject all 52 raw verdicts.
+
 **CI does not run.** `.github/workflows/tests.yml` exists, and every one of its
 runs — over a hundred now — has been refused at GitHub's billing gate before
 reaching pytest, so the repository's Actions state is red while the suite is
@@ -241,6 +246,12 @@ bash scripts/run_chain.sh reports   # regenerate every report from artifacts
 bash scripts/run_chain.sh all
 ```
 
+The `reports` pass runs a stale-corpus preflight first and EXITS rather than
+continuing. `run()` records a stage failure and carries on by design, so without
+the preflight the chain refuses at every scored stage and still reaches the
+report renderer at the end. That happened during the 2026-09-14 contract bump
+and rewrote `docs/M0-REPORT.md` from a corpus no rubric on disk produced.
+
 The quota-spending stages are deliberately NOT in it. They need an account and a
 cap chosen by a human who has looked at `quotapick status`.
 
@@ -256,13 +267,28 @@ Quota rules for the ones that spend:
 - Check `quotapick status` first, and pass what it tells you. **There is no
   default account**: every paid script takes `--account <config dir>` or reads
   `CELEB_ACCOUNT`, and refuses to start without one, naming the config dirs it
-  can see. The six scripts used to default to `~/.claude-e`, which on
+  can see.
+- **To use the account bare `claude` uses, pass `--account default`.** It is a
+  keyword, not a path, and this is not a style choice. That account's config
+  file is `~/.claude.json`, which sits OUTSIDE `~/.claude/`, so pointing
+  `CLAUDE_CONFIG_DIR` at `~/.claude` makes Claude Code look inside, find
+  nothing, and scaffold a brand-new EMPTY account — after which the run fails as
+  `auth_or_quota` and reads like a broken judge. The refusal message used to
+  list `~/.claude` among the valid choices; it no longer does, and
+  `tests/test_default_account.py` asserts that. Found 2026-09-14, when that
+  account held 100% of its fable window and no script could ask for it. The six scripts used to default to `~/.claude-e`, which on
   2026-09-14 was at 0% on its 5-hour window while `~/.claude-c` had 66% fable
   headroom — a default that is wrong is worse than no default, because the run
   fails as `auth_or_quota` and reads like a broken judge. A `--dry-run` needs
   no account; resolution happens where the judge is built.
 - Every runner takes `--max-calls` style caps and **halts at the cap**, reporting
   the halt and the work it did not reach.
+- **The paid stages have an order too**, and it is not in `run_chain.sh` because
+  they are not in `run_chain.sh`: `score_evidenced.py` →
+  `measure_rater_noise.py` → `run_stress.py`. `run_stress.py` reads the
+  rater-noise floor from a SEPARATE scoring run and refuses a stale one, so
+  running it first wastes the calls. It checks before building a judge, so the
+  refusal costs nothing, but only when the floor is already stale.
 
 ## Running the roster-scale chain
 
@@ -294,14 +320,21 @@ anything. The findings that should shape any next step:
 2. **Evidence density was the bottleneck.** Every real dossier once carried
    exactly one observation, so the corpus produced two distinct values. Adding
    prose mentions took it to twelve.
-3. **Evidence SHAPE explains 31% of the estimate** (omega-squared,
+3. **Evidence SHAPE explains 40% of the estimate** (omega-squared,
    unbiased; the biased eta-squared that earlier documents quoted reads 39%). An editorial award pins
    near 92 by construction; ranked placements spread lower. 3 of 4
    jointly covered pairings pit one against the other, so their gaps are
    substantially about publication format.
-4. **The one comparable gap is 0.0**, against a least significant difference of
-   about 2.56 points for rank-shaped estimates, measured on four dossiers
-   repeated four times each. There is no leaderboard here yet, and adding more
+4. **The one comparable gap is 0.5**, against a least significant difference of
+   about 1.03 points for rank-shaped estimates, measured on four dossiers
+   repeated four times each BY BOTH JUDGE FAMILIES.
+
+   Two things about those numbers. The gap was 0.0 while one family scored the
+   corpus and returned integers; it is 0.5 because the reducer now averages two
+   judges and one of them said 93 where the other said 92. That is not a signal.
+   And the floor is NOT pinned: the same judge on the same four dossiers gave a
+   mean within-judge sd of 0.926 on one run and 0.269 on the next, so the LSD
+   measured 2.56 and then 1.03. Quote the interval, not the point. There is no leaderboard here yet, and adding more
    award-shaped sources will not create one. The LSD is quoted PER SHAPE:
    pooling the award dossiers' zero measured variance with the ranked ones'
    halved it to 1.2, which several documents published. Every one of the four
@@ -319,7 +352,7 @@ anything. The findings that should shape any next step:
    alone. Redesign is filed in `docs/BACKLOG.md`.
 6. **Every real estimate came from ONE judge family.** The plan decided J = 2
    so a one-family idiosyncrasy could be told from a property of the rubric.
-   Codex reached 0% of its 7-day window mid-run, so all 39 person-periods were
+   Codex reached 0% of its 7-day window mid-run, so all 40 person-periods were
    scored by `fable` alone and the `astra` column in the report is empty for
    that reason, not because the judges agreed. Both families DID run on the
    stress corpus. Re-scoring with codex when its quota returns is the single
@@ -332,10 +365,22 @@ one.
 
 Do not edit anything under `rubrics/` without reading
 [`docs/CONTRACT-BUMP.md`](docs/CONTRACT-BUMP.md). The grading contract is
-`sha256(rubric + schema)`, so a one-line typo fix gives a new `contract_id`,
-and estimates under different ids must not be pooled. A trivial edit therefore
-costs a full re-score. Three filed corrections are waiting to go together for
-exactly that reason.
+`sha256(len(rubric) + rubric + len(schema) + schema)`, so a one-line typo fix
+gives a new `contract_id`, and estimates under different ids must not be pooled.
+A trivial edit therefore costs a full re-score.
+
+**The three filed corrections landed together on 2026-09-14**, under
+`standing-rubric-2.1` / `mentions-1.1`, with the operator approving the re-score
+they cost. That bump also changed the hashing scheme to `v2-length-prefixed`,
+which moved every contract id including romance's, whose bytes never changed.
+`contract_id_scheme` is stamped beside the id in every artifact so a scheme
+change cannot be misread as a rubric change.
+
+The cost is bigger than "re-score the rubric you edited". A scheme change
+invalidates EVERY rubric's artifacts at once: prose mentions for cohort and
+partners, romance classification, evidenced scores, roster joint scores, rater
+noise and the stress corpus. `docs/CONTRACT-BUMP.md` has the order and the
+lessons from the first real bump.
 
 ## New shared tooling
 

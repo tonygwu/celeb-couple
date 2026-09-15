@@ -17,7 +17,8 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted           # noqa: E402
-from packages.llmkit.contract import load_contract                   # noqa: E402
+from packages.llmkit.contract import (STANDING_RUBRIC_VERSION, load_contract,
+                                      refuse_stale_contract)                   # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge           # noqa: E402
 from packages.llmkit.manifest import RunManifest                     # noqa: E402
 from packages.llmkit.outputs import archive_previous, guard_output                     # noqa: E402
@@ -195,6 +196,10 @@ def main() -> int:
     if args.recompute:
         f = REPO / args.recompute
         blob = json.loads(f.read_text())
+        # Recomputing derived statistics from stored responses is fine; doing
+        # it for responses produced under a rubric that no longer exists is
+        # publishing a number for bytes nobody can reconstruct.
+        refuse_stale_contract(REPO, args.recompute, blob)
         targets = blob["targets"]
         # Rebuild the per-judge SDs from the stored RUNS. The runs are the raw
         # data; per_judge_sd is derived from them. Reusing the stored figure
@@ -275,7 +280,7 @@ def main() -> int:
     if _kept is not None:
         print(f"  [archive] previous measurement kept at {_kept}")
 
-    contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
+    contract = load_contract(RUBRIC, SCHEMA, STANDING_RUBRIC_VERSION)
     rubric, schema = RUBRIC.read_text(), SCHEMA.read_text()
     wanted = [j.strip() for j in args.judges.split(",") if j.strip()]
     judges = []

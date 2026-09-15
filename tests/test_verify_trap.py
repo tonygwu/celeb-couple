@@ -45,11 +45,29 @@ def _fixtures(*, comparable_gap=0.0, mismatched_gap=-6.0, male_ranked=0):
          "shape": "ordered_rank"},
     ]}
     gsc = {"ranked_observations": {"male": male_ranked, "female": 17}}
-    return joint, shape, gsc
+    # A measured floor is now part of the fixture. Without one the claims make
+    # NO assertion, deliberately -- falling back to exact zero is what made them
+    # break when a second judge arrived and produced half-integer means.
+    noise = {"headline": {"by_shape": {
+        "ranked": {"least_significant_difference_95pct": 1.03},
+        "award": {"least_significant_difference_95pct": None}}}}
+    return joint, shape, gsc, noise
 
 
 def _by_claim(results):
     return {r["claim"]: r for r in results}
+
+
+def _claim(results, needle):
+    """Find a claim by a stable fragment rather than its full text.
+
+    Keying on the whole sentence meant every test here failed when the claims
+    were restated against the noise floor -- noise in the diff that hid which
+    behaviour had actually changed.
+    """
+    hits = [r for r in results if needle in r["claim"]]
+    assert len(hits) == 1, f"{needle!r} matched {len(hits)} claims"
+    return hits[0]
 
 
 def test_the_current_fixtures_satisfy_every_claim():
@@ -59,8 +77,8 @@ def test_the_current_fixtures_satisfy_every_claim():
 
 def test_a_comparable_pairing_with_a_real_gap_breaks_the_first_claim():
     mod = _mod()
-    r = _by_claim(mod.check(*_fixtures(comparable_gap=4.0)))
-    first = r["every shape-comparable pairing has a gap of exactly 0.0"]
+    first = _claim(mod.check(*_fixtures(comparable_gap=4.0)),
+                   "shape-comparable pairing")
     assert first["holds"] is False
     assert first["exceptions"], "a broken claim must name the exception"
     assert "first real signal" in first["if_broken"]
@@ -77,8 +95,8 @@ def test_a_nonzero_gap_that_is_comparable_breaks_the_second_claim():
 
 def test_a_ranked_observation_for_a_man_breaks_the_third_claim():
     mod = _mod()
-    r = _by_claim(mod.check(*_fixtures(male_ranked=3)))
-    third = r["men hold zero ranked observations"]
+    third = _claim(mod.check(*_fixtures(male_ranked=3)),
+                   "men hold zero ranked observations")
     assert third["holds"] is False
     assert "3 ranked observations" in third["exceptions"][0]
 
@@ -94,8 +112,9 @@ def test_a_reused_nearby_estimate_is_resolved_not_dropped():
     shape = {"rows": [
         {"person": "A", "period": "2000", "estimate": 92.0, "shape": "editorial_award"},
         {"person": "B", "period": "2000", "estimate": 78.0, "shape": "ordered_rank"}]}
-    results = mod.check(joint, shape, {"ranked_observations": {"male": 0}})
-    second = _by_claim(results)["every non-zero gap is shape-mismatched"]
+    results = mod.check(joint, shape, {"ranked_observations": {"male": 0}},
+                        _fixtures()[3])
+    second = _claim(results, "beyond the noise floor")
     assert second["checked"] == 1, "the reused estimate must resolve"
 
 
@@ -108,8 +127,9 @@ def test_an_unresolvable_pairing_is_not_counted_as_passing():
          "comparability": "comparable"}]}
     shape = {"rows": [{"person": "A", "period": "2003", "estimate": 92.0,
                        "shape": "editorial_award"}]}
-    results = mod.check(joint, shape, {"ranked_observations": {"male": 0}})
-    first = _by_claim(results)["every shape-comparable pairing has a gap of exactly 0.0"]
+    results = mod.check(joint, shape, {"ranked_observations": {"male": 0}},
+                        _fixtures()[3])
+    first = _claim(results, "shape-comparable pairing")
     assert first["checked"] == 0, "an unresolved pairing is not evidence"
 
 
@@ -118,7 +138,8 @@ def test_the_real_corpus_still_satisfies_the_capstone():
     import json
     paths = ["data/pilot/run/joint_with_nearby.json",
              "data/pilot/run/shape_confound.json",
-             "data/pilot/run/gender_shape_confound.json"]
+             "data/pilot/run/gender_shape_confound.json",
+             "data/pilot/run/rater_noise.json"]
     if not all((REPO / p).exists() for p in paths):
         pytest.skip("data/ is gitignored; nothing to verify in a fresh clone")
     mod = _mod()

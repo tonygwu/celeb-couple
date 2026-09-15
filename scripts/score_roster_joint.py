@@ -19,7 +19,7 @@ sys.path.insert(0, str(REPO))
 from packages.llmkit.artifacts import require                          # noqa: E402
 from packages.llmkit.accounts import resolve_account            # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted             # noqa: E402
-from packages.llmkit.contract import load_contract                     # noqa: E402
+from packages.llmkit.contract import STANDING_RUBRIC_VERSION, load_contract                     # noqa: E402
 from packages.llmkit.judges import ClaudeJudge                         # noqa: E402
 from packages.llmkit.manifest import RunManifest                       # noqa: E402
 from packages.schema.records import (                                  # noqa: E402
@@ -104,7 +104,7 @@ def main() -> int:
 
     print(f"jointly covered rows: {len(plan)}; dossiers needed: {len(needed)}")
 
-    contract = load_contract(RUBRIC, SCHEMA, "standing-rubric-2.0")
+    contract = load_contract(RUBRIC, SCHEMA, STANDING_RUBRIC_VERSION)
     rubric, schema = RUBRIC.read_text(), SCHEMA.read_text()
     judge = ClaudeJudge("fable", "claude-fable-5-1", config_dir=resolve_account(args.account))
     budget = Budget(max_calls=args.max_calls)

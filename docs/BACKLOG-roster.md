@@ -42,7 +42,7 @@ half right, and the half it missed matters more.
   synthetic one produced ten. Adding prose mentions took the real corpus to
   twelve distinct values, and two person-periods now carry more than one
   publisher — still two out of thirty-nine.
-- **Shape confounds the gap.** Evidence type alone explains 31% of the
+- **Shape confounds the gap.** Evidence type alone explains 40% of the
   estimate (omega-squared, unbiased; eta-squared reads 39%). 3 of 4 jointly covered pairings pit an award against a list
   placement, so their gaps are substantially about publication format.
 - **The reachable ceiling is lower than the pairing count suggests.** Of 23

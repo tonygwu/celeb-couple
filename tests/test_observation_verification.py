@@ -110,11 +110,16 @@ def test_every_publisher_in_the_corpus_has_a_table_location():
 
 
 def test_the_recorded_result_is_a_full_pass():
-    """Guards the headline number the report quotes.
+    """Guards the claim the report makes: EVERY observation was confirmed.
 
-    If a re-run ever drops below 41 of 41, a document somewhere says every
-    observation was confirmed against its source, and that sentence is now
-    false. This fails rather than letting it stand.
+    The claim is "verified == checked", not "verified == 41". This asserted the
+    literal 41 and failed when the corpus legitimately grew to 42 on a full
+    pass -- a hand-typed number going stale and then lying, which is the exact
+    defect `scripts/audit_doc_numbers.py` exists to catch in prose. A test is
+    not exempt from it.
+
+    The COUNT is still checked, by the doc audit, against whatever the artifact
+    says. Here the invariant is the shape of the result.
     """
     import json
     path = REPO / "data/pilot/run/observation_verification.json"
@@ -123,4 +128,7 @@ def test_the_recorded_result_is_a_full_pass():
     payload = json.loads(path.read_text())
     assert payload["not_verified"] == []
     assert payload["unverifiable"] == []
-    assert payload["verified"] == payload["checked"] == 41
+    assert payload["verified"] == payload["checked"]
+    # Guards against a vacuous pass: 0 == 0 is also "every observation
+    # verified", and would satisfy every assertion above.
+    assert payload["checked"] > 0, "nothing was checked; this proves nothing"

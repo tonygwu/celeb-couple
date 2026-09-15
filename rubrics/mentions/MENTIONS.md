@@ -8,8 +8,8 @@ that person appearing on a published attractiveness list, poll or award.**
 Anything of this shape:
 - "named People's Sexiest Man Alive in 2018"
 - "one of People's 50 Most Beautiful People" (with a year, stated or clearly implied by the sentence)
-- "ranked 5th in FHM's 100 Sexiest Women"
-- "voted the sexiest man in a readers' poll"
+- "ranked 5th in FHM's 100 Sexiest Women 2007"
+- "voted the sexiest man in a readers' poll in 2004"
 - "named Essence's Sexiest Man of the Year in 2013"
 
 ## What NOT to extract

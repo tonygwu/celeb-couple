@@ -227,6 +227,22 @@ def test_the_leave_one_out_range_is_reported_for_a_shape_that_has_a_floor():
     )
 
 
+def _current_standing_contract_id() -> str:
+    """The id the standing rubric on disk produces right now.
+
+    Derived rather than pinned: a pinned id would need editing at every rubric
+    bump, and forgetting would fail this test for a reason unrelated to what it
+    tests.
+    """
+    import sys as _s
+    from pathlib import Path as _P
+    repo = _P(__file__).resolve().parent.parent
+    _s.path.insert(0, str(repo))
+    from packages.ids.keys import contract_id
+    return contract_id((repo / "rubrics/standing/RUBRIC.md").read_bytes(),
+                       (repo / "rubrics/standing/estimate.schema.json").read_bytes())
+
+
 def test_recompute_runs_end_to_end_without_spending_a_call(tmp_path):
     """`--recompute` is the project's stated reproducibility mechanism —
     "reproducibility comes from replaying stored responses" — and it corrected
@@ -245,7 +261,11 @@ def test_recompute_runs_end_to_end_without_spending_a_call(tmp_path):
     repo = _P(__file__).resolve().parent.parent
     art = tmp_path / "noise.json"
     art.write_text(json.dumps({
-        "contract": {"contract_id": "test"},
+        # A CURRENT contract id, not a placeholder. `--recompute` now refuses
+        # an artifact whose rubric is gone, and a fixture stamped "test" would
+        # be refused -- which would make this test assert that the guard works
+        # rather than that recompute does.
+        "contract": {"contract_id": _current_standing_contract_id()},
         "repeats": 4,
         "headline": {"stale": "this must be replaced"},
         "targets": [

@@ -10,7 +10,7 @@ import dataclasses
 import pytest
 
 from packages.schema.records import (
-    ADJUDICATION_GAP,
+    band_for,
     EvidenceType,
     Lineage,
     ListEdition,
@@ -226,10 +226,73 @@ def test_the_two_judge_reducer_is_a_mean_and_is_named_one():
     assert escalate is False
 
 
-def test_a_wide_judge_gap_escalates_instead_of_being_silently_averaged():
+def test_judges_choosing_different_bands_escalate_instead_of_being_averaged():
+    """90 is "among the most strikingly attractive"; 60 is "attractive, without
+    headline framing". The mean of 75 asserts a third characterisation that
+    neither judge gave, which is what escalation exists to prevent."""
     value, escalate = reduce_judges({"fable": 90.0, "astra": 60.0})
     assert value == 75.0
-    assert escalate is True, f"a gap of 30 exceeds ADJUDICATION_GAP={ADJUDICATION_GAP}"
+    assert escalate is True
+
+
+def test_a_small_gap_across_a_band_boundary_still_escalates():
+    """The case that proves a numeric threshold cannot do this job.
+
+    Measured in the corpus: Angelina Jolie 2005, fable 90 and astra 88. Two
+    points apart, and on opposite sides of the 90 boundary, so the judges
+    disagree about which sentence in the rubric is true. Every numeric
+    threshold that catches this flags more than half the corpus.
+    """
+    value, escalate = reduce_judges({"fable": 90.0, "astra": 88.0})
+    assert value == 89.0
+    assert escalate is True
+
+
+def test_a_large_gap_inside_one_band_does_not_escalate():
+    """The mirror case. Six points apart, both in 75-89, so both judges chose
+    the same description and differ on degree. The mean represents them."""
+    value, escalate = reduce_judges({"fable": 80.0, "astra": 86.0})
+    assert value == 83.0
+    assert escalate is False
+
+
+def test_the_stated_band_is_a_consistency_check_not_an_override():
+    """There is no case where a stated band should beat a contradicting number.
+
+    The first version of this test asserted the opposite -- that the judge's
+    stated band wins, because it is the judge's own characterisation. That is
+    wrong, and the reason is worth keeping: where the stated and derived bands
+    AGREE the stated one adds nothing, and where they DISAGREE the judge has
+    contradicted itself and neither value is trustworthy. So the stated band's
+    only job is to detect the contradiction.
+
+    Measured across all 151 stored verdicts, the two never disagreed.
+    """
+    # Agreeing: the stated band changes nothing.
+    with_stated = reduce_judges({"fable": 80.0, "astra": 86.0},
+                                {"fable": "75-89", "astra": "75-89"})
+    without = reduce_judges({"fable": 80.0, "astra": 86.0})
+    assert with_stated == without
+
+    # Disagreeing: escalate rather than picking a side.
+    _, escalate = reduce_judges({"fable": 82.0, "astra": 90.0},
+                                {"fable": "75-89", "astra": "75-89"})
+    assert escalate is True, "astra stated 75-89 and returned 90"
+
+
+def test_an_estimate_outside_every_band_escalates():
+    """The rubric has no band below 25. An estimate there has no
+    characterisation to compare, and unknown provenance escalates rather than
+    passing -- the rule refuse_mixed_contracts applies to a missing id."""
+    _, escalate = reduce_judges({"fable": 10.0, "astra": 12.0})
+    assert escalate is True
+
+
+def test_one_judge_never_escalates():
+    # There is no disagreement to detect with a single judge, and the corpus
+    # was scored by one family alone until 2026-09-15.
+    value, escalate = reduce_judges({"fable": 82.0})
+    assert (value, escalate) == (82.0, False)
 
 
 def test_list_edition_requires_its_candidate_pool_described():
@@ -441,3 +504,31 @@ def test_coverage_and_people_with_none_must_reconcile():
                       if by_name.get(n) in observed]
     assert not wrongly_listed, (
         f"listed as having no observations but they do: {wrongly_listed}" + remedy)
+
+
+def test_a_judge_contradicting_its_own_band_escalates():
+    """A stated band that disagrees with the judge's own number is a
+    contradiction, not a characterisation to trust.
+
+    Trusting it let a self-contradicting verdict SUPPRESS escalation: two
+    judges both stating "90-100" while returning 92 and 60 read as agreement,
+    because the stated bands matched. Found 2026-09-15 by a fixture that
+    overrode the estimate and left the band behind.
+    """
+    value, escalate = reduce_judges({"fable": 92.0, "astra": 60.0},
+                                    {"fable": "90-100", "astra": "90-100"})
+    assert value == 76.0
+    assert escalate is True
+
+
+def test_one_judge_contradicting_itself_is_enough():
+    _, escalate = reduce_judges({"fable": 60.0, "astra": 62.0},
+                                {"fable": "90-100", "astra": "60-74"})
+    assert escalate is True
+
+
+def test_a_consistent_stated_band_is_still_honoured():
+    # The fix must not turn every stated band into an escalation.
+    _, escalate = reduce_judges({"fable": 80.0, "astra": 86.0},
+                                {"fable": "75-89", "astra": "75-89"})
+    assert escalate is False

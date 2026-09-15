@@ -15,9 +15,11 @@ So a one-line typo fix in `rubrics/standing/RUBRIC.md` costs a re-score of every
 person-period, which is 39 model calls at present. That is the real price, and
 it is why three trivial corrections are filed rather than applied.
 
-## What is waiting
+## What was waiting, and landed together on 2026-09-14
 
-All three are in [`docs/BACKLOG.md`](BACKLOG.md) with their reasoning:
+All three were in [`docs/BACKLOG.md`](BACKLOG.md) with their reasoning. They are
+struck through there now. Kept here because the next bump will look like this
+one:
 
 1. **`estimate.schema.json` nullable enums.** `missingness_reason` and `band`
    are declared nullable while their `enum` omits `null`, so every scored
@@ -55,10 +57,23 @@ Do them together. Each one alone costs the same re-score.
    ```sh
    quotapick status                       # pick an account with fable headroom
    .venv/bin/python scripts/score_evidenced.py --judges fable,astra \
-       --account <config dir> --max-calls 120
+       --account <config dir> --max-calls 60
    ```
 
-5. **Re-run the chain and check what moved.**
+5. **Re-score the rest, in this order.** The order matters: `run_stress.py`
+   reads the rater-noise floor from `measure_rater_noise.py`'s artifact and
+   refuses a stale one, so running it first wastes about 27 calls on a run that
+   cannot finish. It refuses before spending anything, but only if the artifact
+   is already stale rather than being made stale later.
+
+   ```sh
+   .venv/bin/python scripts/measure_rater_noise.py --account <config dir>
+   .venv/bin/python scripts/run_stress.py --out data/pilot/stress \
+       --fable-account <config dir>
+   .venv/bin/python scripts/score_roster_joint.py --account <config dir>
+   ```
+
+6. **Re-run the chain and check what moved.**
 
    ```sh
    bash scripts/run_chain.sh reports
@@ -73,14 +88,75 @@ Do them together. Each one alone costs the same re-score.
    to stop that being read as noise. Compare the estimates by hand instead, and
    say in the commit which ones moved and by how much.
 
-6. **Update [`docs/CORRECTIONS.md`](CORRECTIONS.md)** with any published number
+7. **Update [`docs/CORRECTIONS.md`](CORRECTIONS.md)** with any published number
    that changed, and why.
+
+## What the 2026-09-14 bump taught, which this procedure did not say
+
+The first real bump found four things the steps above got wrong or omitted.
+
+1. **The blast radius is every rubric, not the one you edited.** Fixing the
+   `contract_id` boundary changed the HASHING SCHEME, so all three ids moved --
+   standing, mentions and romance -- even though romance's bytes never changed.
+   The re-score was therefore not 39 calls. It was prose mentions (cohort and
+   partners), romance classification, evidenced scores for two judge families,
+   the roster-scale joint scores, rater noise and the stress corpus. Budget for
+   the full set before starting, not for the rubric you happened to open.
+
+2. **A scheme change is not a version bump.** "Do not bump the version without
+   changing the bytes" is still right, so romance stayed at `romance-1.0` while
+   its id moved. That combination is indistinguishable from a mistake unless
+   something records it, so `contract_id_scheme` is now stamped beside the id in
+   every artifact.
+
+3. **Two scripts did not honour the guard**, and one of them was the report
+   renderer. `run_chain.sh` records a stage failure and continues by design, so
+   the chain refused at every `require()`-based stage and then rendered
+   `docs/M0-REPORT.md` from the stale corpus anyway. The chain now refuses the
+   whole report pass up front when any artifact is stale. Check the preflight
+   fires before trusting a bump: `bash scripts/run_chain.sh reports` must exit 1
+   and name every stale artifact.
+
+4. **Expect a CLUSTER of failures, not one, and sort them into two piles.**
+   The first draft of this note said "exactly one place". That was written after
+   editing only the rubric files; once the corpus was re-fetched the count was
+   nine. Two piles:
+
+   *Expected while the corpus is stale* — they clear when the re-score lands:
+
+   - `test_stale_contract.py` (both tests)
+   - `test_doc_claims.py`, `test_doc_numbers.py`, `test_report_prose.py`, which
+     regenerate or audit documents the guard now refuses to build
+
+   *Real, and the bump surfaced them* — they need fixing:
+
+   - `test_observation_verification.py` asserted the literal `41`. The corpus
+     legitimately grew to 42 on a full pass, so a hand-typed number in a TEST
+     went stale and lied, which is the defect `audit_doc_numbers.py` exists to
+     catch in prose. It asserts `verified == checked` now, plus `checked > 0` so
+     an empty corpus cannot pass vacuously.
+   - `test_rater_noise_summary.py` built a fixture stamped `contract_id: "test"`,
+     which the new `--recompute` guard correctly refuses. The fixture now derives
+     the current id instead of pinning one.
+
+   If a failure is in neither pile, something beyond the contract moved.
+
+   **The failing SET moves as stages land, and the count can stay the same
+   while the membership changes.** Measured on this bump: nine before the
+   re-score, nine after it, but not the same nine. The checkpoint-contract test
+   cleared and two document tests appeared, because regenerating a report is
+   what exercises them. Compare the NAMES between runs, not the count -- a
+   steady total reads like no progress and is not.
 
 ## What you must not do
 
 - **Do not pool.** Estimates from the old and new contracts do not average.
-  `refuse_mixed_contracts` exists for this and currently has no caller, so the
-  discipline is yours.
+  `refuse_mixed_contracts` exists for this and is deliberately not wired in: on
+  the record shape this pipeline writes, no row carries a per-record
+  `contract_id`, so the guard would pass on genuinely mixed input and read as
+  provenance that had been checked. See the closed W072 entry in
+  `docs/BACKLOG.md`. The discipline is yours, and `refuse_stale_contract` inside
+  `require()` is what actually catches a bump.
 - **Do not edit a rubric and skip the re-score.** The artifacts would then
   record a contract id for bytes the judge never saw.
 - **Do not bump the version without changing the bytes,** or the reverse.

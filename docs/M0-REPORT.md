@@ -1,6 +1,6 @@
 # M0 pilot report — Celebrity Pairing WAR
 
-Generated 2026-09-14 from the run artifacts under `data/pilot/`, input fingerprint `89218e4833ca`. Every number below is read from a JSON artifact, not typed.
+Generated 2026-09-15 from the run artifacts under `data/pilot/`, input fingerprint `47a3547004f1`. Every number below is read from a JSON artifact, not typed.
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
@@ -16,15 +16,15 @@ This report covers the 14-person pilot. Three companion documents cover what cam
 
 **The measurement works. The evidence supply does not.**
 
-The rubric behaves largely as intended under adversarial testing: 25 of 27 stress scorings succeeded, and of the 4 cases that report a spread, 3 fall within the measured noise floor. The exception is **S2_format_equivalence**, discussed below.
+The rubric behaves largely as intended under adversarial testing: 25 of 25 stress scorings succeeded, and of the 3 cases that report a spread, 0 fall within the measured noise floor. The exception is **S2_format_equivalence, S7_order_sensitivity, S8_volume_without_content**, discussed below.
 
 Both model families ran on the STRESS corpus and agreed on the calibration anchor. They did not both run on the real dossiers: every estimate in this report comes from one family, for the reason given in the scoring section.
 
-But across the 14-person cohort, the permitted sources yielded **41 attractiveness observations total**, covering 10 of 14 cohort people; 4 have none at all. A further 4 people outside the cohort carry observations — partners, whose evidence is what makes a pairing jointly covered.
+But across the 14-person cohort, the permitted sources yielded **42 attractiveness observations total**, covering 10 of 14 cohort people; 4 have none at all. A further 4 people outside the cohort carry observations — partners, whose evidence is what makes a pairing jointly covered.
 
 Across all 29 relationship episodes and 20 co-starring films — **49 candidate pairings** — and after both the ±1-year bounded reuse AND the romance filter, exactly **4** pairings are jointly covered.
 
-**The decisive measurement**: of 39 scored person-periods, 18 rest on a one-winner editorial award and 16 on an ordered rank. The award-shaped ones cluster at mean 91.28 with sd **3.263**; the rank-shaped ones sit lower, at mean 84.56, and spread more than twice as wide, sd **6.727**. A one-winner award is superlative by construction, so it concentrates: 15 of 18 award-shaped estimates are exactly 92. Ranked evidence carries a degree, so it can tell people apart.
+**The decisive measurement**: of 40 scored person-periods, 19 rest on a one-winner editorial award and 16 on an ordered rank. The award-shaped ones cluster at mean 91.89 with sd **0.968**; the rank-shaped ones sit lower, at mean 85.09, and spread more than twice as wide, sd **6.21**. A one-winner award is superlative by construction, so it concentrates: 13 of 19 award-shaped estimates are exactly 92. Ranked evidence carries a degree, so it can tell people apart.
 
 ## 1. Cohort
 
@@ -89,18 +89,18 @@ Film release dates carry their source precision too: 11 of 20 are year-precision
 
 ## 4. Measurement stress tests
 
-27 scorings attempted, 25 succeeded, 2 failed. Taxonomy: `{"model_identity_mismatch": 2}`.
+25 scorings attempted, 25 succeeded, 0 failed. Taxonomy: `{}`.
 
 | Case | Question | Result |
 |---|---|---|
 | S1 single vs multi | Does publication count impose the ordering? | strong single-source **92** vs weak multi-source **63** — the stronger substantive judgment scored higher |
-| S2 format | Award vs rank vs prose | {"as_award": 92, "as_rank": 92, "as_prose": 88}, spread **4**, ABOVE the measured floor of 2.56 — format moved the estimate; see the note below for why this is NOT evidence about format |
-| S3 corroboration | Does an extra publisher jump a band? | 69 → 70, spread **1**, within the measured floor of 2.56 — corroboration left the estimate where it was |
+| S2 format | Award vs rank vs prose | {"as_award": 92, "as_rank": 92, "as_prose": 88}, spread **4**, ABOVE the measured floor of 1.03 — format moved the estimate; see the note below for why this is NOT evidence about format |
+| S3 corroboration | Does an extra publisher jump a band? | 68 → 69, spread **1**, within the measured floor of 1.03 — corroboration left the estimate where it was |
 | S4 contradiction | Does the rationale address the conflict? | estimate [80], names both placements: [True] |
-| S5 empty / off-topic | Unscored, or a low number? | empty unscored: True, off-topic unscored: True |
-| S6 identity | Same evidence, different name | {"named": 82, "anonymised": 82.5, "swapped_name": 82} — spread **0.5**, at or below the measured noise floor of 2.56 — identity did NOT move the score |
-| S7 order | Reordered observations | {"order_a": 84, "order_b": 82}, spread **2**, within the measured floor of 2.56 — observation order did not move the estimate |
-| S8 copy volume | One copy vs five | {"one_copy": 72, "five_copies": 72}, spread **0**, within the measured floor of 2.56 — copy volume changed nothing |
+| S5 empty / off-topic | Unscored, or a low number? | empty unscored: None, off-topic unscored: True |
+| S6 identity | Same evidence, different name | {"fable": {"named": 76, "anonymised": 80, "swapped_name": 80}, "astra": {"named": 82, "anonymised": 83, "swapped_name": 84}} — spread **8**, above the measured noise floor of 1.03 — investigate as possible leakage |
+| S7 order | Reordered observations | {"order_a": 80, "order_b": 82}, spread **2**, ABOVE the measured floor of 1.03 — observation order moved the estimate |
+| S8 copy volume | One copy vs five | {"one_copy": 72, "five_copies": 70}, spread **2**, ABOVE the measured floor of 1.03 — copy volume alone moved the estimate |
 
 Every spread above is judged against the MEASURED noise floor rather than against a stored sentence, because a difference in estimate points only means something next to the amount those points are known to wobble by.
 
@@ -135,61 +135,62 @@ Joint pairing coverage: **0 of 8** (0/4 real-life, 0/4 on-screen).
 
 ## 6. Scored person-periods and pairing contributions
 
-39 of 39 evidenced person-periods scored, using 39 model calls, 0 failed.
-
-**Every estimate below rests on ONE judge (fable).** The plan decided J = 2 so that two model families would score each dossier independently and disagreement would be visible. Codex reached 0% of its 7-day quota window during the run, so the second family contributed to 0 of 39 person-periods. The `astra` column and the `judge gap` column are empty for that reason and not because the judges agreed. Cross-family agreement in this report is established only on the stress corpus, where both families did run.
+40 of 40 evidenced person-periods scored, using 80 model calls, 0 failed.
 
 | Person | Period | Obs | Estimate | fable | astra | judge gap | support |
 |---|---|---|---|---|---|---|---|
-| Michelle Pfeiffer | 1990 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Michelle Pfeiffer | 1995 | 1 | 86.0 | 86.0 | – | – | single_source |
-| Brad Pitt | 1995 | 2 | 94.0 | 94.0 | – | – | multi |
-| Jennifer Aniston | 1996 | 1 | 86.0 | 86.0 | – | – | single_source |
-| Denzel Washington | 1996 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Liv Tyler | 1997 | 1 | 76.0 | 76.0 | – | – | single_source |
-| Jennifer Aniston | 1997 | 1 | 90.0 | 90.0 | – | – | single_source |
-| Jennifer Aniston | 1998 | 1 | 88.0 | 88.0 | – | – | single_source |
-| Harrison Ford | 1998 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Michelle Pfeiffer | 1999 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Aniston | 1999 | 1 | 86.0 | 86.0 | – | – | single_source |
-| Jennifer Aniston | 2000 | 1 | 78.0 | 78.0 | – | – | single_source |
-| Brad Pitt | 2000 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Lopez | 2000 | 1 | 93.0 | 93.0 | – | – | single_source |
-| Jennifer Lopez | 2001 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Garner | 2002 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Lopez | 2002 | 1 | 88.0 | 88.0 | – | – | single_source |
-| Ben Affleck | 2002 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Lopez | 2003 | 1 | 86.0 | 86.0 | – | – | single_source |
-| Angelina Jolie | 2004 | 1 | 82.0 | 82.0 | – | – | single_source |
-| Michelle Pfeiffer | 2004 | 1 | 86.0 | 86.0 | – | – | single_source |
-| Jennifer Aniston | 2004 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Lopez | 2004 | 1 | 82.0 | 82.0 | – | – | single_source |
-| Angelina Jolie | 2005 | 1 | 90.0 | 90.0 | – | – | single_source |
-| Angelina Jolie | 2006 | 2 | 94.0 | 94.0 | – | – | multi |
-| Angelina Jolie | 2007 | 1 | 82.0 | 82.0 | – | – | single_source |
-| Angelina Jolie | 2008 | 1 | 80.0 | 80.0 | – | – | single_source |
-| Kate Beckinsale | 2009 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Aniston | 2011 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Lopez | 2011 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Aniston | 2012 | 1 | 64.0 | 64.0 | – | – | single_source |
-| Idris Elba | 2013 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Gwyneth Paltrow | 2013 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Jennifer Aniston | 2016 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Idris Elba | 2017 | 1 | 78.0 | 78.0 | – | – | single_source |
-| Idris Elba | 2018 | 1 | 94.0 | 94.0 | – | – | single_source |
-| Jennifer Garner | 2019 | 1 | 92.0 | 92.0 | – | – | single_source |
-| Michelle Pfeiffer | 2020 | 1 | 80.0 | 80.0 | – | – | single_source |
-| Melissa McCarthy | 2023 | 1 | 91.0 | 91.0 | – | – | single_source |
+| Michelle Pfeiffer | 1990 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Michelle Pfeiffer | 1995 | 1 | 86.5 | 86.0 | 87.0 | 1.0 | single_source |
+| Brad Pitt | 1995 | 2 | 93.5 | 95.0 | 92.0 | 3.0 | multi |
+| Jennifer Aniston | 1996 | 1 | 83.0 | 80.0 | 86.0 | 6.0 | single_source |
+| Denzel Washington | 1996 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Liv Tyler | 1997 | 1 | 72.0 | 72.0 | 72.0 | 0.0 | single_source |
+| Jennifer Aniston | 1997 | 1 | 90.5 | 90.0 | 91.0 | 1.0 | single_source |
+| Jennifer Aniston | 1998 | 1 | 87.5 | 87.0 | 88.0 | 1.0 | single_source |
+| Harrison Ford | 1998 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Michelle Pfeiffer | 1999 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Jennifer Aniston | 1999 | 1 | 85.0 | 84.0 | 86.0 | 2.0 | single_source |
+| Jennifer Aniston | 2000 | 1 | 82.5 | 80.0 | 85.0 | 5.0 | single_source |
+| Brad Pitt | 2000 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Jennifer Lopez | 2000 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Jennifer Lopez | 2001 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Jennifer Garner | 2002 | 1 | 92.5 | 93.0 | 92.0 | 1.0 | single_source |
+| Jennifer Lopez | 2002 | 1 | 87.5 | 88.0 | 87.0 | 1.0 | single_source |
+| Ben Affleck | 2002 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Jennifer Lopez | 2003 | 1 | 85.0 | 84.0 | 86.0 | 2.0 | single_source |
+| Angelina Jolie | 2004 | 1 | 84.0 | 82.0 | 86.0 | 4.0 | single_source |
+| Michelle Pfeiffer | 2004 | 1 | 86.0 | 82.0 | 90.0 | 8.0 | single_source |
+| Jennifer Aniston | 2004 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Jennifer Lopez | 2004 | 1 | 86.0 | 86.0 | 86.0 | 0.0 | single_source |
+| Angelina Jolie | 2005 | 1 | 89.0 | 90.0 | 88.0 | 2.0 | single_source |
+| Angelina Jolie | 2006 | 2 | 93.0 | 94.0 | 92.0 | 2.0 | multi |
+| Angelina Jolie | 2007 | 1 | 84.0 | 83.0 | 85.0 | 2.0 | single_source |
+| Angelina Jolie | 2008 | 1 | 83.0 | 80.0 | 86.0 | 6.0 | single_source |
+| Kate Beckinsale | 2009 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Angelina Jolie | 2011 | 1 | 91.5 | 91.0 | 92.0 | 1.0 | single_source |
+| Jennifer Aniston | 2011 | 1 | 92.5 | 93.0 | 92.0 | 1.0 | single_source |
+| Jennifer Lopez | 2011 | 1 | 93.0 | 94.0 | 92.0 | 2.0 | single_source |
+| Jennifer Aniston | 2012 | 1 | 64.0 | 64.0 | 64.0 | 0.0 | single_source |
+| Idris Elba | 2013 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Gwyneth Paltrow | 2013 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Jennifer Aniston | 2016 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Idris Elba | 2017 | 1 | 88.0 | 84.0 | 92.0 | 8.0 | single_source |
+| Idris Elba | 2018 | 1 | 92.5 | 93.0 | 92.0 | 1.0 | single_source |
+| Jennifer Garner | 2019 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
+| Michelle Pfeiffer | 2020 | 1 | 82.5 | 80.0 | 85.0 | 5.0 | single_source |
+| Melissa McCarthy | 2023 | 1 | 92.0 | 92.0 | 92.0 | 0.0 | single_source |
 
 ### Score compression — the most consequential measurement result
 
-2 of 39 scored person-periods carry more than one observation; the rest carry exactly one, and the observations behind them fall into 5 shapes: `editorial_award` (n=18, 78.0-94.0, sd 3.263), `ordered_rank` (n=16, 64.0-93.0, sd 6.727), `unordered_inclusion` (n=3, 76.0-86.0, sd 4.11), `editorial_award+ordered_rank` (n=1, 94.0-94.0, sd 0.0), `editorial_award+unordered_inclusion` (n=1, 94.0-94.0, sd 0.0).
+2 of 40 scored person-periods carry more than one observation; the rest carry exactly one, and the observations behind them fall into 5 shapes: `editorial_award` (n=19, 88.0-93.0, sd 0.968), `ordered_rank` (n=16, 64.0-92.0, sd 6.21), `unordered_inclusion` (n=3, 72.0-86.0, sd 5.949), `editorial_award+ordered_rank` (n=1, 93.0-93.0, sd 0.0), `editorial_award+unordered_inclusion` (n=1, 93.5-93.5, sd 0.0).
 
-All 39 estimates land between **64.0** and **94.0**, a spread of **30.0** points on a 0-100 scale.
+All 40 estimates land between **64.0** and **93.5**, a spread of **29.5** points on a 0-100 scale.
 
-The judges agree almost perfectly: 0 of 0 person-periods came back identical from both families, and the largest disagreement was 0 point. So the compression is not rater noise. It is the evidence.
+18 of 40 person-periods came back identical from both families and 22 did not, with a largest disagreement of 8.0 points. Both families nonetheless land in the same compressed region, so the compression is not one family's idiosyncrasy.
 
-An annual one-winner award is a superlative judgment by construction, so the rubric places almost every winner in band 90-100: 17 of 18 award-shaped estimates, the exception being 78.0. The consequence is that **award-shaped evidence cannot discriminate between MOST winners: 15 of 18 land on the same value.** A leaderboard built on it would rank people by the difference between one judge saying 92 and another saying 93.
+**Do not read the agreement rate as agreement about the people.** It is nearly collinear with astra's `effort_took_effect` flag: mean gap 0.39 where that flag is false against 2.64 where it is true, and 14 of 18 award-shaped dossiers fall on the false side. `CodexJudge`'s own measurement note says the flag cannot distinguish a mis-served request from a turn that needed little reasoning, so this corpus cannot separate the two readings. See `docs/BACKLOG.md`.
+
+An annual one-winner award is a superlative judgment by construction, so the rubric places almost every winner in band 90-100: 18 of 19 award-shaped estimates, the exception being 88.0. The consequence is that **award-shaped evidence cannot discriminate between MOST winners: 13 of 19 land on the same value.** A leaderboard built on it would rank people by the difference between one judge saying 92 and another saying 93.
 
 This was predicted in the plan's worked example A and is now measured. It is the strongest argument for either finding ordered, depth-carrying lists on permitted routes, or leading the men's and women's views with intervals instead of point estimates.
 
@@ -198,39 +199,39 @@ This was predicted in the plan's worked example A and is now measured. It is the
 **Daredevil** (2003, on_screen) — co-appearance only; ROMANCE UNVERIFIED
 
 - Ben Affleck: 92.0 (estimate from 2002)
-- Jennifer Garner: 92.0 (estimate from 2002)
+- Jennifer Garner: 92.5 (estimate from 2002)
 - covered share 1, period support `nearby_period`
-- gap in the men's view **+0.0**, in the women's view **+0.0**, mirrors exactly: True
+- gap in the men's view **+0.5**, in the women's view **-0.5**, mirrors exactly: True
 
 **relationship** (1999, real_life) — co-appearance only; ROMANCE UNVERIFIED
 
 - Brad Pitt: 92.0 (estimate from 2000)
-- Jennifer Aniston: 86.0 (estimate from 1999)
+- Jennifer Aniston: 85.0 (estimate from 1999)
 - covered share 1, period support `nearby_period`
-- gap in the men's view **-6.0**, in the women's view **+6.0**, mirrors exactly: True
+- gap in the men's view **-7.0**, in the women's view **+7.0**, mirrors exactly: True
 
 **relationship** (2000, real_life) — co-appearance only; ROMANCE UNVERIFIED
 
 - Brad Pitt: 92.0 (estimate from 2000)
-- Jennifer Aniston: 78.0 (estimate from 2000)
+- Jennifer Aniston: 82.5 (estimate from 2000)
 - covered share 1, period support `contemporaneous`
-- gap in the men's view **-14.0**, in the women's view **+14.0**, mirrors exactly: True
+- gap in the men's view **-9.5**, in the women's view **+9.5**, mirrors exactly: True
 
 **relationship** (2001, real_life) — co-appearance only; ROMANCE UNVERIFIED
 
 - Brad Pitt: 92.0 (estimate from 2000)
-- Jennifer Aniston: 78.0 (estimate from 2000)
+- Jennifer Aniston: 82.5 (estimate from 2000)
 - covered share 1, period support `nearby_period`
-- gap in the men's view **-14.0**, in the women's view **+14.0**, mirrors exactly: True
+- gap in the men's view **-9.5**, in the women's view **+9.5**, mirrors exactly: True
 
 ## 7. Evidence density — the actual bottleneck
 
-Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.051**. Distribution: `{'1': 37, '2': 2}`. Person-periods carrying two or more publishers: **2**. Person-periods that are a lone one-winner award: **18 of 39**.
+Coverage asks whether a person-year has any evidence. Density asks how much. Mean observations per person-period: **1.05**. Distribution: `{'1': 38, '2': 2}`. Person-periods carrying two or more publishers: **2**. Person-periods that are a lone one-winner award: **19 of 40**.
 
 | Corpus | n | range | distinct values | SD |
 |---|---|---|---|---|
-| Real | 39 | 30.0 | **12** | 6.367 |
-| Synthetic stress | 23 | 29 | 10 | 9.183 |
+| Real | 40 | 29.5 | **17** | 5.913 |
+| Synthetic stress | 23 | 29 | 12 | 9.396 |
 
 The rubric discriminates; the corpus does not let it. A lone one-winner award is superlative by construction, so it concentrates almost all of its estimates on a single value, and a person-period carrying exactly that has almost no room to differ from the next one. What the board needs is not more sources covering more people, but sources landing on the SAME person-year as an existing observation.
 
@@ -238,7 +239,7 @@ This reframes what "more sources" has to mean. A source that adds a hundred new 
 
 ## 8. Why joint coverage does not move
 
-The corpus grew from 13 observations to 41 and joint coverage did not move. This is why.
+The corpus grew from 13 observations to 42 and joint coverage did not move. This is why.
 
 - Pairings considered (romance-verified films plus scorable episodes): **34**
 - With evidence on BOTH sides at any distance: **12**
@@ -271,30 +272,30 @@ Two things follow. Widening the bound from ±1 to ±2 would take joint coverage 
 | Gender | `editorial_award` | `ordered_rank` | `unordered_inclusion` |
 |---|---|---|---|
 | male | 8 | **0** | 1 |
-| female | 12 | **17** | 3 |
+| female | 13 | **17** | 3 |
 
 | Gender | n | mean | SD | range |
 |---|---|---|---|---|
-| male | 8 | **90.75** | 4.89 | 78.0–94.0 |
-| female | 31 | **87.1** | 6.49 | 64.0–94.0 |
+| male | 8 | **91.75** | 1.5 | 88.0–93.5 |
+| female | 32 | **87.52** | 6.29 | 64.0–93.0 |
 
-Men hold 0 ranked observations and women 17. Because an award pins near the top of the scale and a ranked placement does not, that imbalance puts the male mean 3.65 points above the female mean before any fact about any individual enters. Every mixed-gender pairing therefore carries roughly that offset built in, in the same direction, and a signed gap that size is a statement about publishing rather than about the couple. Removing any single male person entirely moves the offset between 2.9 and 5.3: it never approaches zero and never reverses, so the finding does not belong to whichever person is carrying it.
+Men hold 0 ranked observations and women 17. Because an award pins near the top of the scale and a ranked placement does not, that imbalance puts the male mean 4.23 points above the female mean before any fact about any individual enters. Every mixed-gender pairing therefore carries roughly that offset built in, in the same direction, and a signed gap that size is a statement about publishing rather than about the couple. Removing any single male person entirely moves the offset between 3.9 and 4.78: it never approaches zero and never reverses, so the finding does not belong to whichever person is carrying it.
 
 **A four-view product compares a man against a woman in every row. With the shapes distributed this unevenly, the sign of a typical gap is decided by which sex the person is, not by the judgments. This has to be disclosed on every row, or the board reports a publishing artifact as a finding about people.**
 
 ## 10. Evidence shape drives the estimate
 
-**Evidence type alone explains 31% of the variance in the estimates** (omega-squared 0.311, the unbiased estimator).
+**Evidence type alone explains 40% of the variance in the estimates** (omega-squared 0.403, the unbiased estimator).
 
-Earlier versions of this report quoted 39%, which is eta-squared. Eta-squared is biased upward, and this corpus has 39 estimates over 5 shape groups, two of them holding a single estimate — and a group of one has its mean equal to its value by construction, contributing to between-group variance with nothing within-group to offset it. The gap between the two figures is the size of that bias. The conclusion does not turn on it: a third of the variance in an attractiveness estimate being explained by the FORMAT of the evidence is decisive either way.
+Earlier versions of this report quoted 47%, which is eta-squared. Eta-squared is biased upward, and this corpus has 40 estimates over 5 shape groups, two of them holding a single estimate — and a group of one has its mean equal to its value by construction, contributing to between-group variance with nothing within-group to offset it. The gap between the two figures is the size of that bias. The conclusion does not turn on it: a third of the variance in an attractiveness estimate being explained by the FORMAT of the evidence is decisive either way.
 
 | Evidence shape | n | mean | range | SD |
 |---|---|---|---|---|
-| `editorial_award` | 18 | 91.28 | 78.0–94.0 | 3.263 |
-| `editorial_award+ordered_rank` | 1 | 94.0 | 94.0–94.0 | 0.0 |
-| `editorial_award+unordered_inclusion` | 1 | 94.0 | 94.0–94.0 | 0.0 |
-| `ordered_rank` | 16 | 84.56 | 64.0–93.0 | 6.727 |
-| `unordered_inclusion` | 3 | 80.67 | 76.0–86.0 | 4.11 |
+| `editorial_award` | 19 | 91.89 | 88.0–93.0 | 0.968 |
+| `editorial_award+ordered_rank` | 1 | 93.0 | 93.0–93.0 | 0.0 |
+| `editorial_award+unordered_inclusion` | 1 | 93.5 | 93.5–93.5 | 0.0 |
+| `ordered_rank` | 16 | 85.09 | 64.0–92.0 | 6.21 |
+| `unordered_inclusion` | 3 | 80.17 | 72.0–86.0 | 5.949 |
 
 **3 of 4 jointly covered pairings have MISMATCHED evidence shapes on the two sides.**
 
@@ -326,7 +327,7 @@ A pairing needs both sides. The partners missing evidence are two different popu
 Co-appearance in a cast list is not a pairing. All 20 candidates were put to the classifier from the Wikipedia plot section alone. 19 reached a model; **8** are confirmed reciprocal romances.
 
 1 never reached one and is recorded as `cannot_tell` with a reason, which is why the table below sums to 20 rather than 19:
-  - *Daredevil: The Director's Cut* — no Plot or Synopsis section
+  - *Daredevil: The Director's Cut* — no English Wikipedia sitelink for Q52028617
 
 | Classification | Count |
 |---|---|
@@ -335,31 +336,35 @@ Co-appearance in a cast list is not a pairing. All 20 candidates were put to the
 | `co_appearance_only` | 3 |
 | `family_or_platonic` | 2 |
 
-3 results worth naming. *Being John Malkovich* came back `cannot_tell` for Brad Pitt and Michelle Pfeiffer — both appear as themselves; before this filter existed the coverage count treated them as a couple. *Pearl Harbor* came back `cannot_tell` for Ben Affleck and Jennifer Garner; `reciprocal_romance` for Ben Affleck and Kate Beckinsale — the two candidate pairs separated, which is the point of classifying per pair rather than per film. *What Lies Beneath* came back `reciprocal_romance` for Harrison Ford and Michelle Pfeiffer — the cast fix changed this one: knowing which characters the two actors play turned an unclassifiable plot into an established marital relationship.
+3 results worth naming. *Being John Malkovich* came back `cannot_tell` for Brad Pitt and Michelle Pfeiffer — both appear as themselves; before this filter existed the coverage count treated them as a couple. *Pearl Harbor* came back `reciprocal_romance` for Ben Affleck and Kate Beckinsale; `cannot_tell` for Ben Affleck and Jennifer Garner — the two candidate pairs separated, which is the point of classifying per pair rather than per film. *What Lies Beneath* came back `reciprocal_romance` for Harrison Ford and Michelle Pfeiffer — the cast fix changed this one: knowing which characters the two actors play turned an unclassifiable plot into an established marital relationship.
 
 ## 13. Rater noise
 
 4 repeats of each unchanged dossier.
 
-- `award`: SD **0.0** over 2 dossier(s). No LSD quoted -- every repeat returned the same value; this sample cannot distinguish low variance from none, so no LSD is quoted.
-- `ranked`: SD **0.926**, least significant difference at 95% about **2.56** points (2.77 x SD).
+- `award`: SD **0.0** over 4 dossier(s). No LSD quoted -- every repeat returned the same value; this sample cannot distinguish low variance from none, so no LSD is quoted.
+- `ranked`: SD **0.371**, least significant difference at 95% about **1.03** points (2.77 x SD).
 
-**Leave-one-out:** dropping any single ranked dossier moves the floor between **2.35** and **2.89**. No verdict in this report flips across that range — the closest are the two 2.0-point results, which stay inside even at 2.35. Four dossiers is few, and a floor set by one outlier would have set every significance verdict here with it.
+**Leave-one-out:** dropping any single ranked dossier moves the floor between **0.85** and **1.18**. No verdict in this report flips across that range — the closest are the two 2.0-point results, which stay inside even at 0.85. Four dossiers is few, and a floor set by one outlier would have set every significance verdict here with it.
 
-The POOLED figure is SD 0.617 and LSD 1.71. It is reported only for continuity with earlier documents. Pooling averages a shape with measured variance against one with none, which halves the number and understates the noise floor for exactly the rank-shaped estimates the LSD gets applied to.
+The POOLED figure is SD 0.248 and LSD 0.69. It is reported only for continuity with earlier documents. Pooling averages a shape with measured variance against one with none, which halves the number and understates the noise floor for exactly the rank-shaped estimates the LSD gets applied to.
 
 | Dossier | Shape | Runs | SD |
 |---|---|---|---|
-| Angelina Jolie 2006 (fable) | ranked | 94, 93, 95, 94 | 0.816 |
-| Michelle Pfeiffer 1995 (fable) | ranked | 86, 86, 88, 88 | 1.155 |
-| Jennifer Aniston 1996 (fable) | ranked | 84, 84, 86, 86 | 1.155 |
-| Jennifer Aniston 1997 (fable) | ranked | 91, 90, 91, 90 | 0.577 |
+| Angelina Jolie 2006 (fable) | ranked | 94, 94, 94, 93 | 0.500 |
+| Angelina Jolie 2006 (astra) | ranked | 92, 92, 92, 92 | 0.000 |
+| Michelle Pfeiffer 1995 (fable) | ranked | 86, 86, 86, 86 | 0.000 |
+| Michelle Pfeiffer 1995 (astra) | ranked | 87, 87, 88, 88 | 0.577 |
+| Jennifer Aniston 1996 (fable) | ranked | 84, 84, 84, 84 | 0.000 |
+| Jennifer Aniston 1996 (astra) | ranked | 86, 87, 86, 86 | 0.500 |
+| Jennifer Aniston 1997 (fable) | ranked | 90, 91, 91, 90 | 0.577 |
+| Jennifer Aniston 1997 (astra) | ranked | 91, 89, 90, 90 | 0.816 |
 | Denzel Washington 1996 (fable) | award | 92, 92, 92, 92 | 0.000 |
+| Denzel Washington 1996 (astra) | award | 92, 92, 92, 92 | 0.000 |
 | Harrison Ford 1998 (fable) | award | 92, 92, 92, 92 | 0.000 |
+| Harrison Ford 1998 (astra) | award | 92, 92, 92, 92 | 0.000 |
 
 **Which dossier moves is the finding.** The award dossier does not move at all, because it is pinned against the 90-100 ceiling where no judgment is left to make. The ranked dossier does move, because there genuinely is one. Zero rater noise is a symptom of evidence that cannot discriminate, not a sign of a well-behaved rubric.
-
-Measured on one judge (fable). Codex reached 0% of its 7-day quota window mid-run, so this describes one model family and not a panel.
 
 ## 14. Cross-gender offset sensitivity
 
@@ -375,13 +380,13 @@ A constant cross-gender offset shifts every PAW rate by exactly delta, so rate r
 
 ## 15. Grounding audit
 
-39 rationales checked: **39** passed the automated checks, 0 failed, 34 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
+80 rationales checked: **80** passed the automated checks, 0 failed, 57 are flagged for a human read in `docs/GROUNDING-AUDIT.md`.
 
 *These checks prove a rationale does not assert MORE than its evidence carries. They do not prove it is a fair reading. Only the human sheet can establish that.*
 
 ## 16. The observations, against the pages they came from
 
-**41 of 41** observations were re-checked against the live Wikipedia page each was extracted from, and every one of them matched: 17 editorial awards, 16 ranked placements, and 8 prose mentions whose excerpts still appear verbatim in the article.
+**42 of 42** observations were re-checked against the live Wikipedia page each was extracted from, and every one of them matched: 17 editorial awards, 16 ranked placements, and 9 prose mentions whose excerpts still appear verbatim in the article.
 
 Until this ran, nothing had checked them. Every finding in this report rests on those rows, which two parsers and one model produced, and all three were taken on trust. They earned it.
 
@@ -408,10 +413,10 @@ Every relationship here comes from Wikidata, and nothing used to cross-check it.
 | Person | Period | Shape | pilot | roster100 | Delta |
 |---|---|---|---|---|---|
 | Brad Pitt | 2000 | `editorial_award` | 92.0 | 92.0 | **+0.0** |
-| Jennifer Aniston | 1999 | `ordered_rank` | 86.0 | 84.0 | **+2.0** |
-| Jennifer Aniston | 2000 | `ordered_rank` | 78.0 | 80.0 | **-2.0** |
+| Jennifer Aniston | 1999 | `ordered_rank` | 85.0 | 84.0 | **+1.0** |
+| Jennifer Aniston | 2000 | `ordered_rank` | 82.5 | 80.0 | **+2.5** |
 
-3 person-periods carry a byte-identical dossier in both runs under the same contract id. 1 returned the same estimate and 2 did not, with a largest move of 2.0 points. A move here is pure run-to-run variance: the evidence, the rubric and the judge family were identical.
+3 person-periods carry a byte-identical dossier in both runs under the same contract id. 1 returned the same estimate and 2 did not, with a largest move of 2.5 points. A move here is pure run-to-run variance: the evidence, the rubric and the judge family were identical.
 
 This is independent of the rater-noise section and agrees with it. The repeats there were deliberate re-invocations inside one run; these two runs did not know about each other. Both say the award shape holds still and the ranked shape does not.
 
@@ -430,11 +435,9 @@ The ±1 nearby-period bound, the romance filter on co-starring films and the enf
 | ±3 | True | 10 | 5 | **0** | 5 | 5 |
 | ±3 | False | 14 | 9 | **0** | 5 | 5 |
 | ±4 | True | 13 | 7 | **0** | 6 | 6 |
-| ±4 | False | 18 | 12 | **1** | 7 | 6 |
+| ±4 | False | 18 | 12 | **0** | 6 | 6 |
 
-The claim that a shape-comparable pairing has a gap of exactly zero holds at **9 of 10** settings. It fails at bound 4, romance_filter False.
-
-The counterexample there is `Thor: Love and Thunder 2022: +3` — a film co-appearance never established as a romance, scored from estimates 4 years from the year in question. It takes both dials at their loosest, in the two directions this project argues against, to produce it.
+The claim that a shape-comparable pairing has a gap of exactly zero holds at **10 of 10** settings.
 
 *Every setting reuses the SAME estimates. This tests whether the conclusions depend on the three methodological dials, not whether they survive different evidence.*
 
@@ -442,8 +445,8 @@ The counterexample there is `Thor: Love and Thunder 2022: +3` — a film co-appe
 
 Of 4 jointly covered pairing-periods, **1** compares two people judged by the same kind of evidence. The rest compare an award against a list placement, where format explains much of the gap.
 
-- **Daredevil (2003)**: gap **+0.0**
-  - Both sides are `editorial_award`-shaped, and that shape's repeat variance is **unmeasured**: every repeat returned the same value, which cannot tell low variance from none. The largest measured floor is `ranked`'s **2.56** points. Against that upper bound the gap is **not distinguishable from zero**.
+- **Daredevil (2003)**: gap **+0.5**
+  - Both sides are `editorial_award`-shaped, and that shape's repeat variance is **unmeasured**: every repeat returned the same value, which cannot tell low variance from none. The largest measured floor is `ranked`'s **1.03** points. Against that upper bound the gap is **not distinguishable from zero**.
 
 So the project can now produce a signed, exactly mirrored, evidence-backed gap for a real couple. It cannot yet produce one that is both comparable and larger than its own measurement noise. That is a much better place than this run started, and it is not a leaderboard.
 
@@ -451,21 +454,21 @@ So the project can now produce a signed, exactly mirrored, evidence-backed gap f
 
 Stages that record a call budget in their own artifact:
 
-- Stress tests: 27 model calls ({"fable": 17, "astra": 10}).
-- Scoring: 39 model calls ({"fable": 39, "astra": 0}).
+- Stress tests: 25 model calls ({"fable": 16, "astra": 9}).
+- Scoring: 80 model calls ({"fable": 40, "astra": 40}).
 - First pilot pass: 0 model calls — every dossier came back empty and short-circuited before any judge was called.
 
 Stages that write a run manifest, with the reconciliation each records. `attempted` equals `succeeded + cached + excluded + failed` by construction, so a stage that failed on every item cannot hide behind a call count:
 
 | Stage | Runs | Attempted | Succeeded | Cached | Excluded | Failed | Errors |
 |---|---|---|---|---|---|---|---|
-| `prose-mentions` | 1 | 14 | 14 | 0 | 0 | 0 | — |
-| `rater-noise` | 5 | 58 | 50 | 0 | 0 | 8 | auth_or_quota=8 |
-| `romance` | 3 | 60 | 45 | 0 | 15 | 0 | — |
+| `prose-mentions` | 3 | 51 | 48 | 0 | 3 | 0 | — |
+| `rater-noise` | 6 | 106 | 98 | 0 | 0 | 8 | auth_or_quota=8 |
+| `romance` | 4 | 80 | 64 | 0 | 16 | 0 | — |
 
 Repeated runs of a stage are summed. A superseded run spent quota too, and this section answers what the pilot cost rather than how many calls stand behind the final artifacts.
 
-**Model calls: 66 from the budgeted stages, plus 132 attempts recorded across the manifested stages — 198 in total, against a cap of 300.**
+**Model calls: 105 from the budgeted stages, plus 237 attempts recorded across the manifested stages — 342 in total, against a cap of 300.**
 
 - Subscription quota only. API billing was asserted off at start-up.
 - Dollar cost is not totalled: only the Claude arm reports `cost_usd`, and inventing a figure for the other arm would be a fabricated number.
@@ -477,7 +480,7 @@ Repeated runs of a stage are summed. A superseded run spent quota too, and this 
 
 The stress cases say the rubric is reading the judgments rather than counting documents: one award beat two low placements by a wide margin, three corroborating publishers moved the estimate by a point, and five copies of one list moved it by zero. Both model families agreed exactly on every construct case they both ran.
 
-With one exception, and it is about FORMAT rather than count: **S2_format_equivalence** exceeded the measured noise floor. The rubric reads the substance of a judgment and not the number of documents carrying it — but it does not read the same substance identically in every shape, which is the confound this report measures observationally elsewhere.
+With one exception, and it is about FORMAT rather than count: **S2_format_equivalence, S7_order_sensitivity, S8_volume_without_content** exceeded the measured noise floor. The rubric reads the substance of a judgment and not the number of documents carrying it — but it does not read the same substance identically in every shape, which is the confound this report measures observationally elsewhere.
 
 But which person-years have any evidence is decided entirely by which publishers happen to be reachable. On the permitted routes the men's award is an annual one-winner prize reported on Wikipedia since 1985, and the women's equivalent is a single number-one per year since 2000. Everything deeper sits behind terms that forbid this use.
 
@@ -488,7 +491,7 @@ The plan's section 8.2 lists six things M0 should produce. Where each one is, an
 | # | Deliverable | Where | Done |
 |---|---|---|---|
 | 1 | The revised rubric and the access decisions | `rubrics/standing/RUBRIC.md`, section 2 | yes |
-| 2 | Dossiers, estimates, support, rationales, exclusions, lineage | `data/pilot/run/evidenced_scores.json`, sections 6 and 15 | yes — 39 person-periods |
+| 2 | Dossiers, estimates, support, rationales, exclusions, lineage | `data/pilot/run/evidenced_scores.json`, sections 6 and 15 | yes — 40 person-periods |
 | 3 | VERIFIED pairings, with mirrored contribution arithmetic | section 6; `docs/RELATIONSHIP-REVIEW.md` for the verification | arithmetic yes, mirrors exact; **verification NOT done** — it needs a person, and the sheet is ready |
 | 4 | Person-period and joint pairing-period coverage, with failures | sections 5 and 8, and the near-miss list | yes |
 | 5 | Stress tests, offset diagnostic, actual costs, review minutes | sections 4, 14 and 22 | yes — review minutes are **0**, stated |
@@ -501,8 +504,7 @@ The plan's section 8.2 lists six things M0 should produce. Where each one is, an
 - **Human verification has not happened.** Every relationship remains a Wikidata candidate that no person has checked, and the plan budgeted 60-90 minutes for exactly that.
   They are no longer unchecked against anything, which is not the same thing: 21 of 29 are corroborated by English Wikipedia prose naming a year this project stored, and the review sheet puts the excerpts beside each claim so the hour is spent judging rather than looking things up. A second source agreeing is evidence; it is not a person having decided.
   On-screen pairings ARE romance-filtered — 8 of 20 candidates are confirmed reciprocal romances from the plot text — so that is no longer an open item, but the filter is a model's reading of a Wikipedia summary, not a human's.
-- **The grounding audit is not done.** 34 rationales are flagged for a human to read and judge whether the cited observations support what they claim. The automated checks cannot establish that.
-- **Rater noise is measured but thin.** 4 repeats across 6 dossiers on 1 judge family. The award shape returned the same value every time, which cannot distinguish low variance from none, so no floor is quoted for it.
+- **The grounding audit is not done.** 57 rationales are flagged for a human to read and judge whether the cited observations support what they claim. The automated checks cannot establish that.
+- **Rater noise is measured but thin.** 4 repeats across 6 dossiers on 2 judge families. The award shape returned the same value every time, which cannot distinguish low variance from none, so no floor is quoted for it.
 - **The cross-gender offset diagnostic ran, on too small a board to be informative.** Cumulative ranks did not move over the tested range, but with 2 people and this little exposure spread that says the board is too small to be sensitive, not that it is robust.
-- **Cross-family agreement on the real dossiers is unmeasured.** Every estimate came from fable alone. The plan decided two families precisely so that a one-family idiosyncrasy could be told from a property of the rubric, and that check has not been run on real evidence.
 

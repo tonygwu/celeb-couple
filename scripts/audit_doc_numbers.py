@@ -35,6 +35,9 @@ from pathlib import Path
 from typing import Any, Callable
 
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+
+from packages.llmkit.contract import refuse_stale_contract  # noqa: E402
 
 #: Documents written by a generator. Editing them by hand is the bug; the fix
 #: is to re-run the generator, so a mismatch here is not actionable prose.
@@ -316,7 +319,12 @@ def audit(repo: Path) -> tuple[list[dict], list[str], list[str]]:
         if not f.exists():
             missing.append(f"{rule.name}: {rule.artifact}")
             continue
-        expected = rule.render(rule.extract(json.loads(f.read_text())))
+        data = json.loads(f.read_text())
+        # Same reason as write_m0_report.load: this was the second script
+        # reading scored artifacts without the provenance check, so a stale
+        # corpus could have its numbers confirmed as correct prose.
+        refuse_stale_contract(repo, rule.artifact, data)
+        expected = rule.render(rule.extract(data))
         if count_occurrences(rule, docs) == 0:
             unmatched.append(rule.name)
         mismatches.extend(find_mismatches(rule, expected, docs))

@@ -357,7 +357,19 @@ def test_the_singleton_groups_are_visible():
         pytest.skip("data/ is gitignored")
     groups = json.loads(f.read_text())["groups"]
     assert sum(1 for n in groups.values() if n == 1) >= 1, groups
-    assert sum(groups.values()) == 39
+    # Cross-checked against the scores, not pinned to a literal. The real
+    # invariant is that the shape breakdown accounts for EVERY scored estimate;
+    # a pinned 39 asserts the corpus size instead, and goes stale the moment the
+    # corpus legitimately grows. tests/test_observation_verification.py had the
+    # same defect with 41 and it fired during the 2026-09-14 contract bump.
+    scores = Path(__file__).resolve().parent.parent / "data/pilot/run/evidenced_scores.json"
+    if scores.exists():
+        scored = sum(1 for r in json.loads(scores.read_text())["person_periods"]
+                     if r.get("estimate") is not None)
+        assert sum(groups.values()) == scored, (
+            f"shape groups account for {sum(groups.values())} estimates but "
+            f"{scored} person-periods are scored; the breakdown is not exhaustive")
+    assert sum(groups.values()) > 0
 
 
 def test_the_gender_offset_does_not_belong_to_one_person():

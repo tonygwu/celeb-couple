@@ -10,6 +10,83 @@ conclusions were not resting on the figures that turned out to be wrong.
 
 Read this if you read an earlier version of `docs/M0-REPORT.md`.
 
+## 2026-09-15 — the bundled contract bump and the first two-family score
+
+Three filed rubric corrections landed together, with the operator approving the
+re-score they cost. `standing-rubric-2.0` became `2.1`, `mentions-1.0` became
+`1.1`, and the hash scheme became `v2-length-prefixed`, which moved every
+contract id including romance's, whose bytes never changed.
+
+**Nothing below overturned a conclusion.** The comparable gap is still under the
+noise floor, and the shape confound is now supported by better evidence than it
+had before.
+
+### The rank-shaped noise floor: 2.56 → 1.03, and the floor is not stable
+
+Measured again with both judge families on the same four ranked dossiers. The
+pooled figure is 0.69 and the rank-shaped one is 1.03, against 2.56 before.
+
+**Do not read this as a more precise floor.** The same judge, on the same four
+dossiers, gave these within-judge standard deviations on two runs:
+
+| fable, ranked | Jolie 06 | Pfeiffer 95 | Aniston 96 | Aniston 97 | mean |
+|---|---|---|---|---|---|
+| previous run | 0.816 | 1.155 | 1.155 | 0.577 | 0.926 |
+| this run | 0.500 | 0.000 | 0.000 | 0.577 | 0.269 |
+
+A 3.4× difference in the noise measurement itself. Four dossiers at four repeats
+does not pin this quantity, and quoting either number as *the* floor overstates
+what was measured. Both are recorded; the conclusion holds against either.
+
+### The one comparable gap: 0.0 → 0.5
+
+Ben Affleck and Jennifer Garner, Daredevil 2003: 92.0 against 92.5, where both
+were 92.0 before. The 92.5 is a mean of two judges, not a moved estimate.
+Still far below the floor on either measurement. No leaderboard here either.
+
+### Every across-judge gap: `None` → measured
+
+`across_judges_gap` was null for all 39 person-periods, because codex ran out of
+quota mid-run and one family scored everything. It is now non-null for all 40:
+median 1.0, mean 1.62, max 8.0, with 18 exact agreements.
+
+**`ADJUDICATION_GAP = 10.0` fires on nothing**, which is what `docs/BACKLOG.md`
+predicted. The observed maximum is 8.0. Setting it is a methodology decision and
+is left open.
+
+### Corpus: 41 → 42 observations
+
+Prose mentions were re-extracted under `mentions-1.1`: the cohort file went 12 →
+10 and the partner file 6 → 7. Observations went 41 → 42, and verification is
+still a full pass at 42 of 42.
+
+### What the contract bump itself moved: nothing beyond rater noise
+
+Disentangled from the second judge, because the headline estimates moved by up
+to 10 points and almost all of that is the reducer now averaging two families
+rather than one. No dossier changed its observation count. fable ALONE moved on
+17 of 39 person-periods, mean absolute move 2.35 — below the 2.56 floor
+published at the time, though above the 1.03 measured after. Two estimates moved
+6 points.
+
+The honest reading is that the rubric and schema edit produced no movement
+clearly distinguishable from rater noise, stated against a floor that is itself
+uncertain by a factor of three.
+
+### A claim that was published to the operator and then withdrawn
+
+Award-shaped evidence was reported as pinning two model families to the
+identical number 72% of the time. That rate was nearly collinear with astra's
+`effort_took_effect` flag, and `CodexJudge`'s own measurement note says that
+flag cannot distinguish a mis-served request from a turn that needed little
+reasoning. The observational cut could not support the claim.
+
+**The repeat experiment can, and does.** Both award-shaped dossiers returned
+exactly 92.0 on all 24 runs — two dossiers, four repeats, two families, two
+separate runs, zero variance in every cell — while ranked dossiers produced
+between-family gaps of 0.5 to 2.25. That is a controlled design rather than an
+observational cut, and it does not depend on the effort flag at all.
+
 ## 2026-09-14 — the overnight hardening run
 
 ### The rank-shaped noise floor: 1.2 → 2.22 → 2.56 points

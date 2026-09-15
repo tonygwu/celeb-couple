@@ -297,10 +297,23 @@ class CodexJudge:
 
     Identity caveat, recorded rather than papered over: the JSONL event stream
     names no model anywhere, so ``served_model`` can only echo the request and
-    ``served_model_verified`` is false.  The one identity-adjacent assertion
-    available is that a reasoning effort actually took effect, which shows up as
-    a non-zero ``reasoning_output_tokens`` in the turn usage.  When effort was
-    requested and that count is zero, the request was not served as asked.
+    ``served_model_verified`` is false.
+
+    ``effort_took_effect`` IS NOT AN IDENTITY CHECK, and this docstring used to
+    say it was -- that "when effort was requested and that count is zero, the
+    request was not served as asked".  The measurement note beside the field in
+    ``__call__`` says the opposite, and it is the one backed by evidence: a zero
+    count does not distinguish "effort did not take effect" from "this turn
+    needed little reasoning", because turns of 234-257 output tokens reported
+    zero while an identical-shaped probe reported 27.
+
+    The contradiction was not harmless.  On 2026-09-14 an analysis read this
+    docstring, found 18 of 40 astra verdicts flagged, and reported that nearly
+    half the cross-family comparison had been mis-served.  It had not been
+    shown to be.  Treat the flag as an UNEXPLAINED SIGNAL worth splitting
+    results on, never as evidence that a request was not honoured.
+
+    Nothing available here verifies which model answered.
     """
 
     def __init__(self, name: str, model: str, binary: str = "codex",

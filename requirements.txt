@@ -4,3 +4,8 @@
 pytest==8.3.4
 # Property-based tests for the metric invariants. Offline and deterministic.
 hypothesis==6.168.0
+# Validates every stored judge verdict against rubrics/standing/estimate.schema.json.
+# Deliberately NOT added until the schema's nullable enums were fixed: before
+# 2026-09-14 the first thing a validator did was reject all 52 raw verdicts,
+# because `missingness_reason` and `band` were nullable by type and not by enum.
+jsonschema==4.26.0

@@ -12,6 +12,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+
+from packages.llmkit.contract import refuse_stale_contract  # noqa: E402
 
 
 #: Every artifact the report reads. The fingerprint over these is the report's
@@ -22,10 +25,26 @@ _INPUTS: list[str] = []
 
 
 def load(p: str, default=None):
+    """Read an artifact, refusing one whose grading contract is gone.
+
+    This used to be a bare ``json.loads`` and was the ONE score-reading script
+    that bypassed ``require``. The effect, caught during the 2026-09-14 contract
+    bump: every require()-based stage correctly refused the stale corpus,
+    run_chain.sh recorded the failures and kept going, and this script then
+    rendered docs/M0-REPORT.md from scores no rubric on disk produced any more.
+    A deliverable is exactly the wrong place to skip a provenance check.
+
+    It stays a ``load`` with a default rather than becoming ``require``,
+    because a missing input here is legitimate -- the roster-scale artifacts
+    are optional and the report renders without them. Absent is allowed; stale
+    is not.
+    """
     f = REPO / p
     if f.exists():
         _INPUTS.append(p)
-        return json.loads(f.read_text())
+        data = json.loads(f.read_text())
+        refuse_stale_contract(REPO, p, data)
+        return data
     return default
 
 
@@ -736,10 +755,23 @@ def main() -> int:
             gaps = [r["across_judges_gap"] for r in scored["person_periods"]
                     if r["across_judges_gap"] is not None]
             agree = sum(1 for g in gaps if g == 0)
-            w(f"The judges agree almost perfectly: {agree} of {len(gaps)} person-periods "
-              f"came back identical from both families, and the largest disagreement was "
-              f"{max(gaps) if gaps else 0} point. So the compression is not rater noise. "
-              f"It is the evidence.")
+            # "agree almost perfectly" was typed and is not what the numbers
+            # say: 18 of 40 identical means 22 of 40 DISAGREED. Report the
+            # split and let the reader judge the adjective.
+            _big = max(gaps) if gaps else 0
+            w(f"{agree} of {len(gaps)} person-periods came back identical from both "
+              f"families and {len(gaps) - agree} did not, with a largest disagreement of "
+              f"{_big} point{'' if _big == 1 else 's'}. Both families nonetheless land in "
+              f"the same compressed region, so the compression is not one family's "
+              f"idiosyncrasy.")
+            w("")
+            w("**Do not read the agreement rate as agreement about the people.** "
+              "It is nearly collinear with astra's `effort_took_effect` flag: mean "
+              "gap 0.39 where that flag is false against 2.64 where it is true, and "
+              "14 of 18 award-shaped dossiers fall on the false side. `CodexJudge`'s "
+              "own measurement note says the flag cannot distinguish a mis-served "
+              "request from a turn that needed little reasoning, so this corpus "
+              "cannot separate the two readings. See `docs/BACKLOG.md`.")
             w("")
             # "places every winner in band 90-100" was typed and is false: one
             # award-shaped estimate sits at 78. Count them.
@@ -1534,7 +1566,8 @@ def main() -> int:
         _degenerate = _h.get("shapes_with_degenerate_sample") or []
         w(f"- **Rater noise is measured but thin.** {noise['repeats']} repeats "
           f"across {len(noise['targets'])} dossiers on "
-          f"{len(_h.get('judges_that_contributed') or [])} judge family. "
+          f"{len(_h.get('judges_that_contributed') or [])} judge "
+          f"{'family' if len(_h.get('judges_that_contributed') or []) == 1 else 'families'}. "
           + (f"The {', '.join(_degenerate)} shape returned the same value every "
              f"time, which cannot distinguish low variance from none, so no "
              f"floor is quoted for it."

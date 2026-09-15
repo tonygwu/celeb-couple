@@ -4,11 +4,15 @@ Filed by the overnight run of 2026-09-14. Difficulty tags are estimates.
 
 See also `docs/BACKLOG-roster.md` for roster scope and the evidence-source hunt.
 
-**Three items below are waiting on a single rubric/schema version bump.** Each
-one alone costs a full re-score, so they should go together:
-`estimate.schema.json`'s nullable enums, the `contract_id` boundary ambiguity,
-and the `MENTIONS.md` example that contradicts rule 3. The procedure is in
-[`docs/CONTRACT-BUMP.md`](CONTRACT-BUMP.md).
+~~**Three items below are waiting on a single rubric/schema version bump.**~~
+**All three landed together on 2026-09-14**, with the operator's approval to
+spend the re-score they cost: `estimate.schema.json`'s nullable enums, the
+`contract_id` boundary ambiguity, and the `MENTIONS.md` example that
+contradicts rule 3. `standing-rubric-2.0` became `2.1`, `mentions-1.0` became
+`1.1`, and the hash scheme became `v2-length-prefixed`, which moved every
+contract id including romance's, whose bytes never changed. The procedure they
+followed is in [`docs/CONTRACT-BUMP.md`](CONTRACT-BUMP.md); what the re-score
+moved is in [`docs/CORRECTIONS.md`](CORRECTIONS.md).
 
 ## The defect class this codebase keeps producing
 
@@ -201,7 +205,7 @@ fired on a downstream number. Neither would have surfaced on its own.
 
 - **Joint pairing coverage is 4 pairing-periods of 49 candidate pairings**,
   and only 1 of those 4 is shape-comparable. Person-period availability is no
-  longer the binding constraint: the corpus now holds 41 observations over 9 of
+  longer the binding constraint: the corpus now holds 42 observations over 9 of
   14 people. The constraint is that BOTH sides must be scorable over the SAME
   period, and prose extraction did not move it. **Difficulty: blocked on
   evidence.**
@@ -313,10 +317,11 @@ fired on a downstream number. Neither would have surfaced on its own.
 
 ## Measurement (added late 2026-09-14)
 
-- **The one comparable gap is 0.0 against a rank-shaped LSD of 2.56.** Daredevil 2003,
-  Affleck and Garner, both judged by an editorial award. Everything larger is
-  shape-mismatched. **Difficulty: blocked on evidence.**
-- **Shape confound is unmitigated.** 31% of the estimate is evidence type
+- **The one comparable gap is 0.5 against a rank-shaped LSD of 1.03.** Daredevil
+  2003, Affleck and Garner, both judged by an editorial award. Everything
+  detectable is shape-mismatched. The 0.5 is the mean-of-two reducer, not a
+  finding: fable gave Garner 93 and astra 92. **Difficulty: blocked on evidence.**
+- **Shape confound is unmitigated.** 40% of the estimate is evidence type
   (omega-squared; the biased eta-squared reads 39%).
   Options not yet explored: restricting the board to same-shape pairings as the
   primary view rather than a scenario, or a within-shape calibration that would
@@ -424,7 +429,25 @@ fired on a downstream number. Neither would have surfaced on its own.
   need a guard, but it will need one shaped for ARTIFACTS rather than records.
   **Difficulty: not a task; recorded so it is not re-filed a third time.**
 
-- **`write_m0_report.py` and `audit_doc_numbers.py` read scored artifacts
+- ~~`write_m0_report.py` and `audit_doc_numbers.py` read scored artifacts
+  without the contract check.~~ **Fixed 2026-09-14**, same day it was filed,
+  by the reviewer who found it while attacking W072.
+
+  Both now call `refuse_stale_contract`. `write_m0_report.load` keeps its
+  optional-default behaviour, because a missing roster-scale artifact is
+  legitimate: absent is allowed, stale is not.
+
+  Two more things were fixed with it, because the two named scripts were
+  instances rather than the defect. `scripts/run_chain.sh` now refuses the
+  whole report pass when any artifact is stale, instead of recording each
+  refusal and running on to the renderer. And
+  `tests/test_no_guard_bypass.py` asserts the CLASS: every script that reads
+  a JSON artifact either goes through `require` or calls the guard, with an
+  explicit exemption list that must carry a reason.
+
+  Superseded text follows.
+
+  **`write_m0_report.py` and `audit_doc_numbers.py` read scored artifacts
   without `require()`, so the stale-contract guard does not cover the report.**
   Found 2026-09-14 while re-reviewing the item above. The stale guard was put
   inside the loader precisely so no script has to remember it, and these two
@@ -441,7 +464,18 @@ fired on a downstream number. Neither would have surfaced on its own.
   the one script whose whole output is the deliverable.
   **Difficulty: easy — route both through `require()`.**
 
-- **The M0 report compares numbers across separate scored artifacts with no
+- ~~The M0 report compares numbers across separate scored artifacts with no
+  contract check.~~ **Fixed 2026-09-14.** `run_stress.py` reads the
+  rater-noise floor from a separate scoring run and compared this run's
+  spread against it. It now refuses a stale floor, and the check sits
+  OUTSIDE the `try` that swallows read errors, which is where a silent
+  `return None` would otherwise have hidden it.
+  `measure_rater_noise.py --recompute` had the same hole and got the same
+  fix.
+
+  Superseded text follows.
+
+  **The M0 report compares numbers across separate scored artifacts with no
   contract check.** `spread_verdict()` judges a spread from
   `stress_report.json` against a noise floor from `rater_noise.json`, and the
   evidence-density table prints `real_estimate_spread` (from
@@ -454,7 +488,20 @@ fired on a downstream number. Neither would have surfaced on its own.
   taking the top-level `contract` blocks rather than per-row fields.
   **Difficulty: easy to write; the decision is which artifact sets must match.**
 
-- **`person_period_scores.json` carries 39 estimates and no contract block at
+- ~~`person_period_scores.json` carries 39 estimates and no contract block.~~
+  **Fixed 2026-09-14.** `score_evidenced.py` now stamps the contract onto the
+  checkpoint as well as the final artifact, and
+  `tests/test_stale_contract.py` asserts both files carry one.
+
+  The related hardcoded-path defect was fixed with it: the currency test
+  listed five artifacts by name and missed `pilot_report.json` and
+  `rater_noise.json`, both of which carry a contract block. It globs now.
+  That is the second time in this repo a hardcoded set of paths went stale
+  after the set grew.
+
+  Superseded text follows.
+
+  **`person_period_scores.json` carries 39 estimates and no contract block at
   all.** `score_evidenced.py` writes it as a crash-recovery checkpoint before
   the pairings step, and writes `{person_periods, failures, halted}` with no
   `contract` key. `refuse_stale_contract` returns early on an artifact with no
@@ -463,7 +510,21 @@ fired on a downstream number. Neither would have surfaced on its own.
   this is small. Its `history/` copies have the same hole.
   **Difficulty: trivial — stamp the contract block on the checkpoint too.**
 
-- **`contract_id` concatenates its parts with no separator.** Moving text from
+- ~~`contract_id` concatenates its parts with no separator.~~ **Fixed
+  2026-09-14** at the bundled contract bump. Each part is now prefixed with
+  its byte count, so moving text across the rubric/schema boundary changes
+  the id. `tests/test_contract_id_boundary.py` reconstructs the old scheme
+  and asserts it really did collide, so the test shows what it fixed rather
+  than only that the new one works.
+
+  The scheme change moved all three ids, including romance's, whose bytes
+  did not move. A reader could not otherwise tell a scheme change from a
+  rubric change, so `contract_id_scheme` is now stamped beside the id in
+  every artifact.
+
+  Superseded text follows.
+
+  **`contract_id` concatenates its parts with no separator.** Moving text from
   the end of the rubric to the start of the schema leaves the contract id
   unchanged, so two genuinely different contracts could share an identity. Not
   fixed now: the corpus records `ab015c99ad3e`, the plan forbids pooling
@@ -472,18 +533,126 @@ fired on a downstream number. Neither would have surfaced on its own.
   next rubric version bump, when the id changes anyway.**
   **Difficulty: easy, but must be bundled.**
 
-- **`ADJUDICATION_GAP = 10.0` is still the plan's provisional value.** The plan
+- ~~`CodexJudge`'s docstring contradicted its own implementation about what
+  `effort_took_effect` means.~~ **Fixed 2026-09-14.**
+
+  The class docstring said a zero `reasoning_output_tokens` count meant "the
+  request was not served as asked". The measurement note beside the field, 60
+  lines below, said the opposite and carried the evidence: turns of 234-257
+  output tokens reported zero while an identical-shaped probe reported 27, so
+  the count cannot separate "effort did not take effect" from "this turn needed
+  little reasoning".
+
+  **It cost a wrong conclusion the same day.** An analysis of the first
+  two-family re-score read the docstring, found 18 of 40 astra verdicts flagged,
+  and reported that nearly half the cross-family comparison had been mis-served.
+  That had not been shown. The docstring now states the disclaimer and records
+  why, and `tests/test_effort_flag_is_not_a_verdict.py` asserts the flag is
+  never read as a verdict and that the measurement behind the disclaimer
+  survives.
+
+  **The open question is untouched by that fix.** The flag splits the corpus
+  hard -- mean cross-family gap 0.39 where it is false against 2.64 where it is
+  true -- and it is nearly collinear with evidence shape, 14 of 18 award-shaped
+  dossiers falling on the false side. Two readings fit: astra got cheaper
+  responses on those dossiers, or a one-winner award needs no reasoning BECAUSE
+  it is pinned by construction, which is the shape finding arriving by another
+  route. n = 40 cannot separate them. **Difficulty: needs a designed probe, not
+  more of the same corpus.**
+
+- **`ADJUDICATION_GAP = 10.0` is still the plan's provisional value — and the
+  data to set it now exists.** **Unblocked 2026-09-15** by the two-family
+  re-score. The threshold itself is a methodology decision and is left to the
+  operator.
+
+  **Observed cross-family gaps**, 40 of 40 person-periods, where every one was
+  previously `None`: median 1.0, mean 1.62, max **8.0**, 18 exact agreements.
+  So 10.0 flags nothing, exactly as this entry predicted when it was filed.
+
+  **The quantity to set it against is within-family noise, not a percentile of
+  the gaps.** A percentile fixes the flag rate by construction whatever the
+  judges do. The repeat measurement gives the meaningful comparison: each family
+  is highly self-consistent on byte-identical dossiers (ranked within-judge sd
+  0.00-0.82, mean 0.371) while differing from each other by 0.5 to 2.25 on those
+  same dossiers. Disagreement is real and is several times each family's noise
+  about itself.
+
+  | candidate | basis | flags (all 40) | flags (22 effort-verified) |
+  |---|---|---|---|
+  | 1.03 | the rank-shaped LSD itself | 14 | 12 |
+  | 2.06 | 2x that LSD | 8 | 8 |
+  | 5.0 | round, below the observed max | 4 | 4 |
+  | 6.0 | only the clearest disagreements | 2 | 2 |
+  | 10.0 | unchanged | 0 | 0 |
+
+  **Two caveats before anyone picks one.** The noise floor is itself unstable:
+  measured twice on the same four dossiers it gave 2.56 and 1.03, so any
+  candidate derived from it inherits a factor-of-three uncertainty. And 18 of 40
+  astra verdicts carry `effort_took_effect: false`, whose meaning is unresolved
+  (see the CodexJudge entry above), which is why the table reports the
+  effort-verified subset separately. **Difficulty: a decision, now informed.**
+
+- ~~`ADJUDICATION_GAP = 10.0` is still the plan's provisional value.~~
+  **Superseded by the entry above.** The plan
   set it "provisionally 10 points, set from M0's own spread", and M0 has now
   measured a spread: the rank-shaped least significant difference is 2.56
   points. Ten is more than four times that, so a real cross-family disagreement
   could sit well inside it and never be flagged.
 
-  Not changed, because the data that should set it does not exist. Every
-  across-judge gap in the corpus is `None`: codex ran out of quota and one
-  family scored all 39 person-periods, so nothing has ever exercised this
+  Not changed, because the data that should set it did not exist. Every
+  across-judge gap in the corpus was `None`: codex ran out of quota and one
+  family scored every person-period, so nothing had ever exercised this
   threshold. Set it from the observed distribution of cross-family gaps AFTER a
   two-family re-score, not from the single-family repeat noise, which measures
   a different thing. **Difficulty: a decision, blocked on the re-score.**
+
+  *The count is deliberately not written here.* This paragraph is history, and
+  a historical count reads identically to a current one to
+  `scripts/audit_doc_numbers.py`, which flagged it as stale against the corpus
+  that has since grown.
+
+- **Identity leakage is measurable in the fable arm: 4 points.** S6 attaches the
+  same evidence to the real name, to an anonymised subject, and to a swapped
+  name. Plan v3 §6.3 requires all three to score the same.
+
+  | arm | fable | astra |
+  |---|---|---|
+  | named | 76 | 82 |
+  | anonymised | 80 | 83 |
+  | swapped_name | 80 | 84 |
+
+  Both families move in the SAME direction -- naming the real person lowers the
+  estimate -- which a single-family run could not have shown. fable moves 4
+  points, above the noise floor on either measurement; astra moves 2.
+
+  One dossier per arm, so this is a signal to investigate rather than an effect
+  size. **What would settle it: several dossiers per arm, and the anonymised
+  arm checked for whether it removed anything besides the name.**
+  **Difficulty: medium, costs a stress re-run.**
+
+- **Copy volume alone moved the estimate by 2 points (S8).** One copy scored 72,
+  five identical syndicated copies scored 70. The plan requires syndication to
+  change nothing.
+
+  This does NOT contradict the deterministic test that five syndicated copies
+  leave `distinct_original_sources` at 1 with the cached score inputs
+  byte-identical. That test checks the PIPELINE arithmetic and it passes. S8
+  checks the JUDGE, which sees the dossier text, and the judge moved. Two
+  different claims that read alike in prose.
+  **Difficulty: medium; the fix is probably dossier rendering, not the rubric.**
+
+- **Every stress verdict is a binary call against an unstable floor.**
+  `verdict()` renders "within" or "ABOVE the measured floor", where the floor is
+  the max per-shape LSD. That floor measured 2.56 on one run and 1.03 on the
+  next, from the same judge on the same four dossiers.
+
+  The verdicts flip: under 2.56 only S2 and S6-fable read ABOVE; under 1.03, S2,
+  S6, S7 and S8 all do. The number of significant stress findings doubles on a
+  quantity that is not pinned at four dossiers by four repeats.
+
+  **What would fix it: more repeat targets, and reporting the spread against an
+  INTERVAL for the floor rather than a point.** Until then, read the spreads and
+  the floor together, never the verdict alone. **Difficulty: medium.**
 
 - **Stress case S2 tests anchor-following, not format equivalence.** Its prose
   arm is the VERBATIM text of the rubric's calibration Example 3, anchored at
@@ -498,7 +667,18 @@ fired on a downstream number. Neither would have surfaced on its own.
   would be a real finding — but it must not be quoted as evidence about format.
   **Difficulty: easy, but it costs a stress re-run (~27 calls).**
 
-- **`rubrics/mentions/MENTIONS.md` lists an undated example it then forbids.**
+- ~~`rubrics/mentions/MENTIONS.md` lists an undated example it then forbids.~~
+  **Fixed 2026-09-14.** `mentions-1.0` became `1.1`.
+
+  The filed item named ONE undated example. There were two:
+  `tests/test_rubric_self_consistency.py` was written to catch the filed one
+  and failed on `"ranked 5th in FHM's 100 Sexiest Women"` as well, which no
+  human reader had noticed. A rule stated as a rule catches more than the
+  instance that prompted it. Both now carry a year.
+
+  Superseded text follows.
+
+  **`rubrics/mentions/MENTIONS.md` lists an undated example it then forbids.**
   "What to extract" includes *"voted the sexiest man in a readers' poll"*,
   which carries no year, while rule 3 says "Never infer a year. If the sentence
   does not carry one, skip it." A judge following the examples and a judge
@@ -510,7 +690,20 @@ fired on a downstream number. Neither would have surfaced on its own.
   alongside the `contract_id` boundary item above, when the id changes anyway.
   **Difficulty: trivial, must be bundled.**
 
-- **`estimate.schema.json` declares two fields nullable that its own enums
+- ~~`estimate.schema.json` declares two fields nullable that its own enums
+  forbid.~~ **Fixed 2026-09-14.** `null` is in both enums.
+
+  The blast radius was measured before and after rather than reasoned about:
+  under the pre-fix schema **52 of 52** stored judge verdicts failed
+  validation; under the fixed one, 0 of 52. `jsonschema` is now a pinned
+  dependency and `tests/test_schema_validates_corpus.py` validates every
+  stored verdict, so the landmine became a gate. That test also reconstructs
+  the pre-fix schema and asserts it still rejects everything, so a silent
+  revert cannot pass.
+
+  Superseded text follows.
+
+  **`estimate.schema.json` declares two fields nullable that its own enums
   forbid.** `missingness_reason` and `band` both carry
   `"type": ["string", "null"]` alongside an `enum` that does not list `null`.
   JSON Schema keywords are conjunctive: an instance must satisfy `type` AND

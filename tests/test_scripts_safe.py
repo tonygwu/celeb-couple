@@ -139,3 +139,25 @@ def test_every_script_appears_in_the_agents_table():
                              capture_output=True, text=True, check=True).stdout.split()
     missing = [s for s in scripts if _P(s).name not in table]
     assert not missing, f"scripts not registered in AGENTS.md: {missing}"
+
+
+def test_a_spender_checks_its_inputs_before_it_spends():
+    """A guard that fires after the model calls is a receipt, not a guard.
+
+    `run_stress.py` reads the rater-noise floor from a separate scoring run.
+    That read only happens in the analysis at the END, so when the floor was
+    given a stale-contract check the script would have spent about 27 calls and
+    THEN refused. The check is now made before the judges are built.
+
+    Asserted on source order rather than by running the script, because
+    exercising it for real would mean spending the quota this test exists to
+    protect.
+    """
+    src = (REPO / "scripts/run_stress.py").read_text()
+    body = src[src.index("def main("):]
+    check = body.index("measured_floor()")
+    first_judge = min(body.index("ClaudeJudge("), body.index("CodexJudge("))
+    assert check < first_judge, (
+        "run_stress.py builds a judge before checking the rater-noise floor. "
+        "A stale floor would then be found after the calls were already spent."
+    )

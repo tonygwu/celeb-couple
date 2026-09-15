@@ -24,7 +24,7 @@ not. So the imbalance shows up directly in the estimates:
 | male | 8 | **90.75** | 4.89 | 78.0–94.0 |
 | female | 31 | **87.1** | 6.49 | 64.0–94.0 |
 
-**The male mean sits 3.65 points above the female mean before any fact about
+**The male mean sits 4.23 points above the female mean before any fact about
 any individual enters**, and removing any single male person entirely moves
 that between 2.9 and 5.3 — it never approaches zero and never reverses, so it
 is not one person carrying it, and the male estimates are compressed (SD 4.89 against 6.49) because five of the eight are exactly 92.
@@ -91,8 +91,14 @@ The award held still and both ranks moved, which is the same split the repeat
 measurement found. It also means the published least significant difference of
 1.2 points was too small: it pooled the award dossiers' zero measured variance
 with the ranked ones', halving it. Quoted per shape, over four ranked dossiers
-repeated four times each, the rank-shaped LSD is **2.56 points**. A 2.0-point
-run-to-run move sits inside that and is well outside 1.2.
+repeated four times each, the rank-shaped LSD was **2.56 points**.
+
+*Measured again 2026-09-15* with both judge families on the same four dossiers:
+**1.03 points**. Do not read that as a sharper floor. fable's own mean
+within-judge sd was 0.926 on the first run and 0.269 on the second, a 3.4x
+difference in the noise measurement itself, so four dossiers at four repeats
+does not pin this quantity. Both numbers are recorded and every conclusion here
+holds against either.
 
 *Corrected twice, 2026-09-14.* The pooled figure was 1.2. Quoting it per shape
 gave 2.22. That still used `pstdev`, the POPULATION standard deviation, on four
