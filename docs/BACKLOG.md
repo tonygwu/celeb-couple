@@ -373,17 +373,95 @@ fired on a downstream number. Neither would have surfaced on its own.
   code change, and a directory without exactly one `.md` and one
   `.schema.json` is skipped rather than guessed at.
 
-- **`refuse_mixed_contracts` still has no production caller, and that is the
-  correct state.** It was filed as a gap. Investigating it found the premise
-  was incomplete: the function refuses to POOL records from different
-  contracts, and nothing in this codebase pools two scored artifacts. The one
-  place that reads two of them, `cross_run_stability.py`, already refuses by
-  hand, and its message is better than the generic one because it can say what
-  the comparison was FOR. The real exposure was staleness rather than mixing,
-  and that is the item above. Keep the function: the first script that
-  genuinely pools will need it, and a test asserts it refuses an unlabelled
-  record rather than skipping it. **Difficulty: not a task; recorded so it is
-  not re-filed.**
+- ~~`refuse_mixed_contracts` still has no production caller.~~ **Closed
+  2026-09-14 after an adversarial re-review. It must stay uncalled, for a
+  stronger reason than was recorded here before: wiring it into this repository
+  would be WORSE than leaving it alone, because on the record shape this
+  pipeline actually writes it is a silent no-op.**
+
+  The function keys on a per-record `contract_id`. No artifact in the corpus
+  carries one. `score_evidenced.py`, `score_roster_joint.py`, `run_stress.py`
+  and `measure_rater_noise.py` each stamp ONE `contract` block at the top of
+  the file and write rows that carry `person`, `period`, `estimate`, `judges`
+  and nothing about provenance. Measured over every artifact under `data/`:
+  ten files carry a contract block, zero carry a per-record contract id. So
+
+  ```
+  refuse_mixed_contracts(evidenced_scores rows + romance.json rows)
+  ```
+
+  passes, although those two files record `ab015c99ad3e` (standing) and
+  `7f82adbc0c79` (romance). Every row reads as `<no contract_id>`, the id set
+  has one member, and the guard returns. A caller added today would buy a
+  refusal that cannot fire and would read, to the next agent, as provenance
+  that had been checked.
+
+  The three fronts it was re-attacked on, and what they showed:
+
+  1. **Does anything pool two scored artifacts?** Two scripts read more than
+     one. `cross_run_stability.py` compares `evidenced_scores.json` with
+     `joint_scores.json`, and refuses by hand at the artifact level.
+     `evidence_density.py` reads `evidenced_scores.json` and
+     `stress_report.json`, but keeps them in separate fields
+     (`real_estimate_spread`, `synthetic_estimate_spread`) and pools nothing.
+     No script concatenates estimate lists from two files.
+  2. **Do two judge families create the pooling point?** No, and this is the
+     argument that looked strongest and lost. `score_evidenced.py` builds ONE
+     `GradingContract` and passes that same object to every judge, so fable and
+     astra produce estimates under an identical contract id by construction.
+     The contract records which BYTES were sent, not who answered. The existing
+     `value = sum(per_judge.values()) / len(per_judge)` is a real pooling point
+     and has been live since before M0, but it pools across families under one
+     contract, which is what `across_judges_gap` and `needs_adjudication` are
+     for. Adding the second family changes nothing the mixing guard can see.
+  3. **Does the rubric bump create it?** No. A bump moves the id, so every
+     stored artifact goes stale, and `refuse_stale_contract` inside `require()`
+     catches that on the first read. Verified against the live tree while the
+     bundled pass was uncommitted in it: reading `evidenced_scores.json` exits
+     naming `ab015c99ad3e` and the three ids the new rubrics produce.
+
+  Keep the function and its tests. The next thing that genuinely pools will
+  need a guard, but it will need one shaped for ARTIFACTS rather than records.
+  **Difficulty: not a task; recorded so it is not re-filed a third time.**
+
+- **`write_m0_report.py` and `audit_doc_numbers.py` read scored artifacts
+  without `require()`, so the stale-contract guard does not cover the report.**
+  Found 2026-09-14 while re-reviewing the item above. The stale guard was put
+  inside the loader precisely so no script has to remember it, and these two
+  bypass the loader: `write_m0_report.py` defines its own `load()` that calls
+  `json.loads(f.read_text())`.
+
+  This is live right now. `scripts/run_chain.sh` sets `-uo pipefail`, not `-e`,
+  and its `run()` helper records `fail=1` and CONTINUES. So after a rubric bump
+  `bash scripts/run_chain.sh reports` fails every `require()`-based stage,
+  keeps going, and still reaches `write_m0_report.py` at the end, which
+  regenerates `docs/M0-REPORT.md` from the stale corpus and exits the chain
+  non-zero for reasons a reader will attribute to the earlier stages. That is
+  the quiet wrong answer the stale guard was written to stop, arriving through
+  the one script whose whole output is the deliverable.
+  **Difficulty: easy — route both through `require()`.**
+
+- **The M0 report compares numbers across separate scored artifacts with no
+  contract check.** `spread_verdict()` judges a spread from
+  `stress_report.json` against a noise floor from `rater_noise.json`, and the
+  evidence-density table prints `real_estimate_spread` (from
+  `evidenced_scores.json`) beside `synthetic_estimate_spread` (from
+  `stress_report.json`). All four artifacts happen to share one contract today,
+  so nothing is wrong now. Nothing enforces it. If a partial re-score ever
+  leaves two of them on different rubrics, a rubric difference is published as
+  a format effect. This, not record pooling, is the guard the invariant
+  actually still wants: assert that a set of ARTIFACTS share a contract id,
+  taking the top-level `contract` blocks rather than per-row fields.
+  **Difficulty: easy to write; the decision is which artifact sets must match.**
+
+- **`person_period_scores.json` carries 39 estimates and no contract block at
+  all.** `score_evidenced.py` writes it as a crash-recovery checkpoint before
+  the pairings step, and writes `{person_periods, failures, halted}` with no
+  `contract` key. `refuse_stale_contract` returns early on an artifact with no
+  contract block, and `refuse_mixed_contracts` sees no per-row id, so BOTH
+  guards are no-ops on it. Nothing reads it today, which is the only reason
+  this is small. Its `history/` copies have the same hole.
+  **Difficulty: trivial — stamp the contract block on the checkpoint too.**
 
 - **`contract_id` concatenates its parts with no separator.** Moving text from
   the end of the rubric to the start of the schema leaves the contract id
