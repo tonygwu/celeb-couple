@@ -266,6 +266,7 @@ that drift is the only reason `modules/analytics/comparability.py` exists.
 | Command | What it does | Spends quota |
 |---|---|---|
 | `scripts/select_m1_slice.py` | picks the M1 focal actors and their pairings by a fixed rule, before any judging | no |
+| `scripts/rebuild_boards.py` | cache → gaps → within-sex normalization → four boards → one HTML file. Free; re-running after grading more person-years costs nothing | no |
 | `scripts/score_person_periods.py` | judges each (person, year) once, film-blind and evidence-anchored, and CACHES it; `--backlog-only` spends nothing | **yes** |
 | ~~`scripts/score_pairings.py`~~ | judged each pairing and returned the gap. **Superseded 2026-09-15**: it told the judge which film it was scoring, so the same person in the same year came back 9.0 for one film and 9.5 for another. See docs/PLAN-v4.md §4a | **yes** |
 | `scripts/build_boards.py` | renders the four leaderboards from judged gaps, and refuses to call a ranking established without measured spread. Also renders the within-sex normalized SECOND view below them and writes its numbers to `data/roster100/run/normalized_view.json` | no |

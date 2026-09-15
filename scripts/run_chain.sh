@@ -151,6 +151,9 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   # BEFORE build_boards.py, which reads what this writes.
   [ -f data/roster100/run/person_period_cache.json ] && run scripts/derive_pairings.py
   [ -f data/roster100/run/pairing_scores.json ] && run scripts/build_boards.py
+  # Renders the HTML from the cache. Last, because it reads what every
+  # stage above just wrote. Free: the cache is the only thing that costs.
+  [ -f data/roster100/run/person_period_cache.json ] && run scripts/rebuild_boards.py
   run scripts/write_m0_report.py
   # Last, because it checks the prose against the artifacts every stage above
   # just rewrote. Running it earlier would audit the previous run's numbers.
