@@ -16,6 +16,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from packages.llmkit.contract import (MENTIONS_RUBRIC_VERSION,  # noqa: E402
+                                      PAIRING_RUBRIC_VERSION,
                                       ROMANCE_RUBRIC_VERSION,
                                       STANDING_RUBRIC_VERSION)
 
@@ -26,7 +27,7 @@ _HOME = REPO / "packages/llmkit/contract.py"
 #: deliberately about SHAPE rather than about the three known names, because
 #: a fourth rubric must be caught too -- this repo has been bitten twice by
 #: code that enumerated a set which later grew.
-_LITERAL = re.compile(r'["\'](?:[a-z]+-)*rubric-\d+\.\d+["\']|["\'](?:mentions|romance)-\d+\.\d+["\']')
+_LITERAL = re.compile(r'["\'](?:[a-z]+-)*rubric-\d+\.\d+["\']|["\'](?:mentions|romance|pairing)-\d+\.\d+["\']')
 
 
 def _tracked_python() -> list[Path]:
@@ -61,10 +62,11 @@ def test_no_script_types_a_rubric_version_literal():
 def test_the_constants_name_the_rubrics_that_exist():
     # A constant for a rubric directory that is gone would bump nothing.
     dirs = {d.name for d in (REPO / "rubrics").iterdir() if d.is_dir()}
-    assert dirs == {"standing", "mentions", "romance"}, dirs
+    assert dirs == {"standing", "mentions", "romance", "pairing"}, dirs
     assert STANDING_RUBRIC_VERSION.startswith("standing-rubric-")
     assert MENTIONS_RUBRIC_VERSION.startswith("mentions-")
     assert ROMANCE_RUBRIC_VERSION.startswith("romance-")
+    assert PAIRING_RUBRIC_VERSION.startswith("pairing-")
 
 
 def test_the_bump_actually_happened():

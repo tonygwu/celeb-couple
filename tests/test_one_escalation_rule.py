@@ -54,6 +54,14 @@ def test_nothing_outside_records_decides_escalation_for_itself():
           "drifts silently from the first.")
 
 
+#: A two-sided range check -- `-10 <= gap <= 10` -- is a schema bound, not an
+#: escalation decision. The first version of the guard below flagged one in
+#: modules/pairing/judge.py, which validates that a returned gap is inside the
+#: scale at all. Excluded by SHAPE rather than by filename, so a real one-sided
+#: threshold in that same file is still caught.
+_RANGE_CHECK = re.compile(r"[-\d.]+\s*<=?\s*gap\w*\s*<=?\s*[-\d.]+")
+
+
 def test_no_bare_numeric_threshold_is_compared_against_a_judge_gap():
     """Catches the specific shape that shipped: `gap > 10`."""
     offenders = []
@@ -62,11 +70,19 @@ def test_no_bare_numeric_threshold_is_compared_against_a_judge_gap():
         if p == _HOME:
             continue
         for i, line in enumerate(p.read_text().splitlines(), 1):
-            if line.lstrip().startswith("#"):
+            if line.lstrip().startswith("#") or _RANGE_CHECK.search(line):
                 continue
             if pat.search(line):
                 offenders.append(f"{p.relative_to(REPO)}:{i}: {line.strip()}")
     assert not offenders, "judge gap compared to a literal:\n  " + "\n  ".join(offenders)
+
+
+def test_the_range_check_exclusion_does_not_hide_a_real_threshold():
+    # A guard with an exemption needs the exemption tested, or it becomes a way
+    # to smuggle the defect back in.
+    assert _RANGE_CHECK.search("if not -10 <= gap <= 10:")
+    assert not _RANGE_CHECK.search("needs_adjudication = gap > 10")
+    assert not _RANGE_CHECK.search("if gapj and gapj > 10:")
 
 
 def test_the_reducer_is_actually_reachable_from_the_scoring_script():

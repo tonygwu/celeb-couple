@@ -53,9 +53,20 @@ def test_the_ids_are_derived_from_the_directory(tmp_path):
     assert current_contract_ids(tmp_path) == {a: "alpha", b: "beta"}
 
 
-def test_the_real_repository_has_its_three_rubrics():
+def test_the_real_repository_has_its_rubrics():
+    """Every rubric directory on disk produces exactly one contract id.
+
+    This pinned the list to three names and broke when `pairing` was added for
+    plan v4 -- a hardcoded set going stale after the set grew, for the third
+    time in this repo. Derived from the directory listing now, so a fifth rubric
+    needs no edit here.
+    """
     ids = current_contract_ids(REPO)
-    assert sorted(ids.values()) == ["mentions", "romance", "standing"]
+    on_disk = sorted(d.name for d in (REPO / "rubrics").iterdir()
+                     if d.is_dir() and len(list(d.glob("*.md"))) == 1
+                     and len(list(d.glob("*.schema.json"))) == 1)
+    assert sorted(ids.values()) == on_disk
+    assert len(ids) == len(on_disk), "two rubrics produced the same contract id"
 
 
 def test_a_directory_with_two_rubric_files_is_skipped_not_guessed(tmp_path):

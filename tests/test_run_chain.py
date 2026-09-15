@@ -25,24 +25,49 @@ def test_every_free_analysis_script_is_in_the_chain():
     went stale relative to the others until someone ran it by hand."""
     from pathlib import Path as _P
     repo = _P(__file__).resolve().parent.parent
-    paid = {"score_evidenced", "classify_romance", "extract_prose_mentions",
-            "measure_rater_noise", "run_stress", "score_roster_joint",
-            "run_pilot", "resolve_roster", "merge_prose_mentions",
-            "scaling_report",
-            "write_m0_report", "fetch_records", "build_episodes",
-            "build_partner_universe", "fetch_observations",
-            "fetch_onscreen_candidates"}
+
+    # Spenders are DERIVED from the declaration, not listed. This was a
+    # hardcoded set of 16 names, and plan v4's score_pairings.py -- which says
+    # SPENDS MODEL QUOTA in its own description -- was reported as a free
+    # script missing from the chain. Third time a pinned set in this repo went
+    # stale after the set grew. tests/test_scripts_safe.py already enforces
+    # that every spender declares itself, so the declaration is trustworthy.
+    def _spends(path) -> bool:
+        return "SPENDS MODEL QUOTA" in path.read_text()
+
+    #: Free, and deliberately NOT in the chain. Each needs a reason: an
+    #: exemption without one is how a guard rots into a formality.
+    outside = {
+        "resolve_roster": "run once to build the roster; not an analysis stage",
+        "merge_prose_mentions": "the chain calls it per mentions file, in a loop",
+        "scaling_report": "gated inside the chain on the roster artifacts existing",
+        "write_m0_report": "in the chain, under its reports pass",
+        "fetch_records": "in the chain, under its free pass",
+        "build_episodes": "in the chain, under its free pass",
+        "build_partner_universe": "in the chain, under its free pass",
+        "fetch_observations": "in the chain, under its free pass",
+        "fetch_onscreen_candidates": "in the chain, under its free pass",
+        "select_m1_slice": "plan v4; picked once before judging, not a recurring stage",
+    }
     scripts = sorted((repo / "scripts").glob("*.py"))
     assert len(scripts) > 20, (
         f"the glob found {len(scripts)} scripts; a broken glob makes this "
         "guard pass while checking nothing")
     for script in scripts:
-        if script.stem in paid:
+        if _spends(script) or script.stem in outside:
             continue
         assert script.name in CHAIN, (
             f"{script.name} is a free analysis script and is not in "
             "run_chain.sh, so its artifact will go stale relative to the others"
         )
+
+
+def test_every_exemption_names_a_script_that_exists():
+    from pathlib import Path as _P
+    repo = _P(__file__).resolve().parent.parent
+    # An exemption for a renamed script silently stops covering the new name.
+    for stem in ("resolve_roster", "select_m1_slice", "write_m0_report"):
+        assert (repo / "scripts" / f"{stem}.py").exists(), stem
 
 
 def test_reports_run_after_the_data_stages():
@@ -53,10 +78,15 @@ def test_reports_run_after_the_data_stages():
 def test_no_quota_spending_stage_is_in_the_convenience_script():
     """Burying a paid stage in a convenience script is how an unattended run
     empties a quota window."""
-    for spender in ("score_evidenced", "classify_romance", "extract_prose_mentions",
-                    "measure_rater_noise", "run_stress", "score_roster_joint"):
-        assert f"{spender}.py" not in CHAIN, (
-            f"{spender} spends model quota and must not run from run_chain.sh"
+    from pathlib import Path as _P
+    repo = _P(__file__).resolve().parent.parent
+    # Derived, for the same reason as above: a pinned list of six would not
+    # have caught plan v4's score_pairings.py if it were ever added to the chain.
+    for script in sorted((repo / "scripts").glob("*.py")):
+        if "SPENDS MODEL QUOTA" not in script.read_text():
+            continue
+        assert script.name not in CHAIN, (
+            f"{script.stem} spends model quota and must not run from run_chain.sh"
         )
 
 

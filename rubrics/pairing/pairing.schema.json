@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "one pairing, judged at one date",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "pairing_id", "judged", "reasoning"],
+  "properties": {
+    "schema_version": {"const": "pairing-1.0"},
+    "pairing_id": {"type": "string"},
+    "judged": {
+      "type": "boolean",
+      "description": "false when the judge cannot place one of the two people at this date."
+    },
+    "cannot_judge_reason": {
+      "type": ["string", "null"],
+      "enum": [null, "person_unknown", "date_unplaceable", "not_a_romance", "other"]
+    },
+    "gap": {
+      "type": ["number", "null"],
+      "minimum": -10,
+      "maximum": 10,
+      "description": "THE PRIMARY OUTPUT. (woman - man) at the time of this pairing. null when judged is false."
+    },
+    "f_absolute": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Secondary. Must be consistent with gap."
+    },
+    "m_absolute": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Secondary. Must be consistent with gap."
+    },
+    "centrality": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "How much the work is about this pair as a couple. Always 1.0 for a real-life relationship."
+    },
+    "reasoning": {"type": "string", "minLength": 1}
+  }
+}

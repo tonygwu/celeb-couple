@@ -227,6 +227,25 @@ file. Run-to-run variance is real — 2 of 3 identical dossiers moved by
 
 | `scripts/score_roster_joint.py` | scores only what the roster-scale joint pairings need | **yes** |
 
+## Plan v4: the pairing boards
+
+`docs/PLAN-v4.md`. The scoring layer changes and everything downstream carries
+over. One call judges one pairing and returns the GAP directly, because two
+absolute scores made in separate calls drift against each other and labelling
+that drift is the only reason `modules/analytics/comparability.py` exists.
+
+| Command | What it does | Spends quota |
+|---|---|---|
+| `scripts/select_m1_slice.py` | picks the M1 focal actors and their pairings by a fixed rule, before any judging | no |
+| `scripts/score_pairings.py` | judges each pairing once and returns the gap | **yes** |
+
+The v4 rubric is `rubrics/pairing/`. `modules/pairing/judge.py` parses a verdict
+and REFUSES one whose two absolute scores contradict its own gap.
+
+Two constraints from plan v3 are kept and asserted by
+`tests/test_no_age_formula.py`: no age arithmetic anywhere in the scoring path,
+and no image fetched or sent to any judge.
+
 The quota-spending scripts take `CELEB_JUDGES` (default `fable,astra`) and
 `CELEB_MAX_CALLS`, or equivalent flags. Run the whole chain in this order after
 changing any source: `fetch_records` → `build_episodes` → `build_partner_universe` →

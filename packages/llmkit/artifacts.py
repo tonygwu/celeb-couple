@@ -63,6 +63,12 @@ PRODUCERS = {
         "scripts/scaling_report.py  (see AGENTS.md)",
     "data/roster100/run/joint_scores.json":
         "scripts/score_roster_joint.py  [spends quota]",
+    # Plan v4.
+    "data/roster100/run/m1_slice.json": "scripts/select_m1_slice.py",
+    "data/roster100/run/pairing_scores.json":
+        "scripts/score_pairings.py  [spends quota]",
+    "data/roster100/records/onscreen_candidates.json":
+        "scripts/fetch_onscreen_candidates.py --cohort docs/roster-100.json  (see AGENTS.md)",
 }
 
 
