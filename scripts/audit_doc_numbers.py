@@ -42,7 +42,8 @@ from packages.llmkit.contract import refuse_stale_contract  # noqa: E402
 #: Documents written by a generator. Editing them by hand is the bug; the fix
 #: is to re-run the generator, so a mismatch here is not actionable prose.
 GENERATED = {"docs/M0-REPORT.md", "docs/GROUNDING-AUDIT.md",
-             "docs/RELATIONSHIP-REVIEW.md", "docs/SCALING.md"}
+             "docs/RELATIONSHIP-REVIEW.md", "docs/SCALING.md",
+             "docs/BOARDS.md"}
 
 #: Documents whose PURPOSE is to quote superseded values. Auditing them against
 #: current artifacts is categorically wrong: docs/CORRECTIONS.md exists to say

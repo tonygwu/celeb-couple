@@ -238,7 +238,7 @@ that drift is the only reason `modules/analytics/comparability.py` exists.
 |---|---|---|
 | `scripts/select_m1_slice.py` | picks the M1 focal actors and their pairings by a fixed rule, before any judging | no |
 | `scripts/score_pairings.py` | judges each pairing once and returns the gap | **yes** |
-| `scripts/build_boards.py` | renders the four leaderboards from judged gaps, and refuses to call a ranking established without measured spread | no |
+| `scripts/build_boards.py` | renders the four leaderboards from judged gaps, and refuses to call a ranking established without measured spread. Also renders the within-sex normalized SECOND view below them and writes its numbers to `data/roster100/run/normalized_view.json` | no |
 
 The v4 rubric is `rubrics/pairing/`. `modules/pairing/judge.py` parses a verdict
 and REFUSES one whose two absolute scores contradict its own gap.
@@ -246,6 +246,34 @@ and REFUSES one whose two absolute scores contradict its own gap.
 Two constraints from plan v3 are kept and asserted by
 `tests/test_no_age_formula.py`: no age arithmetic anywhere in the scoring path,
 and no image fetched or sent to any judge.
+
+### The normalized second view
+
+`modules/pairing/normalize.py` restates every absolute score as its distance
+from the mean of its own sex, in units of that sex's spread. It is a SECOND
+view rendered below the raw boards and it never replaces them, which is how
+plan v3 shipped `same_shape_view` beside the main board. Invoke it through
+`scripts/build_boards.py`; there is no separate command.
+
+Four things to know before reading it:
+
+- The population is **(judge family, sex, person, period) tuples**, because a
+  person is judged at the time of each pairing. A person judged in three
+  periods is three observations; a person judged five times inside one period
+  is one, carrying their mean.
+- **It reads the RAW verdicts, not the scored artifact.** `pairing_scores.json`
+  keeps the gap and drops `f_absolute` and `m_absolute`, and a within-sex
+  normalization cannot be built without the absolutes.
+- **Parse raw verdicts with `parse_pairing_verdict`, never `json.loads`.** One
+  judge family fences its JSON in a code block, and a bare `json.loads` drops
+  every one of those files, raises nothing, and reports a smaller corpus.
+  `repeat_spread()` in `scripts/build_boards.py` still has that defect; it has
+  no caller, which is the only reason it has not cost anything.
+- **The mean normalized gap is zero by construction**, so the normalized view
+  can never be asked whether the judges score women higher than men. The raw
+  board carries that measured offset and stays the default. The zero holds over
+  the whole observation population and NOT inside any subset; the rendered
+  document has the per-domain table showing where it does not.
 
 The quota-spending scripts take `CELEB_JUDGES` (default `fable,astra`) and
 `CELEB_MAX_CALLS`, or equivalent flags. Run the whole chain in this order after
