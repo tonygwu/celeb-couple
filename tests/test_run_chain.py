@@ -48,6 +48,11 @@ def test_every_free_analysis_script_is_in_the_chain():
         "fetch_observations": "in the chain, under its free pass",
         "fetch_onscreen_candidates": "in the chain, under its free pass",
         "select_m1_slice": "plan v4; picked once before judging, not a recurring stage",
+        "expand_roster": ("builds a ROSTER, which is an input to the chain and "
+                          "not a stage of it. Re-snowballing on every free pass "
+                          "would move the cohort under the artifacts derived "
+                          "from it, which is the opposite of what the chain is "
+                          "for. Run it deliberately, like resolve_roster."),
     }
     scripts = sorted((repo / "scripts").glob("*.py"))
     assert len(scripts) > 20, (

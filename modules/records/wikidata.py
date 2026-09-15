@@ -23,7 +23,8 @@ from packages.temporal.dates import Censoring, Interval, PreciseDate, from_wikid
 
 __all__ = ["RelationshipCandidate", "fetch_relationships", "fetch_birth_dates",
            "fetch_gender", "fetch_labels", "query_with_retry", "SPARQL",
-           "TRANSIENT_HTTP_STATUS", "WikidataQueryTimeout", "TruncatedResult",
+           "TRANSIENT_HTTP_STATUS", "WikidataQueryTimeout", "WikidataShortBody",
+           "TruncatedResult",
            "batched_query", "LOOKUP_FAILURES", "LABEL_SOURCES"]
 
 SPARQL = "https://query.wikidata.org/sparql"
@@ -122,6 +123,25 @@ class WikidataQueryTimeout(RuntimeError):
     """
 
 
+class WikidataShortBody(RuntimeError):
+    """A 200 whose body stops mid-JSON and explains nothing.
+
+    Measured 2026-09-15, on the round-3 co-star batch. The response was 393 KB,
+    the status was 200, `urlopen` raised nothing, and the body simply ended in
+    the middle of a result row with no timeout log and no trailer. The same
+    query, re-run by hand a minute later, came back at 625 KB and parsed. The
+    responses carry no `Content-Length` -- the service streams them chunked --
+    so a dropped transfer leaves nothing that says it was dropped except the
+    broken JSON.
+
+    This is NOT the same failure as `WikidataQueryTimeout` and must not be
+    handled the same way. A timeout says the query is too big, so retrying the
+    identical query cannot work and the chunk has to be split. A short body
+    says the transfer failed, so retrying the identical query is exactly the
+    right move.
+    """
+
+
 #: The strings the service leaves in a timed-out body. Two of them, because a
 #: check on the Java class name alone would miss a differently worded abort,
 #: and one on the query echo alone would fire on a query about SPARQL itself.
@@ -150,7 +170,13 @@ def _query(sparql: str, timeout: int = 60) -> list[dict]:
                 f"the query service aborted after {len(body)} bytes of a 200 "
                 "response and appended its own timeout log. The query asks for "
                 "too much at once; split it.") from None
-        raise
+        # No marker. Either the transfer was cut, or the service has started
+        # answering in a shape this code does not know. Both are reported as
+        # what was actually seen -- the length and the last bytes -- rather
+        # than as a guess about the cause.
+        raise WikidataShortBody(
+            f"a 200 response of {len(body)} bytes is not valid JSON and "
+            f"carries no timeout log. Last 120 bytes: {body[-120:]!r}") from None
 
 
 class TruncatedResult(RuntimeError):
@@ -252,7 +278,10 @@ def query_with_retry(sparql: str, timeout: int = 60, attempts: int = 4,
             if exc.code not in TRANSIENT_HTTP_STATUS:
                 raise
             last = exc
-        except (urllib.error.URLError, TimeoutError) as exc:
+        except (urllib.error.URLError, TimeoutError, WikidataShortBody) as exc:
+            # A short body is retried and a TIMEOUT is not, deliberately. The
+            # transfer failing is transient; the query being too big is not,
+            # and re-asking it costs a minute per attempt and cannot succeed.
             last = exc
         RETRIES.append({"attempt": attempt, "error": f"{type(last).__name__}: {last}"})
         # Printed as well as recorded. A silent retry makes a run that is

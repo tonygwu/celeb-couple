@@ -58,15 +58,38 @@ def test_a_good_response_still_parses(monkeypatch):
     assert wd._query("SELECT 1") == [{"x": {"value": "1"}}]
 
 
-def test_a_body_broken_for_any_other_reason_is_not_relabelled(monkeypatch):
-    """Relabelling every unparseable body a timeout would invent a diagnosis.
+def test_a_body_that_stops_mid_json_with_no_marker_is_a_short_body(monkeypatch):
+    """A different failure, and it must not be relabelled a timeout.
 
-    A truncated response with no marker is still a JSONDecodeError, which is
-    the honest answer when nobody knows why.
+    Measured on the round-3 co-star batch: 393 KB, status 200, `urlopen` raised
+    nothing, and the body ended in the middle of a result row with no timeout
+    log. The same query re-run by hand came back at 625 KB and parsed. The
+    responses are chunked and carry no Content-Length, so a dropped transfer
+    leaves nothing saying it was dropped except the broken JSON.
     """
     wd = _serve(monkeypatch, '{"results": {"bindings": [{"x": ')
-    with pytest.raises(json.JSONDecodeError):
+    with pytest.raises(wd.WikidataShortBody) as exc:
         wd._query("SELECT 1")
+    assert "not valid JSON" in str(exc.value)
+    assert "32 bytes" in str(exc.value), "the length actually seen is reported"
+
+
+def test_a_short_body_IS_retried_but_a_timeout_is_not(monkeypatch):
+    """The two failures need opposite handling. A transfer that failed may
+    succeed on the same query; a query that is too big never will."""
+    from modules.records import wikidata as wdmod
+    calls = {"n": 0}
+
+    def flaky(sparql, timeout=60):
+        calls["n"] += 1
+        if calls["n"] < 3:
+            raise wdmod.WikidataShortBody("cut short")
+        return [{"ok": {"value": "1"}}]
+
+    monkeypatch.setattr(wdmod, "_query", flaky)
+    monkeypatch.setattr(wdmod.time, "sleep", lambda s: None)
+    assert wdmod.query_with_retry("SELECT 1") == [{"ok": {"value": "1"}}]
+    assert calls["n"] == 3
 
 
 def test_a_valid_result_that_merely_quotes_the_marker_is_not_a_timeout(monkeypatch):

@@ -186,8 +186,9 @@ running anything in the first group.
 | `scripts/fetch_records.py` | relationship candidates + birth dates for the cohort | no |
 | `scripts/build_episodes.py` | merges progressions, flags defects, applies the adult window | no |
 | `scripts/build_partner_universe.py` | derives the outside-roster partners from scorable episodes | no |
-| `scripts/fetch_onscreen_candidates.py` | films where a male and a female roster member co-star | no |
+| `scripts/fetch_onscreen_candidates.py` | films where a male and a female roster member co-star. Batched, and REFUSES a batch that comes back at its row cap | no |
 | `scripts/resolve_roster.py` | turns a name list into a roster file with Wikidata ids | no |
+| `scripts/expand_roster.py` | snowballs a roster over co-stars (P161) and real-life partners (P26/P451), bounded, recording what each round added and what each bound cut. `--roster docs/roster-100.json --out docs/roster-expanded.json` | no |
 | `scripts/scaling_report.py` | pilot vs full roster; does coverage scale | no |
 | `scripts/source_requirement.py` | how deep a source would have to be | no |
 | `scripts/reachable_products.py` | what can be built with the evidence that exists | no |
@@ -237,10 +238,11 @@ that drift is the only reason `modules/analytics/comparability.py` exists.
 | Command | What it does | Spends quota |
 |---|---|---|
 | `scripts/select_m1_slice.py` | picks the M1 focal actors and their pairings by a fixed rule, before any judging | no |
-| `scripts/score_pairings.py` | judges each pairing once and returns the gap | **yes** |
+| `scripts/score_person_periods.py` | judges each (person, year) once, film-blind and evidence-anchored, and CACHES it; `--backlog-only` spends nothing | **yes** |
+| ~~`scripts/score_pairings.py`~~ | judged each pairing and returned the gap. **Superseded 2026-09-15**: it told the judge which film it was scoring, so the same person in the same year came back 9.0 for one film and 9.5 for another. See docs/PLAN-v4.md §4a | **yes** |
 | `scripts/build_boards.py` | renders the four leaderboards from judged gaps, and refuses to call a ranking established without measured spread. Also renders the within-sex normalized SECOND view below them and writes its numbers to `data/roster100/run/normalized_view.json` | no |
 
-The v4 rubric is `rubrics/pairing/`. `modules/pairing/judge.py` parses a verdict
+The v4 rubrics are `rubrics/person/` (current) and `rubrics/pairing/` (superseded). `modules/pairing/judge.py` parses a verdict
 and REFUSES one whose two absolute scores contradict its own gap.
 
 Two constraints from plan v3 are kept and asserted by
@@ -391,6 +393,51 @@ scripts with different paths:
 Everything above is free. `scripts/score_roster_joint.py` then scores only the
 dossiers the jointly covered pairings need, which is about nine rather than the
 127 a full pass would cost.
+
+## Two ways Wikidata answers wrongly and looks fine
+
+Both were found on 2026-09-15 and both had already shipped a number. Use
+`batched_query` in `modules/records/wikidata.py` for any new SPARQL fetch; it
+carries both guards. Do not write a bare `_query` loop.
+
+**A LIMIT that is reached is data loss, not a limit.** Wikidata returns the
+first N rows and says nothing about the rest. `fetch_onscreen_candidates.py`
+ran one query with `LIMIT 400` against a 100-name roster that produces 2570
+rows, and published 136 co-starring pairs across 74 films. The real figure is
+808 pairs across 502 films, and 25 of the 100 roster members had NO pair at
+all. Gigli, Armageddon and Ghosted each have two roster members in the cast and
+all three were in the discarded tail, so the product looked like it was missing
+famous couples that Wikidata knows about perfectly well. Set the cap far above
+any honest answer, batch the query so that is possible, and REFUSE a batch that
+comes back at its cap.
+
+Two smaller things that made it worse and are worth copying:
+
+- **`SELECT DISTINCT`.** A film whose `P31` values each reach `Q11424` by a
+  different path yields one solution per path, and `P577` repeats per country
+  on top. Those duplicates counted against the cap: 2570 rows for the same 808
+  pairs, 2473 with DISTINCT.
+- **Read the cap off the artifact.** `rows_fetched` and `row_limit_per_batch`
+  are stamped in `onscreen_candidates.json` now. The old artifact recorded
+  neither, so nothing on disk could have revealed the truncation.
+
+**A query timeout arrives as HTTP 200.** The service does not answer 503 when
+it gives up at about sixty seconds. It streams result rows, stops mid-JSON, and
+appends its own log to the same body:
+
+```
+"valSPARQL-QUERY: queryStr=
+SELECT DISTINCT ?seed ...
+java.util.concurrent.TimeoutException
+```
+
+That came back as a 595 KB body with a Java stack trace glued to the end, and
+the status line, the byte count and a `urlopen` that raised nothing all said
+success. `json.loads` rejecting it is the only reason it surfaced.
+`WikidataQueryTimeout` names it, and `batched_query` HALVES the chunk rather
+than asking the same too-big question again, because a retry of an identical
+query costs a minute and cannot succeed. A real fixture of that body is kept at
+`tests/fixtures/wdqs_timeout_body.txt`.
 
 ## What has been measured
 

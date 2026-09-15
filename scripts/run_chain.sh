@@ -146,6 +146,10 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   # Plan v4. Gated on the artifact existing, like the other roster-scale
   # stages: most clones have no judged pairings and the boards are not part of
   # the v3 report.
+  # Plan v4 §4a. Derives every pairing gap from the cached person-year scores,
+  # so a pairing between two already-judged people costs no model call. Must run
+  # BEFORE build_boards.py, which reads what this writes.
+  [ -f data/roster100/run/person_period_cache.json ] && run scripts/derive_pairings.py
   [ -f data/roster100/run/pairing_scores.json ] && run scripts/build_boards.py
   run scripts/write_m0_report.py
   # Last, because it checks the prose against the artifacts every stage above
