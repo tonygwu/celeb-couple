@@ -161,3 +161,39 @@ def test_a_spender_checks_its_inputs_before_it_spends():
         "run_stress.py builds a judge before checking the rater-noise floor. "
         "A stale floor would then be found after the calls were already spent."
     )
+
+
+def test_no_paid_script_defaults_an_account_to_a_machine_absolute_path():
+    """A default that is wrong is worse than no default.
+
+    `accounts.py` was written because six scripts defaulted `--account` to
+    `/Users/tonygwu/.claude-e`, a path that exists on one machine and was at 0%
+    quota the night it was found. The fix removed it from five of them.
+    `score_evidenced.py` kept it AND bypassed `resolve_account`, so the refusal
+    never fired there, until 2026-09-15.
+
+    Prose may still describe the history; this checks argparse DEFAULTS.
+    """
+    import ast
+    offenders = []
+    for path in sorted((REPO / "scripts").glob("*.py")):
+        tree = ast.parse(path.read_text())
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "add_argument"):
+                continue
+            names = [a.value for a in node.args if isinstance(a, ast.Constant)]
+            if not any(isinstance(n, str) and "account" in n for n in names):
+                continue
+            for kw in node.keywords:
+                if kw.arg != "default":
+                    continue
+                for sub in ast.walk(kw.value):
+                    if (isinstance(sub, ast.Constant) and isinstance(sub.value, str)
+                            and sub.value.startswith("/")):
+                        offenders.append(f"{path.name}: --account default {sub.value!r}")
+    assert not offenders, (
+        "account defaults pointing at one machine:\n  " + "\n  ".join(offenders)
+        + "\nUse resolve_account / resolve_codex_home, which refuse and name "
+          "the alternatives.")

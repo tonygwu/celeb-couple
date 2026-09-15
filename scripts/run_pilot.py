@@ -20,7 +20,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from packages.llmkit.accounts import resolve_account            # noqa: E402
+from packages.llmkit.accounts import (resolve_account,       # noqa: E402
+                                      resolve_codex_home)
 from packages.llmkit.budget import Budget, BudgetExhausted             # noqa: E402
 from packages.llmkit.contract import STANDING_RUBRIC_VERSION, load_contract                     # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge             # noqa: E402
@@ -148,7 +149,9 @@ def main() -> int:
         judges.append(("fable", ClaudeJudge("fable", "claude-fable-5-1",
                                             config_dir=resolve_account(args.fable_account))))
     if "astra" in args.judges:
-        judges.append(("astra", CodexJudge("astra", "gpt-6-astra", effort="high")))
+        judges.append(("astra", CodexJudge(
+            "astra", "gpt-6-astra", effort="high",
+            config_dir=resolve_codex_home(getattr(args, "astra_account", None)))))
     budgets = {"fable": Budget(max_calls=args.max_fable),
                "astra": Budget(max_calls=args.max_astra)}
 

@@ -20,7 +20,8 @@ import os
 from pathlib import Path
 
 __all__ = ["AccountNotChosen", "discover_accounts", "resolve_account",
-           "DEFAULT_ACCOUNT"]
+           "DEFAULT_ACCOUNT", "discover_codex_homes", "resolve_codex_home",
+           "CODEX_ENV_VAR"]
 
 #: How to ask for the DEFAULT account, the one Claude Code uses when no
 #: config dir is set.
@@ -94,4 +95,54 @@ def resolve_account(flag: str | None, *, home: Path | None = None) -> str | None
         f"default account's config is {h / '.claude.json'}, OUTSIDE\n"
         f"{h / '.claude'}, so passing that directory scaffolds an empty\n"
         f"account and the run fails as auth_or_quota.\n"
+    )
+
+
+#: Read when `--astra-account` is not passed.
+CODEX_ENV_VAR = "CELEB_CODEX_HOME"
+
+
+def discover_codex_homes(home: Path | None = None) -> list[Path]:
+    """Every Codex account directory visible in ``home``.
+
+    A Codex account IS a CODEX_HOME directory, the way a Claude account is a
+    CLAUDE_CONFIG_DIR. Unlike the Claude side there is no trap here: `~/.codex`
+    is a real account directory holding its own `config.toml` and `auth.json`,
+    so it can be named by path like any other.
+
+    Discovered by globbing rather than listed by letter, for the same reason as
+    ``discover_accounts``: the number of accounts changes.
+    """
+    h = Path(home) if home is not None else Path.home()
+    found = {p for p in h.glob(".codex-*") if p.is_dir()}
+    if (h / ".codex").is_dir():
+        found.add(h / ".codex")
+    # An account has credentials. A stray `.codex-backup` does not.
+    real = {p for p in found if (p / "auth.json").exists()}
+    return sorted(real or found)
+
+
+def resolve_codex_home(flag: str | None, *, home: Path | None = None) -> str:
+    """Return the CODEX_HOME to run under, or raise naming the alternatives.
+
+    There is no default, for the reason the module docstring gives, and for a
+    sharper one measured on 2026-09-15: ``CodexJudge`` passed NO environment to
+    its subprocess, so every call silently inherited the shell's CODEX_HOME and
+    landed on ~/.codex. A second account with a FULL weekly window sat
+    unreachable while runs failed on the exhausted one. An implicit account is
+    not a default, it is a hidden one.
+    """
+    chosen = flag or os.environ.get(CODEX_ENV_VAR)
+    if chosen:
+        return chosen
+    seen = discover_codex_homes(home)
+    listed = ("\n  ".join(str(p) for p in seen) if seen
+              else "(none found; is Codex installed for this user?)")
+    raise AccountNotChosen(
+        "No Codex account chosen, and there is no default on purpose: the "
+        "account that was right yesterday can be at 0% today, and an inherited "
+        "CODEX_HOME is a hidden choice rather than an explicit one.\n\n"
+        "Run `quotapick status` and pass the one with headroom:\n\n"
+        f"  --astra-account <codex home>   or   {CODEX_ENV_VAR}=<codex home>\n\n"
+        f"Codex homes visible here:\n  {listed}\n"
     )

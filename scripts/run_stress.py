@@ -20,7 +20,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from packages.llmkit.accounts import resolve_account            # noqa: E402
+from packages.llmkit.accounts import (resolve_account,       # noqa: E402
+                                      resolve_codex_home)
 from packages.llmkit.budget import Budget, BudgetExhausted          # noqa: E402
 from packages.llmkit.contract import (STANDING_RUBRIC_VERSION, load_contract,
                                       refuse_stale_contract)                   # noqa: E402
@@ -58,7 +59,8 @@ def main() -> int:
     rubric_text, schema_text = RUBRIC.read_text(), SCHEMA.read_text()
 
     fable = ClaudeJudge("fable", args.fable_model, config_dir=resolve_account(args.fable_account))
-    astra = CodexJudge("astra", args.astra_model, effort="high")
+    astra = CodexJudge("astra", args.astra_model, effort="high",
+                       config_dir=resolve_codex_home(args.astra_account))
     budgets = {"fable": Budget(max_calls=args.max_fable),
                "astra": Budget(max_calls=args.max_astra)}
 

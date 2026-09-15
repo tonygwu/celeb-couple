@@ -317,14 +317,40 @@ class CodexJudge:
     """
 
     def __init__(self, name: str, model: str, binary: str = "codex",
-                 effort: str = "high") -> None:
+                 effort: str = "high", config_dir: str | None = None) -> None:
         self.name = name
         self.model = model
         self.binary = binary
         self.effort = effort
+        #: CODEX_HOME for this judge. A Codex account IS a CODEX_HOME directory,
+        #: the way a Claude account is a CLAUDE_CONFIG_DIR.
+        self.config_dir = config_dir
+
+    def _env(self) -> dict[str, str]:
+        """The child's environment, with the account set explicitly.
+
+        This class used to pass NO env at all -- `subprocess.run(cmd, cwd=jail)`
+        -- so every call inherited the shell's CODEX_HOME, which is normally
+        unset and resolves to ~/.codex. The result: a second Codex account with
+        a FULL weekly window sat unreachable while runs failed on the exhausted
+        one, and no flag could redirect them. The `cdx` router picks correctly;
+        this class was simply invoking `codex` underneath it.
+
+        It also inherited ANTHROPIC_API_KEY and OPENAI_API_KEY, so the
+        subscription-only assertion checked this process's environment while the
+        CHILD got a different one. Both are stripped here and the assertion now
+        reads what the child will actually see.
+        """
+        env = dict(os.environ)
+        env.pop("ANTHROPIC_API_KEY", None)
+        env.pop("OPENAI_API_KEY", None)
+        if self.config_dir:
+            env["CODEX_HOME"] = self.config_dir
+        return env
 
     def __call__(self, prompt: str, timeout: int = 900) -> JudgeResult:
-        assert_subscription_only()
+        env = self._env()
+        assert_subscription_only(env)
         cmd = [
             self.binary, "exec", "--json",
             "-m", self.model,
@@ -338,7 +364,7 @@ class CodexJudge:
         with tempfile.TemporaryDirectory(prefix="celeb-judge-") as jail:
             try:
                 proc = subprocess.run(
-                    cmd, cwd=jail, capture_output=True, text=True,
+                    cmd, cwd=jail, env=env, capture_output=True, text=True,
                     timeout=timeout, stdin=subprocess.DEVNULL,
                 )
             except subprocess.TimeoutExpired as exc:

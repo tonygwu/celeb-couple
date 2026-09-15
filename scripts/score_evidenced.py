@@ -8,6 +8,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from packages.llmkit.accounts import (resolve_account,                      # noqa: E402
+                                      resolve_codex_home)
 from packages.llmkit.budget import Budget, BudgetExhausted                  # noqa: E402
 from packages.llmkit.contract import STANDING_RUBRIC_VERSION, load_contract                          # noqa: E402
 from packages.llmkit.outputs import archive_previous                        # noqa: E402
@@ -29,9 +31,17 @@ _ap = argparse.ArgumentParser(
                  "jointly covered pairings. SPENDS MODEL QUOTA."))
 _ap.add_argument("--judges", default=os.environ.get("CELEB_JUDGES", "fable,astra"),
                  help="comma-separated; env CELEB_JUDGES")
-_ap.add_argument("--account", default=os.environ.get("CELEB_ACCOUNT",
-                                                     "/Users/tonygwu/.claude-e"),
-                 help="CLAUDE_CONFIG_DIR for the fable judge; env CELEB_ACCOUNT")
+# NO DEFAULT. This read `os.environ.get("CELEB_ACCOUNT", "/Users/tonygwu/.claude-e")`
+# -- the machine-absolute default AGENTS.md says was removed from all six paid
+# scripts. It was removed from the others; this one kept it and bypassed
+# resolve_account entirely, so the refusal never fired here. A default that is
+# wrong is worse than no default, because the run fails as auth_or_quota and
+# reads like a broken judge.
+_ap.add_argument("--account", default=None,
+                 help="CLAUDE_CONFIG_DIR for the fable judge, or `default` for "
+                      "the account bare `claude` uses; env CELEB_ACCOUNT")
+_ap.add_argument("--astra-account", default=None,
+                 help="CODEX_HOME for the astra judge; env CELEB_CODEX_HOME")
 _ap.add_argument("--max-calls", type=int,
                  default=int(os.environ.get("CELEB_MAX_CALLS", "60")),
                  help="per-judge cap; the run halts at it; env CELEB_MAX_CALLS")
@@ -73,9 +83,10 @@ _JUDGES = [j.strip() for j in _args.judges.split(",") if j.strip()]
 judges = []
 if "fable" in _JUDGES:
     judges.append(("fable", ClaudeJudge("fable", "claude-fable-5-1",
-                                        config_dir=_args.account)))
+                                        config_dir=resolve_account(_args.account))))
 if "astra" in _JUDGES:
-    judges.append(("astra", CodexJudge("astra", "gpt-6-astra", effort="high")))
+    judges.append(("astra", CodexJudge("astra", "gpt-6-astra", effort="high",
+                                     config_dir=resolve_codex_home(_args.astra_account))))
 _CAP = _args.max_calls
 budgets = {"fable": Budget(max_calls=_CAP), "astra": Budget(max_calls=_CAP)}
 out = REPO / "data/pilot/run"; (out / "raw").mkdir(parents=True, exist_ok=True)

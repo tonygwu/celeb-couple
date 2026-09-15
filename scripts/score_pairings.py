@@ -22,7 +22,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from packages.llmkit.accounts import resolve_account                    # noqa: E402
+from packages.llmkit.accounts import (resolve_account,                  # noqa: E402
+                                      resolve_codex_home)
 from packages.llmkit.artifacts import require                           # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted              # noqa: E402
 from packages.llmkit.contract import PAIRING_RUBRIC_VERSION, load_contract  # noqa: E402
@@ -66,6 +67,9 @@ def main() -> int:
                     help="Claude config dir, or `default` for the account bare "
                          "`claude` uses. No default: run `quotapick status` first.")
     ap.add_argument("--model", default="claude-fable-5-1")
+    ap.add_argument("--astra-account", default=None,
+                    help="CODEX_HOME for the astra judge. No default: an "
+                         "inherited CODEX_HOME is a hidden choice.")
     ap.add_argument("--max-calls", type=int, default=150)
     ap.add_argument("--out", default="data/roster100/run/pairing_scores.json")
     ap.add_argument("--raw", default="data/roster100/run/raw_pairings")
@@ -95,7 +99,9 @@ def main() -> int:
     judges = []
     for n in names:
         if n == "astra":
-            judges.append((n, CodexJudge("astra", "gpt-6-astra", effort="high")))
+            judges.append((n, CodexJudge(
+                "astra", "gpt-6-astra", effort="high",
+                config_dir=resolve_codex_home(args.astra_account))))
         else:
             judges.append((n, ClaudeJudge(n, args.model,
                                           config_dir=resolve_account(args.account))))

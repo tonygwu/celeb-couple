@@ -15,7 +15,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-from packages.llmkit.accounts import resolve_account            # noqa: E402
+from packages.llmkit.accounts import (resolve_account,       # noqa: E402
+                                      resolve_codex_home)
 from packages.llmkit.budget import Budget, BudgetExhausted           # noqa: E402
 from packages.llmkit.contract import (STANDING_RUBRIC_VERSION, load_contract,
                                       refuse_stale_contract)                   # noqa: E402
@@ -288,7 +289,8 @@ def main() -> int:
         judges.append(("fable", ClaudeJudge("fable", "claude-fable-5-1",
                                             config_dir=resolve_account(args.account))))
     if "astra" in wanted:
-        judges.append(("astra", CodexJudge("astra", "gpt-6-astra", effort="high")))
+        judges.append(("astra", CodexJudge("astra", "gpt-6-astra", effort="high",
+                                     config_dir=resolve_codex_home(_astra_home()))))
     budgets = {n: Budget(max_calls=args.max_calls_per_judge) for n, _ in judges}
     manifest = RunManifest(stage_name="rater-noise", repo=REPO, args=vars(args),
                            contracts={"standing": contract.as_dict()},
