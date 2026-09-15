@@ -188,6 +188,7 @@ running anything in the first group.
 | `scripts/build_partner_universe.py` | derives the outside-roster partners from scorable episodes | no |
 | `scripts/fetch_onscreen_candidates.py` | films where a male and a female roster member co-star. Batched, and REFUSES a batch that comes back at its row cap | no |
 | `scripts/resolve_roster.py` | turns a name list into a roster file with Wikidata ids | no |
+| `scripts/derive_pairings.py` | derives every pairing gap by SUBTRACTING two cached person-year scores, so an already-judged pair costs nothing; a pairing whose two people are not both cached is emitted with `gap: null` and a reason rather than dropped | no |
 | `scripts/expand_roster.py` | snowballs a roster over co-stars (P161) and real-life partners (P26/P451), bounded, recording what each round added and what each bound cut. `--roster docs/roster-100.json --out docs/roster-expanded.json` | no |
 | `scripts/scaling_report.py` | pilot vs full roster; does coverage scale | no |
 | `scripts/source_requirement.py` | how deep a source would have to be | no |
