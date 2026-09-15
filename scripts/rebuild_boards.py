@@ -27,6 +27,27 @@ from modules.pairing.person import cache_key                # noqa: E402
 SEX = {"male": "male", "female": "female"}
 
 
+def volume_confound(rows: list[dict]) -> float | None:
+    """How much of the cumulative board is just a count of romances.
+
+    Carried over from build_boards.py because it earned its place there: on the
+    film-anchored data it showed 90% of the women's on-screen cumulative ranking
+    was explained by romance COUNT rather than by partner. A board that is
+    really a counter should say so where it is read.
+    """
+    if len(rows) < 3:
+        return None
+    xs = [r["exposure"] for r in rows]
+    ys = [r["paw_total"] for r in rows]
+    mx, my = st.mean(xs), st.mean(ys)
+    sxx = sum((x - mx) ** 2 for x in xs)
+    syy = sum((y - my) ** 2 for y in ys)
+    if sxx == 0 or syy == 0:
+        return None
+    sxy = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+    return (sxy * sxy) / (sxx * syy)
+
+
 def caches(paths: list[str]) -> dict:
     out: dict = {}
     for p in paths:
@@ -154,7 +175,7 @@ def main() -> int:
                     k = ncs.get((c["other"], c["period"], c["work"]))
                     if k: c["n_gap"] = round(k["signed_gap"], 2)
             out["boards"].append({"gender": gender, "domain": dom, "label": f"{gl} — {dl}",
-                                  "r2": None, "rows": rows})
+                                  "r2": volume_confound(rows), "rows": rows})
             print(f"  {gl} — {dl}: {len(rows)} ranked")
 
     dest = Path(args.out).expanduser() if args.out else Path.home()/"Desktop"/"punching-above-weight.html"
