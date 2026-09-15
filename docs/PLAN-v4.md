@@ -88,6 +88,85 @@ cannot drift between calls because there is no second call.
 them and carries a caveat saying so. `PAW-WAR` depends only on `gap`. Where the
 two metrics disagree, `PAW-WAR` is the one to trust.
 
+## 4a. AMENDMENT (2026-09-15): the judgment is film-blind and evidence-anchored
+
+**This reverses §4's "ask for the GAP, not two scores", and the reason is
+measured rather than argued.**
+
+### What §4 got wrong
+
+§4 was right that two absolute judgments made in different calls drift. It was
+wrong about where the drift came from. The pairing prompt told the judge which
+film it was scoring:
+
+> A film: **Just Go with It**, released 2011.
+> Judge them as they were presented IN THAT FILM.
+
+So the same person in the same year was judged repeatedly, once per film, in a
+different context each time. Measured on the M1 corpus:
+
+- 57 of 363 (family, person, year) tuples were judged in more than one pairing
+- mean spread 0.161, median 0.10, **max 0.50**
+- **15 of 57 moved MORE than the 0.28 points by which the two judge families
+  disagree with each other**
+
+Angelina Jolie in 2000 came back 9.0 and 9.5 from the same judge. A judge
+disagreeing with itself more than two different model families disagree is not
+signal, and asking for the gap did not prevent it: the gap was stable while the
+underlying scores were not.
+
+### What replaces it
+
+One judgment per **(person, year)**, film-blind, cached, reused everywhere that
+person-year appears. `rubrics/person/`, `scripts/score_person_periods.py`.
+
+The prompt never names a film, a co-star or a relationship, because none of them
+should change how attractive someone was perceived to be in a given year.
+Styling is a property of a production; this scale is a property of the person in
+that year.
+
+### The cost, stated
+
+The gap becomes a SUBTRACTION of two independently judged scores, which is what
+§4 set out to avoid. What makes the trade acceptable is that neither score is
+anchored to a film any more, so they are no longer drifting between contexts —
+which was the actual mechanism. The risk that remains, and is NOT yet measured:
+a person judged with no partner in front of them may score differently than one
+judged in a pairing. That is a designed probe, not an assumption, and it is
+filed rather than waved away.
+
+Caching does **not** save calls. 119 judged pairings need 215 distinct
+person-years, and one pairing call already returned both scores plus the gap.
+This is a correctness change that happens to be cacheable, not a cost
+optimisation.
+
+### Evidence-anchored
+
+131 dated observations — awards and ranked placements, reported by Wikipedia —
+sat unused because they are facts about a person in a year and the per-pairing
+rubric had nowhere to put them. They are now attached to the judgment when they
+exist, for 33 of 215 person-years.
+
+This answers the weakness §9 names first: *"the numbers are unfalsifiable."*
+They are still subjective, but 33 of them now rest on something a reader can
+check, and every score records whether evidence was used and which ids it cites.
+
+**Absence is stated, never implied.** When no observation exists the prompt says
+so and tells the judge that absence is normal and is not evidence of a low
+score. Silence would otherwise read as a signal.
+
+The restricted-publisher rule is untouched. People Inc., Ziff Davis, Maxim and
+Condé Nast are still never fetched by any route. These observations are
+Wikipedia's CC BY-SA reports of what those publications said, which is how v3
+collected them.
+
+### The backlog
+
+The cache makes the corpus grow incrementally. `--backlog-only` prints what is
+uncached and spends nothing; `--limit N` grades part of it. The cache is written
+after EVERY call, not at the end, so a run the machine sleeps through keeps
+every tuple it paid for.
+
 ## 5. Error bars — what this adds over the ChatGPT version
 
 ChatGPT states +/- 0.2-0.3 uncertainty per score. Its leaderboard is then decided

@@ -78,20 +78,30 @@ def test_every_pairing_carries_a_four_digit_year():
     assert not bad, bad[:5]
 
 
-def test_selection_is_deterministic():
+def test_selection_is_deterministic(tmp_path):
     """Same inputs, same slice. The tie-break is the Wikidata id, which is
-    arbitrary and STABLE rather than arbitrary and not."""
+    arbitrary and STABLE rather than arbitrary and not.
+
+    WRITES TO A TEMP PATH. This used to re-run the selector IN PLACE, so simply
+    running the test suite rewrote the production slice. On 2026-09-15 the
+    candidate data grew sixfold and the suite silently replaced a 131-pairing
+    slice with a 298-pairing one, changing the focal ten underneath a scoring
+    run that was reading it. A test that mutates the artifact it checks can
+    invalidate work that has already been paid for in model calls.
+    """
     if not SLICE.exists():
         pytest.skip("data/ is gitignored")
-    before = SLICE.read_text()
+    before = json.loads(SLICE.read_text())
+    dest = tmp_path / "slice.json"
     out = subprocess.run(
-        [sys.executable, str(REPO / "scripts/select_m1_slice.py")],
+        [sys.executable, str(REPO / "scripts/select_m1_slice.py"), "--out", str(dest)],
         cwd=REPO, capture_output=True, text=True)
     assert out.returncode == 0, out.stderr
-    after = json.loads(SLICE.read_text())
-    first = json.loads(before)
-    assert [f["qid"] for f in first["focal"]] == [f["qid"] for f in after["focal"]]
-    assert ([p["pairing_id"] for p in first["pairings"]]
+    assert SLICE.read_text() == json.dumps(before, indent=2), (
+        "running the selector rewrote the production slice")
+    after = json.loads(dest.read_text())
+    assert [f["qid"] for f in before["focal"]] == [f["qid"] for f in after["focal"]]
+    assert ([p["pairing_id"] for p in before["pairings"]]
             == [p["pairing_id"] for p in after["pairings"]])
 
 
