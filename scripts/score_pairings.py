@@ -111,6 +111,7 @@ def main() -> int:
     taxonomy: Counter = Counter()
     for i, p in enumerate(pairings, 1):
         per_judge, reasons, cent = {}, {}, {}
+        unjudged: dict[str, str] = {}
         for jname, judge in judges:
             try:
                 budgets[jname].spend_call(f"{p['pairing_id']} ({jname})")
@@ -137,13 +138,20 @@ def main() -> int:
                 per_judge[jname] = v.gap
                 reasons[jname] = v.reasoning
                 cent[jname] = 1.0 if p["domain"] == "real_life" else v.centrality
+            else:
+                # RECORDED, not dropped. A verdict of "I cannot judge this" is
+                # neither a success nor a failure, and the first run reported
+                # `attempted 131, succeeded 59, failed 0`, leaving 72 pairings
+                # unaccounted for anywhere in the artifact. 49 of them were
+                # `person_unknown` because the prompt named nobody.
+                unjudged[jname] = v.cannot_judge_reason or "unstated"
         gap = sum(per_judge.values()) / len(per_judge) if per_judge else None
         c = ([x for x in cent.values() if x is not None] or [None])[0]
         records.append({**{k: p[k] for k in ("pairing_id", "domain", "period",
                                              "work", "male", "female",
                                              "male_qid", "female_qid")},
                         "gap": gap, "judges": per_judge, "centrality": c,
-                        "reasonings": reasons})
+                        "unjudged": unjudged, "reasonings": reasons})
         if gap is not None:
             print(f"  [{i}/{len(pairings)}] {p['domain']:<10} {p['period']}  "
                   f"{str(p['female'])[:18]:<18} / {str(p['male'])[:18]:<18} "
@@ -156,10 +164,16 @@ def main() -> int:
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "contract": contract.as_dict(),
         "slice": args.slice,
+        # attempted = succeeded + unjudged + failed, and it must ADD UP. A bare
+        # completion count made a run that judged 45% of its slice look like a
+        # clean success with nothing failing.
         "attempted": len(pairings) * len(judges),
         "succeeded": sum(1 for r in records if r["gap"] is not None),
+        "unjudged": sum(1 for r in records if r["gap"] is None),
         "failed": len(failures),
         "error_taxonomy": dict(taxonomy),
+        "unjudged_taxonomy": dict(Counter(
+            reason for r in records for reason in (r.get("unjudged") or {}).values())),
         "budgets": {n: b.report() for n, b in budgets.items()},
         "pairings": records,
         "failures": failures,
@@ -170,8 +184,16 @@ def main() -> int:
     if kept is not None:
         print(f"  [archive] previous kept at {kept}")
     dest.write_text(json.dumps(out, indent=2))
+    total = out["succeeded"] + out["unjudged"] + out["failed"]
     print(f"\nattempted {out['attempted']}  succeeded {out['succeeded']}  "
-          f"failed {out['failed']}  {dict(taxonomy)}")
+          f"unjudged {out['unjudged']}  failed {out['failed']}")
+    if out["unjudged_taxonomy"]:
+        print(f"  unjudged: {out['unjudged_taxonomy']}")
+    if taxonomy:
+        print(f"  errors:   {dict(taxonomy)}")
+    if total != out["attempted"]:
+        print(f"  WARNING: {out['attempted']} attempted but "
+              f"{total} accounted for; {out['attempted'] - total} vanished")
     print(f"wrote {dest}")
     return 0
 

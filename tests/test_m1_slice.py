@@ -93,3 +93,31 @@ def test_selection_is_deterministic():
     assert [f["qid"] for f in first["focal"]] == [f["qid"] for f in after["focal"]]
     assert ([p["pairing_id"] for p in first["pairings"]]
             == [p["pairing_id"] for p in after["pairings"]])
+
+
+def test_every_pairing_names_both_people():
+    """A prompt that names nobody wastes a call.
+
+    Real-life partners are usually NOT on the roster -- that is what makes them
+    partners -- so looking their names up there returned None and the prompt
+    read `Man: **None**`. The judge refused 49 of those rather than guessing,
+    which is rubric rule 4 working correctly and 49 calls spent for nothing.
+    Names come from the episode's own `subject_name` / `partner_label` now.
+    """
+    s = _slice()
+    nameless = [p["pairing_id"] for p in s["pairings"]
+                if not (p.get("male") and p.get("female"))]
+    assert not nameless, nameless[:5]
+
+
+def test_a_pairing_dropped_for_a_missing_name_is_counted():
+    # Silently dropping one is a pairing the board will not have, with nothing
+    # to say so. A count of zero is the only evidence nothing was lost.
+    assert "skipped_for_missing_name" in _slice()
+
+
+def test_every_on_screen_pairing_names_its_film():
+    s = _slice()
+    untitled = [p["pairing_id"] for p in s["pairings"]
+                if p["domain"] == "on_screen" and not p.get("work")]
+    assert not untitled, untitled[:5]

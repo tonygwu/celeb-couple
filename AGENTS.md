@@ -275,6 +275,40 @@ and rewrote `docs/M0-REPORT.md` from a corpus no rubric on disk produced.
 The quota-spending stages are deliberately NOT in it. They need an account and a
 cap chosen by a human who has looked at `quotapick status`.
 
+## Long runs: caffeinate, not just nohup
+
+**`nohup` survives a closed terminal. It does not survive the machine sleeping.**
+
+Measured 2026-09-15: two scoring runs were launched with `nohup ... &`, confirmed
+alive, and five hours later had made no progress. The processes were orphaned to
+PID 1 with nothing supervising them, so nothing noticed and nothing restarted
+them. A 131-pairing run that should have taken 40 minutes produced nothing for
+most of a day.
+
+Start any run longer than a few minutes under both:
+
+```sh
+nohup caffeinate -i -m -s .venv/bin/python -u scripts/score_pairings.py ... &
+```
+
+`-i` blocks idle sleep, `-m` disk sleep, `-s` system sleep. To protect a run
+that is ALREADY going, attach by pid — `caffeinate` holds until it exits:
+
+```sh
+for pid in $(pgrep -f "[s]core_pairings.py"); do
+  nohup caffeinate -i -m -s -w "$pid" > /dev/null 2>&1 &
+done
+```
+
+Two more habits that go with it, both learned the same day:
+
+- **Arm a watcher.** An orphaned run that dies is indistinguishable from one
+  that is working, until someone asks. Check that verdicts are still landing,
+  not just that the process exists.
+- **Write per-unit output.** `score_pairings.py` writes one raw file per pairing
+  as it lands, so a run killed at 60% keeps 60% of its work. A run that only
+  writes at the end loses everything the machine sleeps through.
+
 Quota rules for the ones that spend:
 
 - **Subscription only. API billing is asserted off at start-up** — a visible

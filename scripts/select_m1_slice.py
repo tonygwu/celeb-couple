@@ -72,10 +72,14 @@ def main() -> int:
     focal_set = set(focal)
 
     pairings = []
+    skipped_unnamed: list[str] = []
     for c in films:
         if focal_set & {c["male_qid"], c["female_qid"]}:
             year = (c.get("release") or "")[:4]
             if not year.isdigit():
+                continue
+            if not (c.get("male") and c.get("female") and c.get("title")):
+                skipped_unnamed.append(c.get("work_qid"))
                 continue
             pairings.append({
                 "pairing_id": f"pr_screen_{c['work_qid']}_{c['male_qid']}_{c['female_qid']}",
@@ -91,6 +95,15 @@ def main() -> int:
         a, b = e["subject_qid"], e["partner_qid"]
         ga = (roster.get(a) or {}).get("gender_category")
         male, female = (a, b) if ga == "male" else (b, a)
+        # Names come from the EPISODE, not the roster. A relationship partner is
+        # usually NOT on the roster -- that is what makes them a partner -- so
+        # `roster.get(qid)` returned None and the prompt read "Man: **None**".
+        # The judge correctly refused 49 of those rather than guessing, which is
+        # rubric rule 4 working and 49 calls wasted. Measured 2026-09-15.
+        label = {a: e.get("subject_name"), b: e.get("partner_label")}
+        if not (label.get(male) and label.get(female)):
+            skipped_unnamed.append(e.get("episode_id"))
+            continue
         # One judgment per EPISODE, not per year. The relationship is the season.
         pairings.append({
             "pairing_id": f"pr_real_{male}_{female}_{years[0]}",
@@ -98,8 +111,7 @@ def main() -> int:
             "period_span": [years[0], years[-1]],
             "work": None, "work_qid": None,
             "male_qid": male, "female_qid": female,
-            "male": (roster.get(male) or {}).get("display_name"),
-            "female": (roster.get(female) or {}).get("display_name"),
+            "male": label[male], "female": label[female],
         })
 
     # Dedupe on pairing_id: a film with two focal actors appears twice above.
@@ -123,6 +135,10 @@ def main() -> int:
                    "gender": roster[q].get("gender_category"),
                    "real_life_pairings": rl[q], "on_screen_pairings": os_[q]}
                   for q in focal],
+        # Reported, never silent. A pairing dropped for a missing name is a
+        # pairing the board will not have, and a count of zero here is the only
+        # evidence that nothing was lost.
+        "skipped_for_missing_name": len(skipped_unnamed),
         "counts": {
             "focal_actors": len(focal),
             "pairings_total": len(unique),
@@ -139,6 +155,9 @@ def main() -> int:
     for f in out["focal"]:
         print(f"  {f['name']:<22} {f['gender']:<7} real-life {f['real_life_pairings']:<3} "
               f"on-screen {f['on_screen_pairings']}")
+    if skipped_unnamed:
+        print(f"\nSKIPPED {len(skipped_unnamed)} pairings with a missing name; "
+              f"a prompt naming nobody wastes a call.")
     print(f"\npairings to judge: {out['counts']['pairings_total']} "
           f"({out['counts']['on_screen']} on-screen, {out['counts']['real_life']} real-life)")
     print(f"wrote {dest}")
