@@ -428,12 +428,32 @@ Quota rules for the ones that spend:
     router whose contract version it has not read, or a router answer it cannot
     parse, all raise `RouterUnavailable`, which IS an `AccountNotChosen`.
     Nothing falls back to `~/.codex`.
-  - **A returned account is not an available one.** `quotapick pick` exits 0
-    and names an account even when every candidate is out of quota, marking it
-    `fits: false`. The resolver refuses on that flag. Without it a whole run
-    routes onto a 0.0% account and fails as `auth_or_quota`, which reads like a
-    broken judge. Measured 2026-09-15, with a real capture kept at
+  - **A returned account is not a spendable one.** `quotapick pick` exits 0 and
+    names an account even when nothing is spendable, marking it `fits: false`.
+    The resolver refuses on that flag. A real capture is kept at
     `tests/fixtures/quotapick_pick_all_exhausted.json`.
+
+    **`fits: false` does not mean the call would fail**, and the first version
+    of this note said it did. A smoke test spent a real `codex exec` against an
+    account reading `fits: false` and got a normal verdict back. The account is
+    held back on purpose: the operator reserves weekly quota on `~/.codex` for
+    the Codex DESKTOP app, which cannot use any other home. At the time of
+    measurement the vendor had 13% of the week left, the reserve held 51%, and
+    0% was spendable by automation. `quotapick status --explain` prints the
+    split, and `pick --explain` does not, because `pick` only ever emits JSON:
+
+    ```
+    reserve codex: 13% left - 51% held for manual use (0.09/day x 5.6d) = 0% spendable
+    ```
+
+    So the guard honours a policy rather than dodging an outage, which is the
+    stronger reason to keep it. A failed run is loud; quietly eating the
+    operator's interactive quota is not.
+  - **Do not read `used_fraction` as the vendor number while a reserve is set.**
+    `status --json` reports `used_fraction: 1.0` for that 7d window although the
+    vendor says 13% remains, because the reserve overwrites the vendor value.
+    Read the account's `manual_reserve` block instead, or `status --explain`.
+    Confirmed by the router's maintainer as a known display defect in v0.1.4.
   - **The candidate list is derived, never written down.** The ids come from
     `quotapick status --json` filtered on `provider == "codex"`. Do not replace
     that with `--only codex,codex_b`; a third Codex account would be invisible

@@ -251,22 +251,38 @@ def router_pick_codex_home(*, timeout: float = ROUTER_TIMEOUT_S) -> tuple[str, s
             f"{reason}"
         )
 
-    # A RETURNED ACCOUNT IS NOT AN AVAILABLE ONE. Measured 2026-09-15: asked to
-    # choose among accounts that were all out of quota, the router answered
-    # exit 0, `"account": "codex"`, `"reason": "every candidate is out of
-    # quota; earliest reset in 5.0h"` -- and `fits: false`. Reading the account
-    # and skipping these two flags would route a whole scoring run onto a 0.0%
-    # account, which fails as `auth_or_quota` and reads like a broken judge.
-    # That is the exact failure this module was written to prevent, re-entering
-    # through the tool that was supposed to end it.
+    # A RETURNED ACCOUNT IS NOT A SPENDABLE ONE. Measured 2026-09-15: the
+    # router answered exit 0, `"account": "codex"`, `"reason": "every candidate
+    # is out of quota; earliest reset in 5.0h"` -- and `fits: false`.
+    #
+    # `fits: false` does NOT mean the call would fail. A smoke test spent a
+    # real `codex exec` call against that same account minutes later and got a
+    # normal verdict back. The first version of this comment concluded from
+    # that the reading was a stale transcript estimate, and the router's
+    # maintainer corrected it: the reading was live, confidence 1.0, age 0s.
+    #
+    # The account is held back ON PURPOSE. The operator sets a manual reserve
+    # on `codex`, because the Codex DESKTOP app can only use ~/.codex and needs
+    # weekly quota left for interactive work. At the time of measurement the
+    # vendor had 13% of the weekly pool left, the reserve held 51%, and 0% was
+    # spendable by automation. `quotapick status --explain` prints that split:
+    #
+    #   reserve codex: 13% left - 51% held for manual use = 0% spendable
+    #
+    # So spending it is worse than a failed run, not better. A failed run is
+    # loud. Quietly eating the reserve takes the operator's interactive quota
+    # and nothing reports it. `fits` is the whole reserve mechanism, and an
+    # automated caller that ignores it defeats a policy rather than dodging an
+    # outage.
     if not (decision.get("fits") and decision.get("meets_policy")):
         raise RouterUnavailable(
             f"`{ROUTER_BINARY}` returned {account} but reports it unusable "
             f"(fits={decision.get('fits')!r}, "
             f"meets_policy={decision.get('meets_policy')!r}): {reason}\n\n"
-            f"Refusing rather than spending a run's retries on a full account. "
-            f"Wait for the reset, or override with "
-            f"{CODEX_ENV_VAR}=<codex home> if you know better."
+            f"Refusing. `fits: false` can mean the vendor window is spent, or "
+            f"that the operator holds this account in reserve for interactive "
+            f"use; `quotapick status --explain` says which. Wait for the reset, "
+            f"or override with {CODEX_ENV_VAR}=<codex home> if you know better."
         )
 
     # Belt and braces on the `--only` filter. CODEX_HOME pointed at a Claude

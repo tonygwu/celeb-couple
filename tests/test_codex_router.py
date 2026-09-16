@@ -32,10 +32,14 @@ from packages.llmkit.accounts import (AccountNotChosen,  # noqa: E402
                                       router_pick_codex_home)
 
 #: A real `quotapick pick --only codex --dry-run --json` body, captured
-#: 2026-09-15 at a moment when every Codex account was out of quota. It is kept
+#: 2026-09-15 at a moment when no Codex account was spendable. It is kept
 #: verbatim because the thing it proves is a claim about the router's real
 #: behaviour, and a hand-written dict would prove only that the test author
 #: believed it.
+#:
+#: Its `reason` says "every candidate is out of quota", which is the router's
+#: wording for "nothing is spendable" and NOT a claim that the vendor refused.
+#: See the note on the test below.
 EXHAUSTED = json.loads(
     (REPO / "tests/fixtures/quotapick_pick_all_exhausted.json").read_text())
 
@@ -102,10 +106,19 @@ def test_the_chosen_account_is_announced(monkeypatch, capsys):
 # --------------------------------------------------------------------------
 
 def test_an_account_the_router_says_does_not_fit_is_refused(monkeypatch):
-    """Measured: asked to choose among accounts that were ALL out of quota, the
-    router exits 0 and returns `"account": "codex"` with `fits: false`. Reading
-    the account and skipping the flag routes the whole run onto a 0.0% account,
-    which fails as `auth_or_quota` and reads like a broken judge."""
+    """The router exits 0 and returns `"account": "codex"` with `fits: false`.
+
+    `fits: false` does not predict a failed call. A smoke test spent a real
+    `codex exec` against that same account minutes after this capture and got a
+    normal verdict. The account is held back on purpose: the operator reserves
+    weekly quota on ~/.codex for the Codex desktop app, which cannot use any
+    other home. At capture time the vendor had 13% left, the reserve held 51%,
+    and 0% was spendable by automation.
+
+    So this guard does not avoid an error, it honours a policy. Ignoring it
+    would quietly spend the operator's interactive quota, which nothing
+    reports. That is worse than a loud failure, not better.
+    """
     assert EXHAUSTED["decision"]["account"], "fixture no longer names an account"
     assert EXHAUSTED["decision"]["fits"] is False, "fixture no longer exhausted"
     _route(monkeypatch, _status("codex", "codex_b"), EXHAUSTED)
