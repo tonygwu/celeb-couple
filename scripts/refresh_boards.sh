@@ -49,10 +49,14 @@ fi
 
 run "pairings " $PY scripts/build_imdb_pairings.py
 run "gradings " $PY scripts/build_person_gradings.py
+# The IMDb graph is on-screen ONLY. The real-life pairings live in the Wikidata
+# relationship graph, so both are passed or the real-life boards render empty.
 run "boards   " $PY scripts/rebuild_boards.py \
       --graph data/imdb/imdb_pairings.json \
+      --graph data/roster100/run/pairing_scores.json \
       --cache data/imdb/person_period_cache_opus.json \
       --cache data/roster100/run/person_period_cache.json \
+      --cache data/roster100/run/person_period_cache_astra.json \
       --out "$HOME/Desktop/punching-above-weight.html"
 
 if (( fail )); then echo "refresh finished WITH FAILURES" >&2; else echo "refresh clean"; fi

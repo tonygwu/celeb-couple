@@ -1,0 +1,238 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Celebrities Punching Above Their Weight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Libre+Franklin:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{--ink:#171a21;--paper:#fafaf8;--rule:#dcdad4;--up:#1c6b52;--down:#9c4a2a;
+ --mute:#6d717a;--faint:#f0eeea;--serif:"Instrument Serif",Georgia,serif;
+ --sans:"Libre Franklin",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e8e6e1;--paper:#12151b;
+ --rule:#2c313b;--up:#46c496;--down:#e08356;--mute:#8d939e;--faint:#1e232c}}
+:root[data-theme="dark"]{--ink:#e8e6e1;--paper:#12151b;--rule:#2c313b;--up:#46c496;
+ --down:#e08356;--mute:#8d939e;--faint:#1e232c}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;
+ line-height:1.55;margin:0;padding-inline:20px;padding-block:40px 72px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:34px}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(36px,7vw,60px);line-height:1.03;
+ margin:0 0 10px;text-wrap:balance}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+ color:var(--mute);margin:0 0 14px}
+.sub{color:var(--mute);max-width:60ch;margin:0}
+
+
+
+
+
+
+
+
+
+
+
+
+.note{font-size:13px;color:var(--mute);max-width:66ch;margin:0}
+.note b{color:var(--ink)}
+.controls{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+nav{display:flex;flex-wrap:wrap;gap:2px;border-bottom:1px solid var(--rule);flex:1}
+nav button{font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--mute);background:none;
+ border:0;border-bottom:2px solid transparent;padding:9px 14px;cursor:pointer;margin-bottom:-1px}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+nav button:hover{color:var(--ink)}
+.seg{display:flex;border:1px solid var(--rule)}
+.seg button{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+ background:none;border:0;color:var(--mute);padding:6px 11px;cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+button:focus-visible{outline:2px solid var(--up);outline-offset:-2px}
+.scroller{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:600px}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);
+ font-weight:500;text-align:right;padding:0 10px 8px;border-bottom:1px solid var(--rule);white-space:nowrap}
+th.l{text-align:left}
+td{padding:11px 10px;border-bottom:1px solid var(--rule);vertical-align:middle}
+tr.person{cursor:pointer}
+tr.person:hover td{background:var(--faint)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.rank{font-family:var(--mono);color:var(--mute);width:28px;text-align:right;font-size:13px}
+.who{font-weight:500;white-space:nowrap}
+.who .chev{color:var(--mute);font-size:10px;margin-right:7px;display:inline-block;width:8px}
+.pos{color:var(--up)}.neg{color:var(--down)}
+.big{font-size:16px;font-weight:500}
+.bar{position:relative;width:110px;height:9px;background:var(--faint)}
+.bar i{position:absolute;top:0;bottom:0;display:block}
+.bar .z{position:absolute;top:-3px;bottom:-3px;left:50%;width:1px;background:var(--rule)}
+.tiecell{width:15px;padding:0!important;position:relative}
+.tie{position:absolute;left:4px;top:0;bottom:0;width:6px;border:1.5px solid var(--mute);
+ border-right:0;opacity:.55}
+.tie.mid{border-top:0;border-bottom:0}.tie.top{border-bottom:0}.tie.bot{border-top:0}
+tr.detail td{padding:0;background:var(--faint)}
+.dl{padding:12px 10px 16px 44px;display:flex;flex-direction:column;gap:8px}
+.line{font-size:13.5px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+.line .yr{font-family:var(--mono);font-size:12px;color:var(--mute);min-width:88px}
+.line .eq{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px}
+.line .res{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+.line .wk{color:var(--mute);font-size:12px;width:100%;padding-left:88px}
+.vol{font-size:13px;color:var(--mute);line-height:1.5;margin:14px 0 0;padding-left:13px;
+ border-left:2px solid var(--rule)}
+.vol.hot{border-left-color:var(--down)}
+.vol b{color:var(--ink)}
+.tienote{font-size:12.5px;color:var(--mute);margin:10px 0 0}
+footer{border-top:1px solid var(--rule);padding-top:18px;font-size:12.5px;color:var(--mute);line-height:1.6}
+footer code{font-family:var(--mono);font-size:11.5px}
+@media (max-width:560px){.dl{padding-left:14px}.line .wk{padding-left:0}.line .yr{min-width:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* trajectory column: every row shares one x-axis, set from the whole population */
+.trend{white-space:nowrap;display:flex;align-items:center;gap:6px}
+.trend svg{display:block;flex:0 0 auto}
+.trend .tl{font-family:var(--mono);font-size:10.5px;color:var(--mute);
+ font-variant-numeric:tabular-nums;width:26px}
+.trend .tl.r{text-align:left}
+.trend .none{font-family:var(--mono);font-size:10.5px;color:var(--mute)}
+.lede{max-width:64ch;margin:0}
+.lede b{font-weight:600}
+@media (max-width:720px){.trend{display:none}th.trendh{display:none}}
+</style></head><body>
+<div class="wrap">
+<header>
+  <p class="eyebrow" id="eyebrow"></p>
+  <h1>Celebrities Punching Above Their Weight</h1>
+  <p class="sub">Which actors and actresses punch above their weight, and end up with partners
+    more attractive than themselves? Every romance, on screen and in real life, is scored by
+    whether they dated up or down. These are model judgments, not measurements.</p>
+  <p class="lede" id="lede"></p>
+</header>
+
+<div class="controls">
+  <nav id="tabs" role="tablist" aria-label="Leaderboards"></nav>
+  <div class="seg" role="group" aria-label="Score basis">
+    <button id="bNorm" data-basis="norm" aria-pressed="true">Normalized</button>
+    <button id="bRaw" data-basis="raw" aria-pressed="false">Raw</button>
+  </div>
+</div>
+
+<section id="board"></section>
+
+<footer>
+  <p>Contract <code id="ct"></code>. Ranked by <b>average</b>, the mean across a person's romances,
+    so it rewards who they were with rather than how many. <b>Cumulative</b> adds them all.
+    Negative is a normal answer and is the point. Click any row for the pairings behind the number.</p>
+</footer>
+</div>
+<script>
+const DATA = __DATA__;
+const f2 = v => (v>0?"+":v<0?"\u2212":"") + Math.abs(v).toFixed(2);
+const s2 = v => v==null ? "\u2014" : v.toFixed(2);
+const cls = v => v>0?"pos":v<0?"neg":"";
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let active=0, basis="norm";
+const open=new Set();
+const G = c => basis==="norm" ? (c.n_gap ?? null) : c.signed_gap;
+const SELF = c => basis==="norm" ? c.self_n : c.self_abs;
+const OTHER= c => basis==="norm" ? c.other_n : c.other_abs;
+const TOT  = r => basis==="norm" ? r.n_total : r.paw_total;
+const AVG  = r => basis==="norm" ? r.n_rate  : r.paw_rate;
+const PT   = p => basis==="norm" ? p.n : p.raw;
+
+/* One trajectory chart per person. The x-axis is the WHOLE corpus's year range
+   and the y-axis is the whole board's score range, so two rows can be compared
+   to each other rather than each being drawn to its own scale. */
+function spark(r, vmin, vmax){
+  const S=(r.series||[]).map(p=>({y:p.y,v:PT(p)})).filter(p=>p.v!=null);
+  if(!S.length) return `<span class="none">\u2014</span>`;
+  const y0=DATA.meta.year_min, y1=DATA.meta.year_max, W=110, H=26, PAD=4;
+  const X=y=>y1===y0?W/2:((y-y0)/(y1-y0))*(W-2)+1;
+  const Y=v=>vmax===vmin?H/2:H-PAD-((v-vmin)/(vmax-vmin))*(H-2*PAD);
+  const pts=S.map(p=>`${X(p.y).toFixed(1)},${Y(p.v).toFixed(1)}`).join(" ");
+  const col=S[S.length-1].v>=S[0].v?"var(--up)":"var(--down)";
+  const dots=S.map(p=>`<circle cx="${X(p.y).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="1.6" fill="${col}"/>`).join("");
+  return `<span class="tl">${S[0].v.toFixed(1)}</span>`+
+    `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="score over time">`+
+    (S.length>1?`<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.4"
+       stroke-linejoin="round" stroke-linecap="round"/>`:"")+dots+`</svg>`+
+    `<span class="tl r">${S[S.length-1].v.toFixed(1)}</span>`;
+}
+
+function ties(rows){
+  const g=[]; let cur=[0];
+  for(let i=1;i<rows.length;i++){
+    const a=AVG(rows[i-1]), b=AVG(rows[i]);
+    if(a!=null&&b!=null&&Math.abs(a-b)<DATA.meta.floor) cur.push(i); else {g.push(cur);cur=[i];}
+  }
+  g.push(cur); return g;
+}
+
+function lede(rows,b){
+  const el=document.getElementById("lede");
+  if(rows.length<2){el.textContent="";return;}
+  const t=rows[0], w=rows[rows.length-1];
+  el.innerHTML=`On <b>${esc(b.label)}</b>, <b>${esc(t.name)}</b> punches hardest above his or her weight:
+    across ${t.pairings} ${t.pairings===1?"romance":"romances"} the partner averaged
+    <b>${Math.abs(AVG(t)).toFixed(2)}</b> points above. At the other end, <b>${esc(w.name)}</b>
+    averaged <b>${Math.abs(AVG(w)).toFixed(2)}</b> points ${AVG(w)<0?"above":"below"} his or her partners.`;
+}
+
+function render(){
+  const b=DATA.boards[active];
+  const rows=[...b.rows].filter(r=>AVG(r)!=null).sort((x,y)=>AVG(y)-AVG(x));
+  const grp=ties(rows), pos={};
+  grp.forEach(g=>g.length>1&&g.forEach((i,k)=>pos[i]=k===0?"top":k===g.length-1?"bot":"mid"));
+  const span=Math.max(...rows.map(r=>Math.abs(AVG(r)??0)),0.5);
+  const tied=grp.filter(g=>g.length>1).reduce((n,g)=>n+g.length-1,0);
+  const all=rows.flatMap(r=>(r.series||[]).map(PT)).filter(v=>v!=null);
+  const vmin=all.length?Math.min(...all):0, vmax=all.length?Math.max(...all):1;
+  lede(rows,b);
+  let h=`<h2 style="font-family:var(--serif);font-weight:400;font-size:29px;margin:0 0 4px">${esc(b.label)}</h2>
+    <div class="scroller"><table><thead><tr><th class="l"></th><th class="l"></th><th class="l">Person</th>
+    <th class="l trendh">Attractiveness over time</th>
+    <th>Romances</th><th>Average</th><th>Cumulative</th><th class="l">Spread</th></tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    const o=open.has(b.label+r.qid), a=AVG(r)??0;
+    const w=Math.abs(a)/span*50, left=a<0?50-w:50;
+    h+=`<tr class="person" tabindex="0" data-q="${esc(r.qid)}" aria-expanded="${o}">
+      <td class="tiecell">${pos[i]?`<i class="tie ${pos[i]}"></i>`:""}</td>
+      <td class="rank">${i+1}</td>
+      <td class="who"><span class="chev">${o?"\u25be":"\u25b8"}</span>${esc(r.name)}</td>
+      <td><div class="trend">${spark(r,vmin,vmax)}</div></td>
+      <td class="num" style="color:var(--mute)">${r.pairings}</td>
+      <td class="num big ${cls(a)}">${f2(a)}</td>
+      <td class="num ${cls(TOT(r)??0)}">${TOT(r)==null?"\u2014":f2(TOT(r))}</td>
+      <td><div class="bar"><i style="left:${left}%;width:${w}%;background:${a>0?"var(--up)":"var(--down)"}"></i><span class="z"></span></div></td></tr>`;
+    if(o){
+      const cs=[...r.contributions].sort((x,y)=>(G(y)??0)-(G(x)??0));
+      h+=`<tr class="detail"><td colspan="8"><div class="dl">`+cs.map(c=>
+        `<div class="line"><span class="yr">${esc(c.work||"Relationship")} (${esc(c.period)}):</span>
+          <span class="eq">${esc(c.other)} (${s2(OTHER(c))}) \u2212 ${esc(r.name)} (${s2(SELF(c))}) =</span>
+          <span class="res ${cls(G(c))}">${f2(G(c))}</span></div>`).join("")+`</div></td></tr>`;
+    }
+  });
+  h+=`</tbody></table></div>`;
+  if(tied) h+=`<p class="tienote">${tied} adjacent ${tied===1?"pair is":"pairs are"} closer than the
+     ${DATA.meta.floor.toFixed(2)} floor. Bracketed rows are not separable \u2014 read them as tied.</p>`;
+  document.getElementById("board").innerHTML=h;
+  document.querySelectorAll("tr.person").forEach(el=>{
+    const t=()=>{const k=DATA.boards[active].label+el.dataset.q; open.has(k)?open.delete(k):open.add(k); render();};
+    el.onclick=t; el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();t();}};
+  });
+}
+function tabs(){
+  document.getElementById("tabs").innerHTML=DATA.boards.map((b,i)=>
+    `<button role="tab" aria-selected="${i===active}" data-i="${i}">${esc(b.label)}</button>`).join("");
+  document.querySelectorAll("#tabs button").forEach(el=>el.onclick=()=>{active=+el.dataset.i;tabs();render();});
+}
+document.querySelectorAll(".seg [data-basis]").forEach(el=>el.onclick=()=>{
+  basis=el.dataset.basis;
+  document.getElementById("bRaw").setAttribute("aria-pressed", basis==="raw");
+  document.getElementById("bNorm").setAttribute("aria-pressed", basis==="norm");
+  render();
+});
+const M=DATA.meta;
+document.getElementById("eyebrow").textContent =
+  [M.people_ranked!=null?M.people_ranked+" people":null,
+   M.works!=null?M.works+" films and relationships":null,
+   M.year_min!=null?M.year_min+"\u2013"+M.year_max:null].filter(Boolean).join(" \u00b7 ");
+document.getElementById("ct").textContent=M.contract+" / "+M.rubric;
+tabs(); render();
+</script></body></html>

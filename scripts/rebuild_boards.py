@@ -96,7 +96,10 @@ def population_from_cache(cache: dict) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Rebuild the boards from the cache. Free.")
     ap.add_argument("--cache", action="append", default=None)
-    ap.add_argument("--graph", default="data/roster100/run/pairing_scores.json")
+    ap.add_argument("--graph", action="append", default=None,
+                    help="repeatable. The IMDb graph is on-screen ONLY, so the "
+                         "real-life boards stay empty unless the Wikidata "
+                         "relationship graph is passed too.")
     ap.add_argument("--families", default="fable,astra")
     ap.add_argument("--gradings", default="data/roster100/run/person_gradings.json",
                     help="canonical scores from build_person_gradings.py")
@@ -104,14 +107,27 @@ def main() -> int:
                     help="score each judge family separately, the pre-2026-09-16 "
                          "behaviour. Default is the canonical mean of every grading.")
     ap.add_argument("--out", default=None, help="HTML destination")
-    ap.add_argument("--template",
-                    default="/private/tmp/claude-501/-Users-tonygwu-Code-misc-celebrity-couple/"
-                            "cad88ae2-bc88-4d63-8771-172c642cc167/scratchpad/page.html")
+    ap.add_argument("--template", default=str(REPO / "web/board.html"))
     args = ap.parse_args()
 
     cache = caches(args.cache or ["data/roster100/run/person_period_cache.json",
                                   "data/roster100/run/person_period_cache_astra.json"])
-    graph = require(REPO, args.graph)
+    sources = args.graph or ["data/roster100/run/pairing_scores.json"]
+    graph, seen_pid = {"pairings": []}, set()
+    for rel in sources:
+        if not (REPO / rel).exists():
+            print(f"  (no {rel}; skipping)")
+            continue
+        got = require(REPO, rel)["pairings"]
+        kept = 0
+        for pr in got:
+            pid = pr.get("pairing_id")
+            if pid in seen_pid:
+                continue
+            seen_pid.add(pid)
+            graph["pairings"].append(pr)
+            kept += 1
+        print(f"  {rel}: {len(got):,} pairings, {kept:,} new")
 
     # sex is not stored per cache entry; the pairing graph knows it
     sex_of = {}
@@ -220,9 +236,32 @@ def main() -> int:
                             c["other_n"] = round(na["f"] if male else na["m"], 2)
                     k = ncs.get((c["other"], c["period"], c["work"]))
                     if k: c["n_gap"] = round(k["signed_gap"], 2)
+            # Each row carries the person's OWN score over time, so the board
+            # can draw a trajectory. Every chart shares one x-axis range, set
+            # below from the whole population, or the rows would not be
+            # comparable to each other.
+            for row in rows:
+                ser = {}
+                for (f, s, qq, per), v in pop.items():
+                    if qq != row["qid"]:
+                        continue
+                    nv = norm.get((f, s, qq, per))
+                    ser.setdefault(int(per), []).append((float(v), float(nv) if nv is not None else None))
+                row["series"] = [
+                    {"y": y,
+                     "raw": round(st.mean([a for a, _ in vs]), 3),
+                     "n": (round(st.mean([b for _, b in vs if b is not None]), 3)
+                           if any(b is not None for _, b in vs) else None)}
+                    for y, vs in sorted(ser.items())]
             out["boards"].append({"gender": gender, "domain": dom, "label": f"{gl} — {dl}",
                                   "r2": volume_confound(rows), "rows": rows})
             print(f"  {gl} — {dl}: {len(rows)} ranked")
+
+    years = sorted({int(p) for (_f, _s, _q, p) in pop})
+    out["meta"]["year_min"] = years[0] if years else None
+    out["meta"]["year_max"] = years[-1] if years else None
+    out["meta"]["people_ranked"] = len({r["qid"] for b in out["boards"] for r in b["rows"]})
+    out["meta"]["works"] = len({r["work"] for r in recs if r.get("work")})
 
     dest = Path(args.out).expanduser() if args.out else Path.home()/"Desktop"/"punching-above-weight.html"
     tpl = Path(args.template).read_text()
