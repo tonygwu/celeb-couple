@@ -776,3 +776,101 @@ fired on a downstream number. Neither would have surfaced on its own.
   surprise. **Difficulty: still blocked on the operator, but only on billing.**
 - **No page-weight or export tooling**, because there is no site yet.
   **Difficulty: deferred until there is a board worth rendering.**
+
+## Public release: what is still open (2026-09-16)
+
+Filed by the pre-publication audit. The repository is **not** public and
+whether it becomes public is the operator's decision alone. Nothing in this
+section was actioned; each item needs a judgement this audit could not make.
+
+The secrets scan came back clean. No API key, token, OAuth credential, `.env`
+file, private key or account credential has ever been committed, across all 252
+commits at the time of the audit. Every commit author is the GitHub noreply
+address. No `data/` path and no `.tsv`/`.tsv.gz` has ever been in history, and
+the largest blob ever committed is 119 KB. Those categories are closed.
+
+### B1. A personal email sits in one pushed commit MESSAGE — `9234a510`
+
+**Caused by this audit, in the commit that fixed the underlying problem.**
+`9234a510` quotes `.wrangler/cache/wrangler-account.json` verbatim to explain
+why `.wrangler/` had to be ignored. That quote carries the Cloudflare account
+id and, as the account NAME, a personal gmail address. Neither is reproduced
+here, for the same reason they should not be in a commit message. It is in that
+message body only. No tracked file has ever contained either, and `git grep`
+over every revision returns nothing.
+
+Read it with `git log -1 9234a510` if you need to see the exact strings.
+
+This defeats part of the reason AGENTS.md sets the noreply author address:
+"so the history never needs an author rewrite if the repository is made public
+later".
+
+A rewrite was deliberately NOT attempted. It would move six commits, one of
+them another agent's, and rule 8 forbids force-pushing `main`. It has to be
+coordinated across `repo-1`..`repo-3` or done when no other agent is working.
+
+**The cost of this item only goes up.** Fixing it now costs one coordinated
+rewrite. After publication it cannot be fixed at all, because forks, caches and
+archives keep the old message.
+
+### B2. No LICENSE, and no preference recorded anywhere
+
+`git grep` finds no licence statement in any tracked file and `pyproject.toml`
+has no `license` field. A public repository with no LICENSE grants nobody any
+permission, which is legal but usually not what was intended. README.md and
+CONTRIBUTING.md both say so plainly rather than leaving it silent. Choosing one
+is an operator decision.
+
+### B3. The boards rank named people, some of whom are private individuals
+
+`docs/BOARDS.md` publishes attractiveness rankings of real named people, and
+says of itself that no source backs any number in it. Several partners named
+there are private individuals known publicly only as somebody's former partner,
+not public performers.
+
+This is the highest-reputational-risk content in the repository and it is a
+product-policy question, not a tidiness one. **It was not changed**, because
+AGENTS.md is explicit that nobody is removed from the roster by name, and
+picking people to delete is exactly the roster-selection-for-presentation that
+`docs/SOURCE-HUNT.md` warns against.
+
+Note that `scripts/deploy_site.sh` now publishes a board to a public URL, so
+this question is partly live whatever the repository's visibility is.
+
+### B4. Judge and model identifiers may not be public names
+
+`fable`, `astra`, `gpt-6-astra`, `claude-fable-5-1`, `claude-opus-5` and
+`claude-sonnet-5` appear throughout the code, the artifacts and `web/board.html`.
+If any is an unreleased or internal vendor codename, publishing the repository
+publishes it. This audit could not determine that. Confirm before publishing.
+
+### B5. A private Figma file key is published in three tracked files
+
+`docs/design/FIGMA-HANDOFF.md`, `.app-ux-design/design-brief.md` and
+`.app-ux-design/state-ledger.json` all carry the same Figma file key, which is
+already in those tracked files and is therefore not repeated here. The URL
+alone grants no access. It does reveal the
+file exists, and it becomes a working link for anyone if that file's sharing is
+ever set to "anyone with the link". The key has no value to an outside reader.
+
+### Smaller items, none of them blocking
+
+- **248 commit messages carry a `claude.ai/code/session_...` URL.** Those links
+  are not usable by a reader and cannot be removed without rewriting nearly the
+  whole history. Accept them, or rewrite once and never add another.
+- **`docs/design/FIGMA-HANDOFF.md` states stale numbers under the heading
+  "Immutable product facts a future session must not contradict".** It says
+  evidence shape explains **31%**; the current measured figure is 40%
+  omega-squared. `scripts/audit_doc_numbers.py` has no rule matching that
+  phrasing, so it did not catch it. Either regenerate the section or mark it as
+  a dated snapshot.
+- **`scripts/rebuild_boards.py` and `scripts/refresh_boards.sh` default to
+  writing `~/Desktop/punching-above-weight.html`.** Convenient for one machine
+  and a poor default for a stranger who clones the repository. Left alone
+  because changing it would change a workflow this audit did not own.
+- **`tests/fixtures/quotapick_pick_all_exhausted.json` still names the
+  operator's subscription accounts** (`claude`, `claude_b`..`claude_d`, `codex`,
+  `cursor`) with their quota remaining at capture time. The absolute home path
+  was neutralised in `1d59c1c`; the account topology was kept because the
+  capture's realism is its value and AGENTS.md discusses those account names
+  openly anyway. Revisit only if that topology is considered private.
