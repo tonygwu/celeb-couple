@@ -1,0 +1,29 @@
+# Static-asset Worker serving the "punching above their weight" leaderboard.
+#
+# There is no server side to this project: the board is ONE self-contained HTML
+# file that scripts/rebuild_boards.sh renders. A Worker with an [assets]
+# directory and no script entrypoint just serves files, which is the smallest
+# thing that can host it. Cloudflare recommends Workers over Pages for new
+# projects, and the sibling site verbatim-index.tonygwu.com is already deployed
+# this way; this file deliberately copies that shape.
+#
+# Publish with `bash scripts/deploy_site.sh`. Do not run `npx wrangler deploy`
+# directly: the script is what checks the HTML is the real board before it goes
+# out, and a direct deploy would happily publish an empty ./site.
+name = "celebrity-couple"
+compatibility_date = "2026-09-01"
+
+[assets]
+directory = "./site"
+not_found_handling = "single-page-application"
+
+# ./site is gitignored. It holds a COPY of the generated board, staged by
+# scripts/deploy_site.sh at deploy time, so the 500KB artifact never enters git
+# history.
+
+# tonygwu.com is already a Cloudflare zone, so the hostname is claimed here as
+# a Worker custom domain rather than through a hand-made DNS record. Cloudflare
+# creates and owns the CNAME for this name.
+[[routes]]
+pattern = "celebrities.tonygwu.com"
+custom_domain = true
