@@ -20,13 +20,43 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-#: Everything that can touch a pairing score.
+#: Everything that can touch a pairing score. `score_pairings.py` and the
+#: `rubrics/pairing/` files are SUPERSEDED (AGENTS.md, plan v4 §4a) and stay
+#: here because superseded is not deleted and the guarantee is about the whole
+#: scoring surface, not only the live half.
 _SCORING_PATH = (
     "scripts/score_pairings.py",
     "scripts/select_m1_slice.py",
     "modules/pairing/judge.py",
     "rubrics/pairing/PAIRING.md",
     "rubrics/pairing/pairing.schema.json",
+)
+
+#: The CURRENT person-year scorer. Everything real has been graded through this
+#: since 2026-09-15, and until now no test in this file named any of it, so the
+#: project's strongest public claim -- that no image ever reaches a judge -- was
+#: pinned only on the path that stopped being used.
+_PERSON_SCORING_PATH = (
+    "scripts/score_person_periods.py",
+    "modules/pairing/person.py",
+    "rubrics/person/person.schema.json",
+)
+
+#: Rubric PROSE is checked differently from code. `rubrics/person/PERSON.md`
+#: tells the judge to weigh "their photographs, appearances, magazine coverage",
+#: meaning what the model already knows about a public figure. A blunt ban on
+#: the WORD would fire on that legitimate instruction, which is the same trap
+#: `_AGE_ARITHMETIC` above is shaped to avoid. So the ban is on TRANSPORT: on
+#: this project fetching, attaching or encoding a picture and putting it in
+#: front of a model.
+_RUBRIC_PROSE = ("rubrics/person/PERSON.md", "rubrics/pairing/PAIRING.md")
+
+_IMAGE_TRANSPORT = re.compile(
+    r"data:image/|base64|image_url|\bimage_b64\b|\battach(ment)?s?\b|"
+    r"\b(fetch|download|upload|encode|embed)\w*[ _-]*(the[ _-]*)?"
+    r"(image|photo|picture|headshot|portrait)\b|"
+    r"\b(image|photo|picture|headshot|portrait)[ _-]*(url|uri|path|file|bytes|data)\b",
+    re.I,
 )
 
 #: An age term doing arithmetic. Deliberately about ARITHMETIC, not about the
@@ -83,3 +113,38 @@ def test_no_image_is_fetched_or_sent_to_a_judge():
         src = (REPO / rel).read_text().lower()
         for token in ("image", "photo", "jpg", "png", "base64", "vision"):
             assert token not in src, f"{rel} mentions {token}"
+
+
+
+def test_the_current_person_scorer_is_also_image_free():
+    """The live path, not just the superseded one.
+
+    `_SCORING_PATH` predates plan v4. Every person-year in
+    `data/roster100/run/person_gradings.json` was produced by
+    `score_person_periods.py`, which none of the checks above ever opened.
+    """
+    for rel in _PERSON_SCORING_PATH:
+        src = (REPO / rel).read_text().lower()
+        for token in ("image", "photo", "jpg", "png", "base64", "vision"):
+            assert token not in src, f"{rel} mentions {token}"
+
+
+def test_no_rubric_asks_for_a_picture_to_be_transported():
+    """The rubric may name photographs; it may not ask for one to be sent."""
+    for rel in _RUBRIC_PROSE:
+        hit = _IMAGE_TRANSPORT.search((REPO / rel).read_text())
+        assert hit is None, f"{rel} looks like it moves an image: {hit.group(0)!r}"
+
+
+def test_the_transport_ban_has_teeth():
+    """A regex that matches nothing would pass the test above forever."""
+    for bad in ("data:image/png;base64,AAAA",
+                "attach the headshot",
+                "image_url",
+                "download the photo first",
+                "portrait_bytes"):
+        assert _IMAGE_TRANSPORT.search(bad), f"transport ban missed {bad!r}"
+
+    for fine in ("their photographs, appearances, magazine coverage",
+                 "how they looked in one production"):
+        assert not _IMAGE_TRANSPORT.search(fine), f"transport ban fired on {fine!r}"
