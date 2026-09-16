@@ -282,8 +282,20 @@ def main() -> int:
             shown = {r["qid"] for r in rows}
             all_rows = build_board(recs, gender=gender, domain=dom, names=names,
                                    min_pairings=1)
-            out["boards"].append({"below_bar": len([r for r in all_rows
-                                                    if r["qid"] not in shown]),
+            below = [r for r in all_rows if r["qid"] not in shown]
+            # Two very different reasons to sit below the bar, and lumping them
+            # together misreads as a rule that excluded 83 people. Nearly half
+            # are there because SCORING has not reached their other romances
+            # yet, and they return on their own.
+            in_graph: dict[str, int] = {}
+            for r0 in recs:
+                q = r0["male_qid"] if gender == "male" else r0["female_qid"]
+                if q and r0.get("domain") == dom:
+                    in_graph[q] = in_graph.get(q, 0) + 1
+            pending = sum(1 for r in below
+                          if in_graph.get(r["qid"], 0) >= args.min_pairings)
+            out["boards"].append({"below_bar": len(below),
+                                  "below_bar_pending": pending,
                                   "gender": gender, "domain": dom, "label": f"{gl} — {dl}",
                                   "r2": volume_confound(rows), "rows": rows})
             print(f"  {gl} — {dl}: {len(rows)} ranked")

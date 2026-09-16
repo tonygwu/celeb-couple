@@ -241,7 +241,9 @@ function render(){
   h+=`</tbody></table></div>`;
   if(b.below_bar) h+=`<p class="tienote">${b.below_bar}
      ${b.below_bar===1?"person has":"people have"} fewer than ${DATA.meta.min_pairings}
-     scored romances and are not ranked. They still appear as partners on the rows above.</p>`;
+     scored romances and are not ranked yet${b.below_bar_pending?`, ${b.below_bar_pending}
+     of them only because scoring has not reached their other romances`:""}.
+     They still appear as partners on the rows above.</p>`;
   if(tied) h+=`<p class="tienote">${tied} adjacent ${tied===1?"pair is":"pairs are"} closer than the
      ${DATA.meta.floor.toFixed(2)} floor. Bracketed rows are not separable \u2014 read them as tied.</p>`;
   document.getElementById("board").innerHTML=h;
