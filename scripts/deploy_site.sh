@@ -75,23 +75,62 @@ RC=$?
 
 # --- 4. Prove the LIVE page is the board -------------------------------------
 # A 200 proves a Worker answered, not that it answered with this board. Assert
-# on the content. The first deploy of a new custom domain needs a certificate,
-# so allow a few minutes of TLS failures before calling it broken.
+# on the content.
+#
+# The address is resolved through a PUBLIC resolver and handed to curl with
+# --resolve, rather than left to the system resolver. That is not tidiness. The
+# first deploy of this site was verified on a machine whose resolver had cached
+# the NXDOMAIN from before the hostname existed, so curl could not resolve a
+# name that 1.1.1.1 and 8.8.8.8 were both already answering, and the script
+# reported the live site broken when it was serving correctly. A stale negative
+# cache is local to one machine; what a public resolver returns is what a
+# visitor gets, and that is the thing worth checking.
+HOSTNAME_ONLY=$(printf '%s' "$SITE_URL" | sed -e 's|^https://||' -e 's|/.*$||')
 echo "verifying ${SITE_URL}"
-LIVE=""
+
+# The response goes to a FILE and is grepped there, never piped into grep.
+# `printf '%s' "$body" | grep -q PATTERN` looks equivalent and is not: grep -q
+# exits the moment it matches, printf gets SIGPIPE, and under `set -o pipefail`
+# the pipeline reports 141. That reads as "the live page is wrong" on exactly
+# the runs where the page is right. It failed this script once, on a
+# byte-identical page.
+LIVE_FILE=$(mktemp -t celeb-deploy-live)
+trap 'rm -f "$LIVE_FILE"' EXIT
+GOT=0
 for attempt in $(seq 1 40); do
-  LIVE=$(curl -fsS --max-time 30 "$SITE_URL" 2>/dev/null) && break
-  echo "  attempt ${attempt}: not serving yet (new hostnames need a certificate); waiting 15s"
+  # Re-resolve every attempt: on a brand-new hostname the record itself is
+  # what has not appeared yet.
+  IP=$(dig +short @1.1.1.1 "$HOSTNAME_ONLY" A 2>/dev/null | grep -E '^[0-9.]+$' | head -1)
+  if [ -z "$IP" ]; then
+    echo "  attempt ${attempt}: ${HOSTNAME_ONLY} does not resolve publicly yet; waiting 15s"
+    sleep 15; continue
+  fi
+
+  if curl -fsS --max-time 30 --resolve "${HOSTNAME_ONLY}:443:${IP}" \
+          -o "$LIVE_FILE" "$SITE_URL" 2>/dev/null; then
+    GOT=1; break
+  fi
+  # Resolves but will not serve: on a new custom domain this is the certificate
+  # being issued, which takes a few minutes.
+  echo "  attempt ${attempt}: resolves to ${IP} but not serving yet (a new hostname needs a certificate); waiting 15s"
   sleep 15
 done
 
-[ -n "$LIVE" ] || die "deployed, but ${SITE_URL} never served a response. Check the Cloudflare dashboard."
+[ "$GOT" -eq 1 ] || die "deployed, but ${SITE_URL} never served a response. Check the Cloudflare dashboard."
 
-printf '%s' "$LIVE" | grep -q "<title>${TITLE}</title>" \
+grep -q "<title>${TITLE}</title>" "$LIVE_FILE" \
   || die "${SITE_URL} served something that is not this board (no matching <title>)"
-printf '%s' "$LIVE" | grep -q 'const DATA' \
+grep -q 'const DATA' "$LIVE_FILE" \
   || die "${SITE_URL} served the page WITHOUT its DATA blob"
 
-LIVE_BYTES=$(printf '%s' "$LIVE" | wc -c | tr -d ' ')
-echo "live     ${SITE_URL} -> ${LIVE_BYTES} bytes, title and DATA blob present"
+# The strongest check available: the bytes on the wire against the bytes that
+# were rendered. A match means the published page IS the reviewed page, not
+# merely a page with the same title.
+LIVE_BYTES=$(wc -c < "$LIVE_FILE" | tr -d ' ')
+if [ "$(shasum -a256 < "$LIVE_FILE" | cut -d' ' -f1)" = "$(shasum -a256 < "$HTML" | cut -d' ' -f1)" ]; then
+  echo "live     ${SITE_URL} -> ${LIVE_BYTES} bytes, byte-identical to the rendered board"
+else
+  echo "live     ${SITE_URL} -> ${LIVE_BYTES} bytes, title and DATA blob present"
+  echo "         NOTE: bytes differ from ${HTML}. An edge cache may still hold the previous version."
+fi
 echo "published $(date -u +%Y-%m-%dT%H:%M:%SZ)"
