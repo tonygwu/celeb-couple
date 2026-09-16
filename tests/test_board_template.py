@@ -39,10 +39,10 @@ def test_the_graph_flag_is_repeatable_so_real_life_boards_can_fill():
 def test_the_refresh_passes_both_graphs():
     src = (REPO / "scripts/refresh_boards.sh").read_text()
     assert "--graph data/imdb/imdb_pairings.json" in src
-    # real_life ONLY: that graph's on-screen half is raw co-starring with no
-    # romance check. See tests/test_graph_domains.py.
-    assert "pairing_scores.json#real_life" in src, (
-        "without the relationship graph the two real-life boards render empty")
+    # Real life comes from relationship RECORDS, not from co-starring. See
+    # tests/test_graph_domains.py.
+    assert "reallife_pairings.json" in src, (
+        "without a real-life graph the two real-life boards render empty")
 
 
 def test_normalized_is_the_default_view():

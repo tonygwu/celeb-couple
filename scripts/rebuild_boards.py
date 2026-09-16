@@ -107,10 +107,15 @@ def main() -> int:
                          "co-starring with no romance check, so take only "
                          "real_life from it.")
     ap.add_argument("--min-pairings", type=int, default=3,
-                    help="a person needs this many scored romances to appear. "
+                    help="scored romances needed to appear on an ON-SCREEN board. "
                          "DISPLAY ONLY: the pairings stay in the data, and a "
                          "person below the bar is still a partner on someone "
                          "else's row.")
+    ap.add_argument("--min-pairings-real-life", type=int, default=2,
+                    help="the same bar for the REAL-LIFE boards, lower on "
+                         "purpose: an actor makes far more films than they have "
+                         "relationships, so the same number is a much harsher "
+                         "test there.")
     ap.add_argument("--min-year", type=int, default=1980,
                     help="scope floor, applied AFTER the merge so it covers every "
                          "source. Reported, never silent.")
@@ -238,6 +243,7 @@ def main() -> int:
                     "rubric": PERSON_RUBRIC_VERSION,
                     "min_year": args.min_year,
                     "min_pairings": args.min_pairings,
+                    "min_pairings_real_life": args.min_pairings_real_life,
                     "norm_method": ("z-score within sex over CANONICAL scores, film-blind"
                                     if not args.per_family else
                                     "z-score within (judge family, sex), film-blind")},
@@ -245,9 +251,11 @@ def main() -> int:
     for gender, gl in (("male","Men"), ("female","Women")):
         for dom, dl in (("on_screen","On screen"), ("real_life","Real life")):
             male = gender == "male"
-            rows = build_board(recs, gender=gender, domain=dom, names=names, min_pairings=args.min_pairings)
+            bar = (args.min_pairings_real_life if dom == "real_life"
+                   else args.min_pairings)
+            rows = build_board(recs, gender=gender, domain=dom, names=names, min_pairings=bar)
             nrows = {r["qid"]: r for r in
-                     build_board(nrecs, gender=gender, domain=dom, names=names, min_pairings=args.min_pairings)}
+                     build_board(nrecs, gender=gender, domain=dom, names=names, min_pairings=bar)}
             by = {r["pairing_id"]: r for r in recs}
             for row in rows:
                 n = nrows.get(row["qid"])
@@ -304,10 +312,9 @@ def main() -> int:
                 q = r0["male_qid"] if gender == "male" else r0["female_qid"]
                 if q and r0.get("domain") == dom:
                     in_graph[q] = in_graph.get(q, 0) + 1
-            pending = sum(1 for r in below
-                          if in_graph.get(r["qid"], 0) >= args.min_pairings)
+            pending = sum(1 for r in below if in_graph.get(r["qid"], 0) >= bar)
             out["boards"].append({"below_bar": len(below),
-                                  "below_bar_pending": pending,
+                                  "below_bar_pending": pending, "bar": bar,
                                   "gender": gender, "domain": dom, "label": f"{gl} — {dl}",
                                   "r2": volume_confound(rows), "rows": rows})
             print(f"  {gl} — {dl}: {len(rows)} ranked")

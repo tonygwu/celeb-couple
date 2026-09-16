@@ -154,6 +154,9 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   # are not in the repo.
   [ -f data/imdb/couples_cache.json ] && [ -f data/imdb/person_bridge.json ] \
     && run scripts/build_imdb_pairings.py
+  # Every scorable episode becomes a real-life pairing. NOT select_m1_slice,
+  # which narrows to 10 focal actors and is why the real-life boards showed 4.
+  [ -f data/roster100/records/episodes.json ] && run scripts/build_reallife_pairings.py
   # Averages every grading of a person-year into one canonical score, so a
   # tuple graded by fable, astra and opus becomes one number with an n and
   # a spread. BEFORE derive_pairings.py, which subtracts those scores.

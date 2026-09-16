@@ -28,17 +28,21 @@ def test_the_graph_flag_supports_a_domain_suffix():
     assert 'rel, _, only = spec.partition("#")' in BUILDER
 
 
-def test_the_refresh_takes_only_real_life_from_the_unchecked_graph():
-    assert "pairing_scores.json#real_life" in REFRESH, (
-        "taking that graph whole puts un-romance-checked co-star pairs on the "
-        "board -- Idris Elba and Scarlett Johansson in The Jungle Book")
-
-
-def test_the_refresh_does_not_take_that_graph_whole():
+def test_the_unchecked_graph_is_never_passed_unfiltered():
+    """pairing_scores.json's on-screen half is raw co-starring. It may be used
+    ONLY with a #domain filter, or not at all. Real life now comes from
+    build_reallife_pairings.py, which reads relationship records rather than
+    co-starring, so the graph is not used here any more -- but the rule has to
+    survive someone adding it back."""
     for line in REFRESH.splitlines():
         s = line.strip()
-        if s.startswith("--graph") and "pairing_scores.json" in s:
-            assert "#real_life" in s, f"unfiltered: {s}"
+        if "pairing_scores.json" in s and s.startswith("--graph"):
+            assert "#" in s, f"unfiltered co-starring graph on the board: {s}"
+
+
+def test_real_life_comes_from_relationship_records():
+    assert "build_reallife_pairings.py" in REFRESH
+    assert "--graph data/roster100/run/reallife_pairings.json" in REFRESH
 
 
 def test_the_reason_is_recorded_where_someone_would_change_it():

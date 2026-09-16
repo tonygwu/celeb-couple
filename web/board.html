@@ -240,7 +240,7 @@ function render(){
   });
   h+=`</tbody></table></div>`;
   if(b.below_bar) h+=`<p class="tienote">${b.below_bar}
-     ${b.below_bar===1?"person has":"people have"} fewer than ${DATA.meta.min_pairings}
+     ${b.below_bar===1?"person has":"people have"} fewer than ${b.bar}
      scored romances and are not ranked yet${b.below_bar_pending?`, ${b.below_bar_pending}
      of them only because scoring has not reached their other romances`:""}.
      They still appear as partners on the rows above.</p>`;
@@ -274,7 +274,8 @@ if(M.person_years){
   document.getElementById("scope").innerHTML = M.min_year
     ? `Two rules decide who appears, and nobody is left out by hand. Only films from
        <b>${M.min_year}</b> on are graded, and a person needs at least
-       <b>${M.min_pairings} scored romances</b> to be ranked. Everyone else is still in
+       <b>${M.min_pairings} scored romances</b> to be ranked on an on-screen board, or
+       <b>${M.min_pairings_real_life}</b> in real life. Everyone else is still in
        the data, and still appears as a partner on the rows above.` : "";
   document.getElementById("cover").innerHTML =
     `A dated published ranking exists for <b>${pct}%</b> of the

@@ -222,6 +222,7 @@ running anything in the first group.
 | `scripts/resolve_imdb_people.py` | bridges IMDb `nconst` to Wikidata `QID` via P345, so a person found through IMDb can be scored against evidence the project already holds. Joins on the id, NEVER on a name | no |
 | `scripts/build_imdb_pairings.py` | joins couples + the P345 bridge + film years into pairings the boards read. Counts every drop by reason; sex comes from Wikidata P21, never from IMDb's actor/actress credit | no |
 | `bash scripts/refresh_boards.sh` | the whole free chain over whatever has landed: bridge (only if new people appeared) → pairings → canonical gradings → HTML. Safe to run WHILE the paid runs are still writing | no |
+| `scripts/build_reallife_pairings.py` | EVERY scorable episode becomes a real-life pairing. Not `select_m1_slice.py`, which narrows to 10 focal actors and is why the real-life boards showed 4 people when the episodes file held 228 relationships | no |
 | `scripts/scaling_report.py` | pilot vs full roster; does coverage scale | no |
 | `scripts/source_requirement.py` | how deep a source would have to be | no |
 | `scripts/reachable_products.py` | what can be built with the evidence that exists | no |
@@ -321,6 +322,18 @@ and averaging those in as 0.0 would drag every one to the bottom of the board.
 is what those runs pinned. The time is NOT recoverable and is NOT back-filled
 from file mtime, which records when a file was touched rather than when a
 judgment was made. `tests/test_grading_provenance.py` forbids that back-fill.
+
+**The real-life bar is 2, not 3.** An actor makes far more films than they have
+relationships, so the same number is a much harsher test there.
+`--min-pairings-real-life`.
+
+**Real life does NOT come from `pairing_scores.json`.** That graph's on-screen
+half is raw co-starring from `fetch_onscreen_candidates.py` with no romance
+check, and merging it whole put Idris Elba on the board as Scarlett Johansson's
+partner in Avengers: Age of Ultron and The Jungle Book. 21 of its 75 on-screen
+pairs were never checked at all, including a Banksy documentary and a film
+dated 2028. Real life now comes from `build_reallife_pairings.py`, which reads
+relationship RECORDS.
 
 ### Two rules decide who appears (2026-09-16)
 

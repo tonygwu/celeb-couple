@@ -48,6 +48,7 @@ else
 fi
 
 run "pairings " $PY scripts/build_imdb_pairings.py
+run "real-life" $PY scripts/build_reallife_pairings.py
 run "gradings " $PY scripts/build_person_gradings.py
 # The IMDb graph is on-screen ONLY, and the relationship graph supplies real
 # life. Take ONLY real_life from the latter: its on-screen half is raw
@@ -58,7 +59,7 @@ run "gradings " $PY scripts/build_person_gradings.py
 # Avengers: Age of Ultron and The Jungle Book.
 run "boards   " $PY scripts/rebuild_boards.py \
       --graph data/imdb/imdb_pairings.json \
-      --graph 'data/roster100/run/pairing_scores.json#real_life' \
+      --graph data/roster100/run/reallife_pairings.json \
       --cache data/imdb/person_period_cache_opus.json \
       --cache data/roster100/run/person_period_cache.json \
       --cache data/roster100/run/person_period_cache_astra.json \
