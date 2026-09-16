@@ -35,12 +35,33 @@ def _schema() -> dict:
     return json.loads(SCHEMA_PATH.read_text())
 
 
+def _raw_dirs_under(root: Path) -> list[Path]:
+    """The raw-verdict directories that actually exist under `root`.
+
+    Kept as a function of an arbitrary root so the two cases below can be told
+    apart in a test rather than only in production.
+    """
+    return [root / d for d in _RAW_DIRS if (root / d).is_dir()]
+
+
+def _require_corpus() -> None:
+    """Skip where the corpus CANNOT be present; never where it is merely empty.
+
+    `data/` is gitignored, so a fresh clone and CI carry none of it. Failing
+    there says nothing about the schema and turns the first public CI run red.
+    A checkout that HAS a raw-verdict directory and no valid verdicts in it is
+    a real defect, and still fails: the non-vacuity guard below keeps its teeth
+    exactly where there is something to guard.
+    """
+    if not _raw_dirs_under(REPO):
+        pytest.skip(
+            "data/ is gitignored and no raw-verdict directory exists here; "
+            "run scripts/score_evidenced.py to produce one")
+
+
 def _verdicts() -> list[tuple[str, dict]]:
     out = []
-    for d in _RAW_DIRS:
-        root = REPO / d
-        if not root.is_dir():
-            continue
+    for root in _raw_dirs_under(REPO):
         for f in sorted(root.rglob("*.txt")):
             try:
                 obj = json.loads(f.read_text())
@@ -52,12 +73,14 @@ def _verdicts() -> list[tuple[str, dict]]:
 
 
 def test_there_are_verdicts_to_validate():
+    _require_corpus()
     # Without this, an empty glob would make every assertion below vacuous --
     # the defect this repo has already paid for once.
     assert len(_verdicts()) >= 40, "raw verdicts missing; the check below proves nothing"
 
 
 def test_every_stored_verdict_validates():
+    _require_corpus()
     v = jsonschema.Draft7Validator(_schema())
     failures = []
     for name, obj in _verdicts():
@@ -73,6 +96,7 @@ def test_the_pre_fix_schema_would_have_rejected_all_of_them():
     been reverted -- which the test above would not necessarily catch, because
     a corpus of only-unscored records would pass both schemas.
     """
+    _require_corpus()
     old = copy.deepcopy(_schema())
     for f in ("missingness_reason", "band"):
         old["properties"][f]["enum"] = [e for e in old["properties"][f]["enum"] if e is not None]
@@ -95,3 +119,17 @@ def test_null_is_in_the_enum_wherever_the_type_allows_it():
         f"declared nullable but null is absent from the enum: {bad}. "
         "JSON Schema keywords are conjunctive, so these fields can never be null."
     )
+
+
+def test_an_absent_corpus_and_an_empty_one_are_not_the_same_thing(tmp_path):
+    """The skip above must not become a blanket excuse.
+
+    A checkout with no raw-verdict directory has nothing to validate. A
+    checkout that has the directory and nothing in it is the vacuous-pass
+    defect this file exists to prevent, and must still reach the assertions.
+    """
+    assert _raw_dirs_under(tmp_path) == []
+
+    present = tmp_path / _RAW_DIRS[0]
+    present.mkdir(parents=True)
+    assert _raw_dirs_under(tmp_path) == [present]
