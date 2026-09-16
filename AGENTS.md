@@ -488,11 +488,27 @@ Quota rules for the ones that spend:
     So the guard honours a policy rather than dodging an outage, which is the
     stronger reason to keep it. A failed run is loud; quietly eating the
     operator's interactive quota is not.
-  - **Do not read `used_fraction` as the vendor number while a reserve is set.**
-    `status --json` reports `used_fraction: 1.0` for that 7d window although the
-    vendor says 13% remains, because the reserve overwrites the vendor value.
-    Read the account's `manual_reserve` block instead, or `status --explain`.
-    Confirmed by the router's maintainer as a known display defect in v0.1.4.
+  - **`used_fraction` is the vendor reading, and `held_fraction` is the hold**
+    (quotapick v0.1.5 and later). They net to the whole window. Measured
+    2026-09-15 on the codex 7d window: `used_fraction 0.89`, `held_fraction
+    0.11`, summing to 1.0, with `manual_reserve.spendable 0.0`.
+
+    **This reverses the advice that stood between v0.1.4 and v0.1.5**, which
+    this file carried and which said to ignore `used_fraction` and read the
+    `manual_reserve` block instead. Under v0.1.4 the reserve OVERWROTE the
+    vendor value, so the same window read `used_fraction: 1.0` while the vendor
+    still had 13% left, and a held account was indistinguishable from an
+    exhausted one. `manual_reserve` still works and is still the place the
+    reserve arithmetic is spelled out. It is no longer a workaround.
+
+    Nothing in this repo reads either field, so nothing needed changing. The
+    note is here because the next person to debug a 0%-spendable Codex account
+    will read `used_fraction` and needs to know which version's semantics they
+    are looking at.
+
+    There is **no `remaining_fraction` field**, in `status --json` or in
+    `pick --json`, although the v0.1.5 announcement named one. The netted value
+    is `account.min_remaining`, and `manual_reserve.spendable` beside it.
   - **The candidate list is derived, never written down.** The ids come from
     `quotapick status --json` filtered on `provider == "codex"`. Do not replace
     that with `--only codex,codex_b`; a third Codex account would be invisible
