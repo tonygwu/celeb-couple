@@ -68,3 +68,10 @@ yarn-error.log*
 # file cannot silently make them committable.
 .overnight/
 .hypothesis/
+
+# Design working files live OUTSIDE the repo, in ../design-private/.
+# They carry a Figma file key, which is a capability: anyone with it can open
+# the file if its sharing allows. Not a secret exactly, and not something to
+# hand to a public repository either.
+.app-ux-design/
+docs/design/
