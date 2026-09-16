@@ -53,3 +53,18 @@ yarn-error.log*
 # repo entirely; scripts/build_imdb_graph.py takes --dumps or CELEB_IMDB_DIR.
 *.tsv.gz
 *.tsv
+
+# --------------------------------------------------------------------------------------
+# Local agent + deploy state — carries machine and account detail, never commit
+# --------------------------------------------------------------------------------------
+# wrangler caches the Cloudflare account it authenticated as, including the
+# account id and the account NAME, which is the operator's email address.
+# Untracked is not the same as unignorable: this was one `git add` away from a
+# public repository.
+.wrangler/
+
+# Overnight-run bookkeeping and hypothesis's example database. Both already
+# carry a nested .gitignore; naming them here too means deleting that nested
+# file cannot silently make them committable.
+.overnight/
+.hypothesis/
