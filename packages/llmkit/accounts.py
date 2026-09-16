@@ -260,6 +260,10 @@ def router_pick_codex_home(*, timeout: float = ROUTER_TIMEOUT_S) -> tuple[str, s
     # normal verdict back. The first version of this comment concluded from
     # that the reading was a stale transcript estimate, and the router's
     # maintainer corrected it: the reading was live, confidence 1.0, age 0s.
+    # Codex quota is a live rate-limit read from the codex app-server, with
+    # session transcripts kept only as the FALLBACK when that read fails. Do
+    # not read the correction as "transcripts are gone" either; both halves of
+    # that sentence have now been got wrong once each.
     #
     # The account is held back ON PURPOSE. The operator sets a manual reserve
     # on `codex`, because the Codex DESKTOP app can only use ~/.codex and needs
