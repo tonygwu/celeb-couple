@@ -78,6 +78,10 @@ PRODUCERS = {
     "data/roster100/run/person_gradings.json": "scripts/build_person_gradings.py",
     "data/imdb/seed_graph.json": "scripts/build_imdb_graph.py --dumps <dir>",
     "data/imdb/couples_cache.json": "scripts/identify_couples.py  [spends quota]",
+    "data/imdb/person_bridge.json": "scripts/resolve_imdb_people.py",
+    "data/imdb/imdb_pairings.json": "scripts/build_imdb_pairings.py",
+    "data/imdb/person_period_cache_opus.json":
+        "scripts/score_person_periods.py --from-scores data/imdb/imdb_pairings.json  [spends quota]",
 }
 
 

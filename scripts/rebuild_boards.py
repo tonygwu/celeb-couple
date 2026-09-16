@@ -48,6 +48,27 @@ def volume_confound(rows: list[dict]) -> float | None:
     return (sxy * sxy) / (sxx * syy)
 
 
+CANON_FAMILY = "canonical"
+
+
+def population_from_gradings(canon: dict, sex_of: dict) -> dict:
+    """(CANON_FAMILY, sex, person, period) -> the canonical mean score.
+
+    One synthetic family, because a canonical score has no family: it is the
+    mean of every grading of that person-year, whichever model produced it.
+    Using the same key shape lets normalize_population z-score within sex with
+    no change to it.
+    """
+    pop = {}
+    for key, v in canon.items():
+        qid, period = key.split("|", 1)
+        sex = sex_of.get(qid)
+        if sex is None:
+            continue
+        pop[(CANON_FAMILY, sex, qid, str(period))] = Fraction(str(v["score"]))
+    return pop
+
+
 def caches(paths: list[str]) -> dict:
     out: dict = {}
     for p in paths:
@@ -77,6 +98,11 @@ def main() -> int:
     ap.add_argument("--cache", action="append", default=None)
     ap.add_argument("--graph", default="data/roster100/run/pairing_scores.json")
     ap.add_argument("--families", default="fable,astra")
+    ap.add_argument("--gradings", default="data/roster100/run/person_gradings.json",
+                    help="canonical scores from build_person_gradings.py")
+    ap.add_argument("--per-family", action="store_true",
+                    help="score each judge family separately, the pre-2026-09-16 "
+                         "behaviour. Default is the canonical mean of every grading.")
     ap.add_argument("--out", default=None, help="HTML destination")
     ap.add_argument("--template",
                     default="/private/tmp/claude-501/-Users-tonygwu-Code-misc-celebrity-couple/"
@@ -86,7 +112,6 @@ def main() -> int:
     cache = caches(args.cache or ["data/roster100/run/person_period_cache.json",
                                   "data/roster100/run/person_period_cache_astra.json"])
     graph = require(REPO, args.graph)
-    fams = [f.strip() for f in args.families.split(",") if f.strip()]
 
     # sex is not stored per cache entry; the pairing graph knows it
     sex_of = {}
@@ -96,7 +121,22 @@ def main() -> int:
     for e in cache.values():
         e["sex"] = sex_of.get(e["person_id"], "male")
 
-    pop = population_from_cache(cache)
+    if args.per_family:
+        pop = population_from_cache(cache)
+        fams = [f.strip() for f in args.families.split(",") if f.strip()]
+        spread_of = {}
+    else:
+        blob = require(REPO, args.gradings)
+        canon = blob["canonical"]
+        pop = population_from_gradings(canon, sex_of)
+        fams = [CANON_FAMILY]
+        # The per-tuple disagreement the mean hides. Shown on the board rather
+        # than dropped, because a row built on one grading and a row built on
+        # five are not equally certain.
+        spread_of = {(k.split("|", 1)[0], k.split("|", 1)[1]): v["spread"]
+                     for k, v in canon.items()}
+        print(f"canonical person-years {len(canon):,}  "
+              f"placed on the board population {len(pop):,}")
     norm = nz.normalize_population(pop)
     print(f"cache entries {len(cache)}  judged {len(pop)}  normalized {len(norm)}")
 
@@ -128,6 +168,10 @@ def main() -> int:
                      # binary: a romance counts fully, a non-romance not at all
                      "centrality": (1.0 if (p.get("centrality") or 0) > 0 else 0.0)
                                    if p.get("centrality") is not None else None,
+                     "spread": max(
+                         [s for s in (spread_of.get((p.get("male_qid"), per)),
+                                      spread_of.get((p.get("female_qid"), per)))
+                          if s is not None] or [None], default=None),
                      "abs": {k: st.mean(v) for k, v in absol.items()},
                      "nabs": {k: st.mean(v) for k, v in nabs.items()}})
 
@@ -145,7 +189,9 @@ def main() -> int:
                     "contract": (next(iter(cache.values()))["contract"]["contract_id"]
                                  if cache else "?"),
                     "rubric": PERSON_RUBRIC_VERSION,
-                    "norm_method": "z-score within (judge family, sex), film-blind"},
+                    "norm_method": ("z-score within sex over CANONICAL scores, film-blind"
+                                    if not args.per_family else
+                                    "z-score within (judge family, sex), film-blind")},
            "boards": []}
     for gender, gl in (("male","Men"), ("female","Women")):
         for dom, dl in (("on_screen","On screen"), ("real_life","Real life")):

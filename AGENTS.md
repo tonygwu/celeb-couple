@@ -220,6 +220,8 @@ running anything in the first group.
 | `scripts/build_imdb_graph.py` | seed filmographies + full billed cast from the local IMDb dumps. Needs `--dumps <dir>` or `CELEB_IMDB_DIR`; the ~2GB `.tsv.gz` files are NEVER committed. Person-first on purpose: billing order is unreliable for picking a couple and reliable for listing a person's films | no |
 | `scripts/build_person_gradings.py` | averages EVERY grading of a person-year into one canonical score, carrying `n`, `spread` and the models behind it. `--exclude-model claude-sonnet-5` drops one without re-grading anything | no |
 | `scripts/resolve_imdb_people.py` | bridges IMDb `nconst` to Wikidata `QID` via P345, so a person found through IMDb can be scored against evidence the project already holds. Joins on the id, NEVER on a name | no |
+| `scripts/build_imdb_pairings.py` | joins couples + the P345 bridge + film years into pairings the boards read. Counts every drop by reason; sex comes from Wikidata P21, never from IMDb's actor/actress credit | no |
+| `bash scripts/refresh_boards.sh` | the whole free chain over whatever has landed: bridge (only if new people appeared) → pairings → canonical gradings → HTML. Safe to run WHILE the paid runs are still writing | no |
 | `scripts/scaling_report.py` | pilot vs full roster; does coverage scale | no |
 | `scripts/source_requirement.py` | how deep a source would have to be | no |
 | `scripts/reachable_products.py` | what can be built with the evidence that exists | no |

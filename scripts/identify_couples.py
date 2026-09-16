@@ -29,6 +29,7 @@ sys.path.insert(0, str(REPO))
 
 from packages.llmkit.accounts import resolve_account                   # noqa: E402
 from packages.llmkit.artifacts import require                          # noqa: E402
+from packages.llmkit.atomic import write_json_atomic                    # noqa: E402
 from packages.llmkit.contract import COUPLES_RUBRIC_VERSION, load_contract  # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, JudgeError             # noqa: E402
 from modules.pairing.couples import (                                  # noqa: E402
@@ -110,7 +111,7 @@ def main() -> int:
         }
         # Write after EVERY call. A run that dies at 200 of 300 keeps its 200.
         cache_path.parent.mkdir(parents=True, exist_ok=True)
-        cache_path.write_text(json.dumps(cache, indent=1))
+        write_json_atomic(cache_path, cache, indent=1)
         succeeded += 1
         print(f"  [{i}/{len(todo)}] {f['title'][:34]:<35} "
               f"{len(keep)} board, {len(drop)} incidental", flush=True)

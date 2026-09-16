@@ -43,6 +43,7 @@ sys.path.insert(0, str(REPO))
 from packages.llmkit.accounts import (resolve_account,                    # noqa: E402
                                       resolve_codex_home)
 from packages.llmkit.artifacts import require                             # noqa: E402
+from packages.llmkit.atomic import write_json_atomic                       # noqa: E402
 from packages.llmkit.budget import Budget, BudgetExhausted                # noqa: E402
 from packages.llmkit.contract import PERSON_RUBRIC_VERSION, load_contract  # noqa: E402
 from packages.llmkit.judges import ClaudeJudge, CodexJudge, JudgeError    # noqa: E402
@@ -234,7 +235,7 @@ def main() -> int:
         # Written EVERY time, not at the end. A run the machine sleeps through
         # keeps every tuple it paid for; AGENTS.md records why that matters.
         cache_path.parent.mkdir(parents=True, exist_ok=True)
-        cache_path.write_text(json.dumps(cache, indent=2, sort_keys=True))
+        write_json_atomic(cache_path, cache, indent=2, sort_keys=True)
         mark = "ev" if v.evidence_used else "  "
         print(f"  [{i}/{len(backlog)}] {name[:24]:<24} {per} {j:<6} {mark} "
               f"-> {v.score if v.judged else 'UNJUDGED'}", flush=True)

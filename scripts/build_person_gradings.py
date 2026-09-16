@@ -28,7 +28,12 @@ from modules.pairing.canonical import (                                # noqa: E
 )
 
 DEFAULT_CACHES = ("data/roster100/run/person_period_cache.json",
-                  "data/roster100/run/person_period_cache_astra.json")
+                  "data/roster100/run/person_period_cache_astra.json",
+                  # the IMDb corpus, graded by Opus. A separate FILE, not a
+                  # separate population: keys are (family, qid, period), so a
+                  # person in both corpora gets one canonical score from all
+                  # of their gradings.
+                  "data/imdb/person_period_cache_opus.json")
 DEFAULT_EXTRA = ("data/roster100/run/extra_gradings.json",)
 
 
