@@ -1,5 +1,5 @@
 {
- "version": "seed-roster-2026-09-16",
+ "version": "seed-roster-2026-09-16b",
  "selected_on": "2026-09-15",
  "selection_basis": "Performers who headlined romantic leads AND were themselves the subject of published appearance rankings, balanced by sex, spanning the 1980s to the 2020s. Chosen on that basis BEFORE any check of how easy each is to score, and before any pairing graph existed. This is a SEED, not the final cohort: scripts/identify_couples.py surfaces partners who are not on it, and those are added in later rounds.",
  "known_limits": [
@@ -7,46 +7,44 @@
   "Nobody here was chosen because they would rank well. Tuning the cohort to produce a result is forbidden; see docs/SOURCE-HUNT.md."
  ],
  "men": [
-  "Brad Pitt",
-  "George Clooney",
-  "Leonardo DiCaprio",
-  "Johnny Depp",
-  "Tom Cruise",
-  "Denzel Washington",
-  "Ryan Gosling",
-  "Chris Hemsworth",
-  "Idris Elba",
-  "Richard Gere",
   "Ben Affleck",
+  "Brad Pitt",
+  "Chris Hemsworth",
+  "Denzel Washington",
+  "George Clooney",
+  "Hugh Grant",
+  "Idris Elba",
+  "Johnny Depp",
+  "Leonardo DiCaprio",
   "Matthew McConaughey",
-  "Hugh Grant"
+  "Paul Newman",
+  "Richard Gere",
+  "Robert Redford",
+  "Ryan Gosling",
+  "Tom Cruise"
  ],
  "women": [
+  "Ana de Armas",
   "Angelina Jolie",
-  "Julia Roberts",
-  "Nicole Kidman",
+  "Audrey Hepburn",
   "Charlize Theron",
   "Halle Berry",
-  "Scarlett Johansson",
   "Jennifer Aniston",
-  "Michelle Pfeiffer",
   "Julia Ormond",
-  "Monica Bellucci",
+  "Julia Roberts",
   "Margot Robbie",
-  "Zendaya",
-  "Ana de Armas"
+  "Michelle Pfeiffer",
+  "Monica Bellucci",
+  "Nicole Kidman",
+  "Scarlett Johansson",
+  "Sophia Loren",
+  "Zendaya"
  ],
  "scope": "Films from 1980 onward. Stated as SCOPE, not hidden: the board covers the modern era and says so on the page.",
- "removed_2026_09_16": {
-  "who": [
-   "Audrey Hepburn",
-   "Paul Newman",
-   "Robert Redford",
-   "Sophia Loren"
-  ],
-  "why": "Their careers are mostly before the scope floor. Hepburn has no film after 1989 at all, and her 1961 point sat 22 years before the next one, stretching every chart. Removing these four is what fixed the axis: with them gone the corpus runs continuously from 1977, with no gap.",
-  "cost": "This is a roster change made partly for presentation, which docs/SOURCE-HUNT.md warns against. It is acceptable ONLY because it is a stated scope rather than a silent exclusion. Do not extend this reasoning to drop anyone whose SCORE is inconvenient.",
-  "floor_note": "The floor was first set to 1990 and that was WRONG. It cut 101 pairings, and the loss was not spread evenly: Michelle Pfeiffer lost 33% of her romances, Richard Gere 27% and Tom Cruise 25%, while 17 of the 26 seeds lost nothing. It took Dangerous Liaisons, Scarface, Top Gun and An Officer and a Gentleman -- the prime years of the three oldest remaining seeds. That is the same distortion the four removals were meant to avoid. 1980 costs 8 pairings instead of 101.",
-  "what_removal_means": "They are off the SEED roster, so build_imdb_graph.py no longer pulls their whole filmography. They are NOT banned. Where one of them co-starred in a film that entered through a remaining seed, the pairing counts like any other non-seed partner. Measured 2026-09-16: Robert Redford keeps 2 pairings (Up Close & Personal with Michelle Pfeiffer, The Horse Whisperer), Paul Newman 1, Sophia Loren 1, and Audrey Hepburn 0 -- she disappears only because every one of her films is pre-1980 and the floor removes them."
+ "rules": {
+  "min_year": 1980,
+  "min_pairings": 3,
+  "statement": "TWO RULES DECIDE WHO APPEARS, and nobody is removed by hand. (1) Only films from 1980 on are graded. (2) A person needs at least 3 scored romances to be ranked. Everyone else stays in the data and still appears as a partner on other people's rows.",
+  "why_no_hand_removals": "An earlier version removed Audrey Hepburn, Sophia Loren, Paul Newman and Robert Redford by name, because their careers are mostly pre-1980. That worked but it was roster selection for presentation, which docs/SOURCE-HUNT.md warns against: the roster was chosen on prominence BEFORE anything was scored, deliberately. The two rules above reach a similar place without anyone choosing who. Measured with the 1980 floor: Hepburn has 1 post-1980 romance and is not ranked; Loren has 3, Newman 9 and Redford 16, and they are ranked on their post-1980 work. That is the honest consequence of the rule and it is preferred to picking names."
  }
 }

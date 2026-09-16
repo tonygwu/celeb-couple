@@ -101,6 +101,11 @@ def main() -> int:
                     help="repeatable. The IMDb graph is on-screen ONLY, so the "
                          "real-life boards stay empty unless the Wikidata "
                          "relationship graph is passed too.")
+    ap.add_argument("--min-pairings", type=int, default=3,
+                    help="a person needs this many scored romances to appear. "
+                         "DISPLAY ONLY: the pairings stay in the data, and a "
+                         "person below the bar is still a partner on someone "
+                         "else's row.")
     ap.add_argument("--min-year", type=int, default=1980,
                     help="scope floor, applied AFTER the merge so it covers every "
                          "source. Reported, never silent.")
@@ -220,6 +225,7 @@ def main() -> int:
                                  if cache else "?"),
                     "rubric": PERSON_RUBRIC_VERSION,
                     "min_year": args.min_year,
+                    "min_pairings": args.min_pairings,
                     "norm_method": ("z-score within sex over CANONICAL scores, film-blind"
                                     if not args.per_family else
                                     "z-score within (judge family, sex), film-blind")},
@@ -227,9 +233,9 @@ def main() -> int:
     for gender, gl in (("male","Men"), ("female","Women")):
         for dom, dl in (("on_screen","On screen"), ("real_life","Real life")):
             male = gender == "male"
-            rows = build_board(recs, gender=gender, domain=dom, names=names, min_pairings=2)
+            rows = build_board(recs, gender=gender, domain=dom, names=names, min_pairings=args.min_pairings)
             nrows = {r["qid"]: r for r in
-                     build_board(nrecs, gender=gender, domain=dom, names=names, min_pairings=2)}
+                     build_board(nrecs, gender=gender, domain=dom, names=names, min_pairings=args.min_pairings)}
             by = {r["pairing_id"]: r for r in recs}
             for row in rows:
                 n = nrows.get(row["qid"])
@@ -273,7 +279,12 @@ def main() -> int:
                      "n": (round(st.mean([b for _, b in vs if b is not None]), 3)
                            if any(b is not None for _, b in vs) else None)}
                     for y, vs in sorted(ser.items())]
-            out["boards"].append({"gender": gender, "domain": dom, "label": f"{gl} — {dl}",
+            shown = {r["qid"] for r in rows}
+            all_rows = build_board(recs, gender=gender, domain=dom, names=names,
+                                   min_pairings=1)
+            out["boards"].append({"below_bar": len([r for r in all_rows
+                                                    if r["qid"] not in shown]),
+                                  "gender": gender, "domain": dom, "label": f"{gl} — {dl}",
                                   "r2": volume_confound(rows), "rows": rows})
             print(f"  {gl} — {dl}: {len(rows)} ranked")
 

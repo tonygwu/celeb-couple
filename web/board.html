@@ -239,6 +239,9 @@ function render(){
     }
   });
   h+=`</tbody></table></div>`;
+  if(b.below_bar) h+=`<p class="tienote">${b.below_bar}
+     ${b.below_bar===1?"person has":"people have"} fewer than ${DATA.meta.min_pairings}
+     scored romances and are not ranked. They still appear as partners on the rows above.</p>`;
   if(tied) h+=`<p class="tienote">${tied} adjacent ${tied===1?"pair is":"pairs are"} closer than the
      ${DATA.meta.floor.toFixed(2)} floor. Bracketed rows are not separable \u2014 read them as tied.</p>`;
   document.getElementById("board").innerHTML=h;
@@ -267,12 +270,10 @@ document.getElementById("ct").textContent=M.contract+" / "+M.rubric;
 if(M.person_years){
   const pct=Math.round(M.with_evidence/M.person_years*100);
   document.getElementById("scope").innerHTML = M.min_year
-    ? `Films from <b>${M.min_year}</b> onward. Four performers whose careers are mostly
-       earlier &mdash; Audrey Hepburn, Sophia Loren, Paul Newman and Robert Redford &mdash;
-       are not among the people whose filmographies we follow, because scoring them only
-       from ${M.min_year} would rank them on how they looked in their sixties. They are
-       not excluded: where one of them appears opposite someone we do follow, the pairing
-       counts like any other.` : "";
+    ? `Two rules decide who appears, and nobody is left out by hand. Only films from
+       <b>${M.min_year}</b> on are graded, and a person needs at least
+       <b>${M.min_pairings} scored romances</b> to be ranked. Everyone else is still in
+       the data, and still appears as a partner on the rows above.` : "";
   document.getElementById("cover").innerHTML =
     `A dated published ranking exists for <b>${pct}%</b> of the
      ${M.person_years.toLocaleString()} person-years scored here. The rest rest on the

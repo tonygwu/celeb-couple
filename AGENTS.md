@@ -322,44 +322,36 @@ is what those runs pinned. The time is NOT recoverable and is NOT back-filled
 from file mtime, which records when a file was touched rather than when a
 judgment was made. `tests/test_grading_provenance.py` forbids that back-fill.
 
-### Scope: films from 1980 onward (2026-09-16)
+### Two rules decide who appears (2026-09-16)
 
-`docs/seed-roster.json` holds 26 people, not the original 30. **Audrey Hepburn,
-Sophia Loren, Paul Newman and Robert Redford were removed**, and every pairing
-before 1980 is dropped by a `--min-year` floor in both
-`build_imdb_pairings.py` and `rebuild_boards.py`.
+1. **Only films from 1980 on are graded.** `--min-year`, defaulted in BOTH
+   `build_imdb_pairings.py` and `rebuild_boards.py`. It lives in the pairings
+   stage as well as the board so `score_person_periods.py` never pays for a
+   person-year the board cannot show. The per-person trajectory obeys it too,
+   or a 1978 score stretches the shared x-axis to 1978.
+2. **A person needs 3 scored romances to be ranked.** `--min-pairings`.
+   **DISPLAY ONLY**: the pairings stay in the data and a person below the bar
+   is still a partner on someone else's row. Each board prints how many people
+   the bar hides, because a threshold nobody can see is the same problem as a
+   silent exclusion.
 
-**Why, measured.** The operator's first proposal was to drop anyone with no
-film after 1990. That removes Hepburn alone: Loren worked to 2020, Newman to
-2008, Redford to 2018. Their EARLY films stay, so the shared x-axis would have
-reached **1954** once scoring caught up. Applying only the year floor was worse
-in a different way: Redford would keep 10 pairings, Newman 2 and Loren 2, every
-one from their fifties onward, which ranks Paul Newman on how he looked at 65.
+**Nobody is removed by name.** An earlier version deleted Audrey Hepburn,
+Sophia Loren, Paul Newman and Robert Redford from the roster because their
+careers are mostly pre-1980. It worked, and it was roster selection for
+presentation, which `docs/SOURCE-HUNT.md` warns against: the roster was chosen
+on prominence BEFORE anything was scored, deliberately. The two rules reach a
+similar place without anyone choosing who. Measured under them: Hepburn has 1
+post-1980 romance and is not ranked, Loren 3, Newman 9, Redford 15.
 
-**The floor was first set to 1990, and that was WRONG.** It cut 101 pairings and
-the loss was not spread evenly: **Michelle Pfeiffer lost 33% of her romances,
-Richard Gere 27% and Tom Cruise 25%, while 17 of the 26 seeds lost nothing.**
-It took Dangerous Liaisons, Scarface, Top Gun, Rain Man and An Officer and a
-Gentleman -- the prime years of the three oldest remaining seeds. That is the
-SAME distortion the four removals were meant to avoid, in a smaller package.
+**Two floors were tried and rejected, and why is recorded so they are not
+tried again.** 1990 cut 101 pairings and the loss was concentrated: Michelle
+Pfeiffer lost 33% of her romances, Richard Gere 27%, Tom Cruise 25%, while 17
+of 26 seeds lost nothing. It took Dangerous Liaisons, Scarface, Top Gun and An
+Officer and a Gentleman. 1985 cut 39 with the same shape. **1980 cuts 8**, all
+three of Richard Gere's earliest films, and nobody else loses anything.
 
-Removing those four is what actually fixed the axis. With them gone the corpus
-runs **continuously from 1977** with no gap at all: 3, 2, 3, 3, 2, 8, 8, 5, 8,
-10, 13, 23 pairings per year through 1988. The 22-year void was Audrey Hepburn
-alone. At 1980 the floor costs **8 pairings** rather than 101, and every one of
-them is Richard Gere's first three films.
-
-**The cost, stated plainly.** `docs/SOURCE-HUNT.md` says *do not select the
-roster to fit the evidence* -- the roster was chosen on prominence BEFORE
-anything was scored, deliberately. This removal is partly for presentation, so
-it is acceptable ONLY as a stated scope. The page names all four and says the
-board covers 1990 onward. `tests/test_scope_floor.py` fails if that sentence
-disappears, if a removal loses its recorded reason, or if the two floors drift
-apart. **Do not extend this reasoning to drop anyone whose SCORE is
-inconvenient.**
-
-The floor lives in `build_imdb_pairings.py` as well as the board, so
-`score_person_periods.py` never pays for a person-year the board cannot show.
+The floor is not what fixed the axis. Removing the pre-1980 outliers did, and
+the rules now do it: the corpus runs continuously from 1980 with no gap.
 
 ## Plan v4: the pairing boards
 
