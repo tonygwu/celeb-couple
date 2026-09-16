@@ -18,6 +18,7 @@ sys.path.insert(0, str(REPO))
 from packages.llmkit.contract import (MENTIONS_RUBRIC_VERSION,  # noqa: E402
                                       PAIRING_RUBRIC_VERSION,
                                       PERSON_RUBRIC_VERSION,
+    COUPLES_RUBRIC_VERSION,
                                       ROMANCE_RUBRIC_VERSION,
                                       STANDING_RUBRIC_VERSION)
 
@@ -63,12 +64,14 @@ def test_no_script_types_a_rubric_version_literal():
 def test_the_constants_name_the_rubrics_that_exist():
     # A constant for a rubric directory that is gone would bump nothing.
     dirs = {d.name for d in (REPO / "rubrics").iterdir() if d.is_dir()}
-    assert dirs == {"standing", "mentions", "romance", "pairing", "person"}, dirs
+    assert dirs == {"standing", "mentions", "romance", "pairing", "person",
+                    "couples"}, dirs
     assert STANDING_RUBRIC_VERSION.startswith("standing-rubric-")
     assert MENTIONS_RUBRIC_VERSION.startswith("mentions-")
     assert ROMANCE_RUBRIC_VERSION.startswith("romance-")
     assert PAIRING_RUBRIC_VERSION.startswith("pairing-")
     assert PERSON_RUBRIC_VERSION.startswith("person-")
+    assert COUPLES_RUBRIC_VERSION.startswith("couples-")
 
 
 def test_the_bump_actually_happened():

@@ -22,7 +22,7 @@ __all__ = ["GradingContract", "load_contract", "MixedContractError",
            "current_contract_ids", "refuse_stale_contract",
            "STANDING_RUBRIC_VERSION", "MENTIONS_RUBRIC_VERSION",
            "ROMANCE_RUBRIC_VERSION", "PAIRING_RUBRIC_VERSION",
-           "PERSON_RUBRIC_VERSION"]
+           "PERSON_RUBRIC_VERSION", "COUPLES_RUBRIC_VERSION"]
 
 #: The rubric version strings, in ONE place.
 #:
@@ -42,6 +42,7 @@ MENTIONS_RUBRIC_VERSION = "mentions-1.1"
 ROMANCE_RUBRIC_VERSION = "romance-1.0"
 PAIRING_RUBRIC_VERSION = "pairing-1.0"
 PERSON_RUBRIC_VERSION = "person-1.0"
+COUPLES_RUBRIC_VERSION = "couples-1.0"
 
 
 class MixedContractError(RuntimeError):

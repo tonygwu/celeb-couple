@@ -48,6 +48,12 @@ def test_every_free_analysis_script_is_in_the_chain():
         "fetch_observations": "in the chain, under its free pass",
         "fetch_onscreen_candidates": "in the chain, under its free pass",
         "select_m1_slice": "plan v4; picked once before judging, not a recurring stage",
+        "build_imdb_graph": ("same reason as expand_roster: it builds an INPUT "
+                             "to the chain, not a stage of it. It also needs "
+                             "the ~2GB IMDb dumps, which are not in the repo "
+                             "and not ours to redistribute, so a free pass on "
+                             "a fresh clone would fail on a missing file "
+                             "rather than on anything wrong."),
         "expand_roster": ("builds a ROSTER, which is an input to the chain and "
                           "not a stage of it. Re-snowballing on every free pass "
                           "would move the cohort under the artifacts derived "

@@ -1,0 +1,16 @@
+{
+  "version": "seed-30-2026-09-15",
+  "selected_on": "2026-09-15",
+  "selection_basis": "Performers who headlined romantic leads AND were themselves the subject of published appearance rankings, balanced 15 men and 15 women, spanning the 1980s to the 2020s. Chosen on that basis BEFORE any check of how easy each is to score, and before any pairing graph existed. This is a SEED, not the final cohort: scripts/identify_couples.py surfaces partners who are not on it, and those are added in later rounds.",
+  "known_limits": [
+    "Anglophone and film-centric. Musicians and television-first performers enter only as discovered partners.",
+    "Nobody here was chosen because they would rank well. Tuning the cohort to produce a result is forbidden; see docs/SOURCE-HUNT.md."
+  ],
+  "men": ["Brad Pitt", "George Clooney", "Leonardo DiCaprio", "Johnny Depp", "Tom Cruise",
+          "Denzel Washington", "Ryan Gosling", "Chris Hemsworth", "Idris Elba", "Paul Newman",
+          "Robert Redford", "Richard Gere", "Ben Affleck", "Matthew McConaughey", "Hugh Grant"],
+  "women": ["Angelina Jolie", "Julia Roberts", "Nicole Kidman", "Charlize Theron", "Halle Berry",
+            "Scarlett Johansson", "Jennifer Aniston", "Michelle Pfeiffer", "Julia Ormond",
+            "Monica Bellucci", "Margot Robbie", "Zendaya", "Ana de Armas", "Sophia Loren",
+            "Audrey Hepburn"]
+}

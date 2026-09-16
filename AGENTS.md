@@ -217,6 +217,7 @@ running anything in the first group.
 | `scripts/resolve_roster.py` | turns a name list into a roster file with Wikidata ids | no |
 | `scripts/derive_pairings.py` | derives every pairing gap by SUBTRACTING two cached person-year scores, so an already-judged pair costs nothing; a pairing whose two people are not both cached is emitted with `gap: null` and a reason rather than dropped | no |
 | `scripts/expand_roster.py` | snowballs a roster over co-stars (P161) and real-life partners (P26/P451), bounded, recording what each round added and what each bound cut. `--roster docs/roster-100.json --out docs/roster-expanded.json` | no |
+| `scripts/build_imdb_graph.py` | seed filmographies + full billed cast from the local IMDb dumps. Needs `--dumps <dir>` or `CELEB_IMDB_DIR`; the ~2GB `.tsv.gz` files are NEVER committed. Person-first on purpose: billing order is unreliable for picking a couple and reliable for listing a person's films | no |
 | `scripts/scaling_report.py` | pilot vs full roster; does coverage scale | no |
 | `scripts/source_requirement.py` | how deep a source would have to be | no |
 | `scripts/reachable_products.py` | what can be built with the evidence that exists | no |
@@ -240,6 +241,7 @@ running anything in the first group.
 | `scripts/verify_observations.py` | re-checks every observation against the live Wikipedia page it came from; exits 1 if one stopped matching | no |
 | `scripts/verify_identities.py` | checks every roster Wikidata id is the person named, and is a human; exits 1 if not. `--roster docs/roster-100.json` for the roster scale | no |
 | `scripts/absence_audit.py` | for cohort members with no observations, whether any permitted source names them at all — separates a pipeline gap from a source gap | no |
+| `scripts/identify_couples.py` | which characters in each seed film are a couple, with a `central`/`substantial`/`incidental` weight. Cached per (film, family); `--backlog-only` spends nothing. Defaults to `claude-opus-5`, NOT Fable: this is factual recall and must not spend Fable's separate weekly allowance | **yes** |
 | `scripts/run_stress.py --out data/pilot/stress` | the eight measurement stress cases | **yes** |
 | `scripts/score_evidenced.py` | scores person-periods that have evidence | **yes** |
 | `scripts/classify_romance.py` | is a co-starring pair actually a romance in the film | **yes** |
@@ -255,6 +257,31 @@ file. Run-to-run variance is real — 2 of 3 identical dossiers moved by
 2.0 points — so both runs have to survive for it to be measurable.
 
 | `scripts/score_roster_joint.py` | scores only what the roster-scale joint pairings need | **yes** |
+
+### Why `identify_couples.py` does not use Fable
+
+It answers a factual question about a film, so it does not need the model the
+appearance scoring needs, and Fable has its own weekly allowance that is
+usually the scarcest thing on the account. Measured on the same ten films:
+
+| check | fable | sonnet | opus |
+|---|---|---|---|
+| recovers Minnie Driver, unbilled in Good Will Hunting | yes | yes | yes |
+| rejects Armageddon's father/daughter pair | yes | **no** | yes |
+| finds Cristin Milioti, unbilled in The Wolf of Wall Street | yes | **no** | yes |
+| finds Julia Roberts + Alec Baldwin in Notting Hill | yes | **no** | yes |
+| Just Go with It: pairs Brooklyn Decker correctly | yes | **no** | yes |
+| Notting Hill: who ends up with Honey | **no** | - | yes |
+
+Opus matched Fable everywhere and beat it once. Sonnet failed four of six, and
+two of those failures silently delete real board rows rather than erroring.
+
+**`weight` and `confidence` are different axes and both are required.** Alec
+Baldwin's Jeff King really is Anna Scott's boyfriend, so confidence is `high`,
+and he has one scene, so weight is `incidental`. A filter on confidence alone
+put that pair on the board as a Julia Roberts row. Board rows come from
+`central` and `substantial`; `incidental` is recorded and excluded so the
+exclusion stays countable. `tests/test_couples.py` pins this.
 
 ## Plan v4: the pairing boards
 

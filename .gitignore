@@ -48,3 +48,8 @@ yarn-error.log*
 # --------------------------------------------------------------------------------------
 /data/
 /site/
+
+# IMDb bulk dumps: ~2GB and not ours to redistribute. Keep them outside the
+# repo entirely; scripts/build_imdb_graph.py takes --dumps or CELEB_IMDB_DIR.
+*.tsv.gz
+*.tsv
