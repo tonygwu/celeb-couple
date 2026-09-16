@@ -23,6 +23,7 @@ from packages.llmkit.contract import PERSON_RUBRIC_VERSION  # noqa: E402
 from modules.pairing import normalize as nz                 # noqa: E402
 from modules.pairing.boards import build_board              # noqa: E402
 from modules.pairing.person import cache_key                # noqa: E402
+from modules.pairing import merge as mg                    # noqa: E402
 
 SEX = {"male": "male", "female": "female"}
 
@@ -113,21 +114,25 @@ def main() -> int:
     cache = caches(args.cache or ["data/roster100/run/person_period_cache.json",
                                   "data/roster100/run/person_period_cache_astra.json"])
     sources = args.graph or ["data/roster100/run/pairing_scores.json"]
-    graph, seen_pid = {"pairings": []}, set()
+    loaded = []
     for rel in sources:
         if not (REPO / rel).exists():
             print(f"  (no {rel}; skipping)")
             continue
-        got = require(REPO, rel)["pairings"]
-        kept = 0
-        for pr in got:
-            pid = pr.get("pairing_id")
-            if pid in seen_pid:
-                continue
-            seen_pid.add(pid)
-            graph["pairings"].append(pr)
-            kept += 1
-        print(f"  {rel}: {len(got):,} pairings, {kept:,} new")
+        loaded.append((rel, require(REPO, rel)["pairings"]))
+    # Semantic identity, NOT pairing_id: the IMDb graph names a film by tconst
+    # and the Wikidata graph names the same film by QID, so the two ids differ
+    # for one romance. See modules/pairing/merge.py.
+    merged, mstats = mg.merge_graphs(loaded)
+    graph = {"pairings": merged}
+    for rel, rows in loaded:
+        print(f"  {rel}: {len(rows):,} pairings, {mstats['by_source'][rel]:,} kept")
+    print(f"  merged {mstats['seen']:,} -> {len(merged):,}  "
+          f"(duplicates dropped {mstats['duplicates_dropped']:,}, "
+          f"unidentifiable kept {mstats['without_both_qids']:,})")
+    for ex in mstats["dropped_examples"][:3]:
+        print(f"    dup: {ex['who']} in {ex['work']!r} ({ex['period']}) "
+              f"kept from {ex['kept_from']}")
 
     # sex is not stored per cache entry; the pairing graph knows it
     sex_of = {}
@@ -261,6 +266,11 @@ def main() -> int:
     out["meta"]["year_min"] = years[0] if years else None
     out["meta"]["year_max"] = years[-1] if years else None
     out["meta"]["people_ranked"] = len({r["qid"] for b in out["boards"] for r in b["rows"]})
+    # Honesty on the page: most scores carry NO published evidence, and the
+    # page must not imply the rankings drive them.
+    canon_all = (require(REPO, args.gradings)["canonical"] if not args.per_family else {})
+    out["meta"]["person_years"] = len(canon_all)
+    out["meta"]["with_evidence"] = sum(1 for v in canon_all.values() if v["any_evidence"])
     out["meta"]["works"] = len({r["work"] for r in recs if r.get("work")})
 
     dest = Path(args.out).expanduser() if args.out else Path.home()/"Desktop"/"punching-above-weight.html"

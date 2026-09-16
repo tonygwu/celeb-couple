@@ -99,9 +99,11 @@ footer code{font-family:var(--mono);font-size:11.5px}
 <header>
   <p class="eyebrow" id="eyebrow"></p>
   <h1>Celebrities Punching Above Their Weight</h1>
-  <p class="sub">Which actors and actresses punch above their weight, and end up with partners
-    more attractive than themselves? Every romance, on screen and in real life, is scored by
-    whether they dated up or down. These are model judgments, not measurements.</p>
+  <p class="sub">Which celebrities end up with partners more attractive than themselves?
+    Every pairing is judged on whether they dated up or down, <b>on screen</b> and
+    <b>in real life</b>. Where a dated ranking exists &mdash; People&rsquo;s Sexiest Man Alive
+    and Most Beautiful, Esquire&rsquo;s Sexiest Woman Alive, Maxim&rsquo;s Hot 100 &mdash; the
+    judge is shown it. <span id="evnote"></span></p>
   <p class="lede" id="lede"></p>
 </header>
 
@@ -164,14 +166,21 @@ function ties(rows){
   g.push(cur); return g;
 }
 
-function lede(rows,b){
+function topOf(gender,domain){
+  const b=DATA.boards.find(x=>x.gender===gender&&x.domain===domain);
+  if(!b) return null;
+  const r=[...b.rows].filter(x=>AVG(x)!=null).sort((x,y)=>AVG(y)-AVG(x))[0];
+  return r?{r,b}:null;
+}
+/* Named from the data, so the claim cannot drift from the board below it. */
+function lede(){
   const el=document.getElementById("lede");
-  if(rows.length<2){el.textContent="";return;}
-  const t=rows[0], w=rows[rows.length-1];
-  el.innerHTML=`On <b>${esc(b.label)}</b>, <b>${esc(t.name)}</b> punches hardest above his or her weight:
-    across ${t.pairings} ${t.pairings===1?"romance":"romances"} the partner averaged
-    <b>${Math.abs(AVG(t)).toFixed(2)}</b> points above. At the other end, <b>${esc(w.name)}</b>
-    averaged <b>${Math.abs(AVG(w)).toFixed(2)}</b> points ${AVG(w)<0?"above":"below"} his or her partners.`;
+  const m=topOf("male","on_screen"), w=topOf("female","on_screen");
+  if(!m||!w){el.textContent="";return;}
+  const say=(x,pron)=>`<b>${esc(x.r.name)}</b>, whose ${x.r.pairings}
+    on-screen ${x.r.pairings===1?"romance":"romances"} averaged
+    <b>${f2(AVG(x.r))} points</b> ${AVG(x.r)>=0?"above":"below"} ${pron} own score at the time`;
+  el.innerHTML=`Among the men, ${say(m,"his")}. Among the women, ${say(w,"her")}.`;
 }
 
 function render(){
@@ -183,7 +192,6 @@ function render(){
   const tied=grp.filter(g=>g.length>1).reduce((n,g)=>n+g.length-1,0);
   const all=rows.flatMap(r=>(r.series||[]).map(PT)).filter(v=>v!=null);
   const vmin=all.length?Math.min(...all):0, vmax=all.length?Math.max(...all):1;
-  lede(rows,b);
   let h=`<h2 style="font-family:var(--serif);font-weight:400;font-size:29px;margin:0 0 4px">${esc(b.label)}</h2>
     <div class="scroller"><table><thead><tr><th class="l"></th><th class="l"></th><th class="l">Person</th>
     <th class="l trendh">Attractiveness over time</th>
@@ -234,5 +242,12 @@ document.getElementById("eyebrow").textContent =
    M.works!=null?M.works+" films and relationships":null,
    M.year_min!=null?M.year_min+"\u2013"+M.year_max:null].filter(Boolean).join(" \u00b7 ");
 document.getElementById("ct").textContent=M.contract+" / "+M.rubric;
-tabs(); render();
+if(M.person_years){
+  const pct=Math.round(M.with_evidence/M.person_years*100);
+  document.getElementById("evnote").innerHTML =
+    `That covers <b>${pct}%</b> of the ${M.person_years.toLocaleString()} person-years scored here;
+     the rest rest on the model&rsquo;s own knowledge of how each person was seen at the time.
+     These are model judgments, not measurements.`;
+}
+tabs(); lede(); render();
 </script></body></html>
