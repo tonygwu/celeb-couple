@@ -91,6 +91,8 @@ footer code{font-family:var(--mono);font-size:11.5px}
  font-variant-numeric:tabular-nums;width:26px}
 .trend .tl.r{text-align:left}
 .trend .none{font-family:var(--mono);font-size:10.5px;color:var(--mute)}
+.axis{font-family:var(--mono);font-size:9.5px;letter-spacing:0;color:var(--mute);opacity:.6;font-weight:400;text-transform:none;margin-top:3px;padding-left:32px;width:142px;display:flex;justify-content:space-between}
+.axis i{font-style:normal}
 .lede{max-width:64ch;margin:0}
 .lede b{font-weight:600}
 @media (max-width:720px){.trend{display:none}th.trendh{display:none}}
@@ -100,10 +102,11 @@ footer code{font-family:var(--mono);font-size:11.5px}
   <p class="eyebrow" id="eyebrow"></p>
   <h1>Celebrities Punching Above Their Weight</h1>
   <p class="sub">Which celebrities end up with partners more attractive than themselves?
-    Every pairing is judged on whether they dated up or down, <b>on screen</b> and
-    <b>in real life</b>. Where a dated ranking exists &mdash; People&rsquo;s Sexiest Man Alive
-    and Most Beautiful, Esquire&rsquo;s Sexiest Woman Alive, Maxim&rsquo;s Hot 100 &mdash; the
-    judge is shown it. <span id="evnote"></span></p>
+    Every pairing is judged on whether they dated up or down, on screen and in real life.
+    We use sources like <b>People&rsquo;s Sexiest Man Alive and Most Beautiful</b>,
+    <b>Esquire&rsquo;s Sexiest Woman Alive</b> and <b>Maxim&rsquo;s Hot 100</b>, and have Opus,
+    Fable and Astra judge their normalized attractiveness in a given year. We then compute
+    how much each A-lister punched above their weight in landing an on-screen dating resume.</p>
   <p class="lede" id="lede"></p>
 </header>
 
@@ -118,6 +121,7 @@ footer code{font-family:var(--mono);font-size:11.5px}
 <section id="board"></section>
 
 <footer>
+  <p id="cover"></p>
   <p>Contract <code id="ct"></code>. Ranked by <b>average</b>, the mean across a person's romances,
     so it rewards who they were with rather than how many. <b>Cumulative</b> adds them all.
     Negative is a normal answer and is the point. Click any row for the pairings behind the number.</p>
@@ -141,19 +145,26 @@ const PT   = p => basis==="norm" ? p.n : p.raw;
 /* One trajectory chart per person. The x-axis is the WHOLE corpus's year range
    and the y-axis is the whole board's score range, so two rows can be compared
    to each other rather than each being drawn to its own scale. */
-function spark(r, vmin, vmax){
+/* Deliberately NEUTRAL. Green and red already mean "dated up" and "dated down"
+   in the number columns. Colouring the line by whether a person got more or
+   less attractive over time gave one colour two unrelated meanings, which reads
+   as a bug. The trend is carried by the shape. The faint dashed rule is this
+   board's mean, so a line reads as above or below average, not only against
+   itself. */
+function spark(r, vmin, vmax, vmid){
   const S=(r.series||[]).map(p=>({y:p.y,v:PT(p)})).filter(p=>p.v!=null);
   if(!S.length) return `<span class="none">\u2014</span>`;
   const y0=DATA.meta.year_min, y1=DATA.meta.year_max, W=110, H=26, PAD=4;
   const X=y=>y1===y0?W/2:((y-y0)/(y1-y0))*(W-2)+1;
   const Y=v=>vmax===vmin?H/2:H-PAD-((v-vmin)/(vmax-vmin))*(H-2*PAD);
   const pts=S.map(p=>`${X(p.y).toFixed(1)},${Y(p.v).toFixed(1)}`).join(" ");
-  const col=S[S.length-1].v>=S[0].v?"var(--up)":"var(--down)";
-  const dots=S.map(p=>`<circle cx="${X(p.y).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="1.6" fill="${col}"/>`).join("");
+  const dots=S.map(p=>`<circle cx="${X(p.y).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="1.6" fill="currentColor"/>`).join("");
+  const mid=vmid==null?"":`<line x1="0" x2="${W}" y1="${Y(vmid).toFixed(1)}" y2="${Y(vmid).toFixed(1)}" stroke="currentColor" stroke-width="1" opacity="0.18" stroke-dasharray="2 3"/>`;
   return `<span class="tl">${S[0].v.toFixed(1)}</span>`+
-    `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="score over time">`+
-    (S.length>1?`<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.4"
-       stroke-linejoin="round" stroke-linecap="round"/>`:"")+dots+`</svg>`+
+    `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" style="color:var(--mute)"
+       aria-label="score from ${S[0].y} to ${S[S.length-1].y}">`+mid+
+    (S.length>1?`<polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.4"
+       stroke-linejoin="round" stroke-linecap="round" opacity="0.9"/>`:"")+dots+`</svg>`+
     `<span class="tl r">${S[S.length-1].v.toFixed(1)}</span>`;
 }
 
@@ -177,10 +188,11 @@ function lede(){
   const el=document.getElementById("lede");
   const m=topOf("male","on_screen"), w=topOf("female","on_screen");
   if(!m||!w){el.textContent="";return;}
-  const say=(x,pron)=>`<b>${esc(x.r.name)}</b>, whose ${x.r.pairings}
-    on-screen ${x.r.pairings===1?"romance":"romances"} averaged
-    <b>${f2(AVG(x.r))} points</b> ${AVG(x.r)>=0?"above":"below"} ${pron} own score at the time`;
-  el.innerHTML=`Among the men, ${say(m,"his")}. Among the women, ${say(w,"her")}.`;
+  el.innerHTML=`Among the men, <b>${esc(m.r.name)}</b> is the top, averaging
+    <b>${f2(AVG(m.r))} points</b> over his own attractiveness at the time of each film.
+    Among the women, <b>${esc(w.r.name)}</b> takes the top spot, landing on-screen love
+    interests that are <b>${f2(AVG(w.r))} points</b> more attractive than her
+    (as judged by the LLM).`;
 }
 
 function render(){
@@ -192,9 +204,11 @@ function render(){
   const tied=grp.filter(g=>g.length>1).reduce((n,g)=>n+g.length-1,0);
   const all=rows.flatMap(r=>(r.series||[]).map(PT)).filter(v=>v!=null);
   const vmin=all.length?Math.min(...all):0, vmax=all.length?Math.max(...all):1;
+  const vmid=all.length?all.reduce((a,b)=>a+b,0)/all.length:null;
   let h=`<h2 style="font-family:var(--serif);font-weight:400;font-size:29px;margin:0 0 4px">${esc(b.label)}</h2>
     <div class="scroller"><table><thead><tr><th class="l"></th><th class="l"></th><th class="l">Person</th>
-    <th class="l trendh">Attractiveness over time</th>
+    <th class="l trendh">Attractiveness over time
+      <span class="axis"><i>${DATA.meta.year_min ?? ""}</i><i>${DATA.meta.year_max ?? ""}</i></span></th>
     <th>Romances</th><th>Average</th><th>Cumulative</th><th class="l">Spread</th></tr></thead><tbody>`;
   rows.forEach((r,i)=>{
     const o=open.has(b.label+r.qid), a=AVG(r)??0;
@@ -203,7 +217,7 @@ function render(){
       <td class="tiecell">${pos[i]?`<i class="tie ${pos[i]}"></i>`:""}</td>
       <td class="rank">${i+1}</td>
       <td class="who"><span class="chev">${o?"\u25be":"\u25b8"}</span>${esc(r.name)}</td>
-      <td><div class="trend">${spark(r,vmin,vmax)}</div></td>
+      <td><div class="trend">${spark(r,vmin,vmax,vmid)}</div></td>
       <td class="num" style="color:var(--mute)">${r.pairings}</td>
       <td class="num big ${cls(a)}">${f2(a)}</td>
       <td class="num ${cls(TOT(r)??0)}">${TOT(r)==null?"\u2014":f2(TOT(r))}</td>
@@ -244,10 +258,11 @@ document.getElementById("eyebrow").textContent =
 document.getElementById("ct").textContent=M.contract+" / "+M.rubric;
 if(M.person_years){
   const pct=Math.round(M.with_evidence/M.person_years*100);
-  document.getElementById("evnote").innerHTML =
-    `That covers <b>${pct}%</b> of the ${M.person_years.toLocaleString()} person-years scored here;
-     the rest rest on the model&rsquo;s own knowledge of how each person was seen at the time.
-     These are model judgments, not measurements.`;
+  document.getElementById("cover").innerHTML =
+    `A dated published ranking exists for <b>${pct}%</b> of the
+     ${M.person_years.toLocaleString()} person-years scored here. The rest rest on the
+     model&rsquo;s own knowledge of how each person was seen at the time. These are model
+     judgments, not measurements.`;
 }
 tabs(); lede(); render();
 </script></body></html>
