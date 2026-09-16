@@ -48,6 +48,10 @@ def test_every_free_analysis_script_is_in_the_chain():
         "fetch_observations": "in the chain, under its free pass",
         "fetch_onscreen_candidates": "in the chain, under its free pass",
         "select_m1_slice": "plan v4; picked once before judging, not a recurring stage",
+        "resolve_imdb_people": ("builds the nconst-to-QID BRIDGE, an input the "
+                                "scoring stages read. Like expand_roster it also "
+                                "fetches, so a free pass would hit Wikidata on "
+                                "every run for a mapping that does not move."),
         "build_imdb_graph": ("same reason as expand_roster: it builds an INPUT "
                              "to the chain, not a stage of it. It also needs "
                              "the ~2GB IMDb dumps, which are not in the repo "
