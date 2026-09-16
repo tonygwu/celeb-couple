@@ -417,6 +417,14 @@ class CodexJudge:
                 "requested_model": self.model,
                 "served_model": self.model,
                 "served_model_verified": False,   # the stream names no model
+                # WHICH ACCOUNT PAID FOR THIS. `ClaudeJudge` has recorded its
+                # config_dir all along; this class never did, so the Codex
+                # account behind a verdict was unrecoverable after the run.
+                # That mattered little while the home could only be named by
+                # hand. It matters now that the router picks it, because the
+                # picked account varies run to run and the artifact is the only
+                # place the choice survives.
+                "config_dir": self.config_dir or "__INHERITED__",
                 "effort": self.effort,
                 "input_tokens": usage.get("input_tokens"),
                 "output_tokens": usage.get("output_tokens"),

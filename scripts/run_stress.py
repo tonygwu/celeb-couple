@@ -43,6 +43,16 @@ def main() -> int:
                           "`quotapick status` first, or set CELEB_ACCOUNT."))
     ap.add_argument("--fable-model", default="claude-fable-5-1")
     ap.add_argument("--astra-model", default="gpt-6-astra")
+    # Line 63 has read `args.astra_account` since this script was written, and
+    # this flag was never declared, so building the astra judge raised
+    # AttributeError every time. The script has therefore never run a Codex
+    # judge. `tests/test_codex_account.py` asserted only that the source
+    # mentions `resolve_codex_home`, which it does, so the string check passed
+    # over a script that could not reach its first model call.
+    ap.add_argument("--astra-account", default=None,
+                    help=("CODEX_HOME for the astra judge. Left unset, "
+                          "`quotapick` picks the Codex account with the most "
+                          "headroom; env CELEB_CODEX_HOME overrides."))
     ap.add_argument("--max-fable", type=int, default=25)
     ap.add_argument("--max-astra", type=int, default=10)
     ap.add_argument("--only", default=None, help="run one case id")

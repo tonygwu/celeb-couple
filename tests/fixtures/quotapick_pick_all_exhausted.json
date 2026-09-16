@@ -1,0 +1,115 @@
+{
+  "contract_version": 1,
+  "decision": {
+    "account": "codex",
+    "provider": "codex",
+    "reason": "every candidate is out of quota; earliest reset in 5.0h",
+    "score": 0.0,
+    "binding_window": "7d",
+    "regime": null,
+    "fits": false,
+    "meets_policy": false,
+    "available_at": 1789447800.0,
+    "sticky": false
+  },
+  "exec": {
+    "env": {
+      "CODEX_HOME": "/Users/tonygwu/.codex"
+    },
+    "argv_prefix": [],
+    "unset_env": []
+  },
+  "ranked": [
+    {
+      "account": "codex",
+      "score": 0.0,
+      "min_slack": -0.8085172046957508,
+      "binding_window": "7d",
+      "remaining": 0.0,
+      "eligible": true,
+      "source": "live",
+      "age_s": 0.0,
+      "fits": false
+    }
+  ],
+  "excluded": [
+    {
+      "account": "claude",
+      "score": 0.0,
+      "min_slack": -0.7032605015111979,
+      "binding_window": "fable",
+      "remaining": 0.13,
+      "eligible": false,
+      "source": "live",
+      "age_s": 100.40216088294983,
+      "fits": true,
+      "reason": "disabled by configuration or --only/--exclude"
+    },
+    {
+      "account": "claude_b",
+      "score": 0.0,
+      "min_slack": -0.15093970439169146,
+      "binding_window": "5h",
+      "remaining": 0.0,
+      "eligible": false,
+      "source": "live",
+      "age_s": 100.40216088294983,
+      "fits": false,
+      "reason": "disabled by configuration or --only/--exclude"
+    },
+    {
+      "account": "claude_c",
+      "score": 0.0,
+      "min_slack": -0.25254669994707146,
+      "binding_window": "fable",
+      "remaining": 0.0,
+      "eligible": false,
+      "source": "live",
+      "age_s": 100.40216088294983,
+      "fits": false,
+      "reason": "disabled by configuration or --only/--exclude"
+    },
+    {
+      "account": "claude_d",
+      "score": 0.0,
+      "min_slack": -0.1063574355639636,
+      "binding_window": "fable",
+      "remaining": 0.76,
+      "eligible": false,
+      "source": "live",
+      "age_s": 100.40216088294983,
+      "fits": true,
+      "reason": "disabled by configuration or --only/--exclude"
+    },
+    {
+      "account": "codex",
+      "score": 0.0,
+      "min_slack": -0.8085172046957508,
+      "binding_window": "7d",
+      "remaining": 0.0,
+      "eligible": false,
+      "source": "live",
+      "age_s": 0.0,
+      "fits": false,
+      "reason": "only 0.0% left in its tightest applicable window (min-remaining 2.0%)"
+    },
+    {
+      "account": "cursor",
+      "score": 0.0,
+      "min_slack": 0.0,
+      "binding_window": null,
+      "remaining": null,
+      "eligible": false,
+      "source": "assumed",
+      "age_s": null,
+      "fits": false,
+      "reason": "disabled by configuration or --only/--exclude"
+    }
+  ],
+  "degraded": [],
+  "warnings": [
+    "claude_c: live cannot see window(s) 5h; restored from another source rather than scoring the account as unconstrained",
+    "no candidate can serve this call right now"
+  ],
+  "generated_at": "2026-09-16T03:00:43Z"
+}

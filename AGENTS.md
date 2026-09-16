@@ -378,9 +378,46 @@ Quota rules for the ones that spend:
   granting the permission — a judge with filesystem access is not isolated from
   the corpus it is being kept away from.
 - Check `quotapick status` first, and pass what it tells you. **There is no
-  default account**: every paid script takes `--account <config dir>` or reads
-  `CELEB_ACCOUNT`, and refuses to start without one, naming the config dirs it
-  can see.
+  default CLAUDE account**: every paid script takes `--account <config dir>` or
+  reads `CELEB_ACCOUNT`, and refuses to start without one, naming the config
+  dirs it can see.
+- **The CODEX account is picked for you, from live usage (2026-09-15).** Leave
+  `--astra-account` and `CELEB_CODEX_HOME` unset and `resolve_codex_home` asks
+  `quotapick` which Codex home has headroom, then announces its choice on
+  stderr:
+
+  ```
+  [accounts] quotapick chose Codex account codex_b (CODEX_HOME=/Users/tonygwu/.codex-b)
+  ```
+
+  This is not the hardcoded default that AGENTS.md spends a section warning
+  about. That default was a value frozen into a file; this is a question asked
+  at the moment of the run. Both overrides still outrank it, and a named home
+  is never second-guessed.
+
+  Four things worth knowing before you rely on it:
+
+  - **It still refuses.** No router on PATH, a router that names no account, a
+    router whose contract version it has not read, or a router answer it cannot
+    parse, all raise `RouterUnavailable`, which IS an `AccountNotChosen`.
+    Nothing falls back to `~/.codex`.
+  - **A returned account is not an available one.** `quotapick pick` exits 0
+    and names an account even when every candidate is out of quota, marking it
+    `fits: false`. The resolver refuses on that flag. Without it a whole run
+    routes onto a 0.0% account and fails as `auth_or_quota`, which reads like a
+    broken judge. Measured 2026-09-15, with a real capture kept at
+    `tests/fixtures/quotapick_pick_all_exhausted.json`.
+  - **The candidate list is derived, never written down.** The ids come from
+    `quotapick status --json` filtered on `provider == "codex"`. Do not replace
+    that with `--only codex,codex_b`; a third Codex account would be invisible
+    to the picker while `quotapick status` listed it.
+  - **It costs about 5 seconds**, once per run, for two live calls. Name the
+    home yourself to skip them.
+
+  The Codex judge now records `config_dir` in its telemetry, the way the Claude
+  judge always has, so the artifact says which account paid for a verdict.
+  Before this, the Codex account behind a verdict was unrecoverable after the
+  run.
 - **To use the account bare `claude` uses, pass `--account default`.** It is a
   keyword, not a path, and this is not a style choice. That account's config
   file is `~/.claude.json`, which sits OUTSIDE `~/.claude/`, so pointing
