@@ -101,6 +101,9 @@ def main() -> int:
                     help="repeatable. The IMDb graph is on-screen ONLY, so the "
                          "real-life boards stay empty unless the Wikidata "
                          "relationship graph is passed too.")
+    ap.add_argument("--min-year", type=int, default=1990,
+                    help="scope floor, applied AFTER the merge so it covers every "
+                         "source. Reported, never silent.")
     ap.add_argument("--families", default="fable,astra")
     ap.add_argument("--gradings", default="data/roster100/run/person_gradings.json",
                     help="canonical scores from build_person_gradings.py")
@@ -124,7 +127,13 @@ def main() -> int:
     # and the Wikidata graph names the same film by QID, so the two ids differ
     # for one romance. See modules/pairing/merge.py.
     merged, mstats = mg.merge_graphs(loaded)
+    before = len(merged)
+    merged = [p for p in merged
+              if str(p.get("period") or "").isdigit() and int(p["period"]) >= args.min_year]
     graph = {"pairings": merged}
+    if before != len(merged):
+        print(f"  scope floor {args.min_year}: dropped {before - len(merged):,} "
+              f"pairings before it")
     for rel, rows in loaded:
         print(f"  {rel}: {len(rows):,} pairings, {mstats['by_source'][rel]:,} kept")
     print(f"  merged {mstats['seen']:,} -> {len(merged):,}  "
@@ -210,6 +219,7 @@ def main() -> int:
                     "contract": (next(iter(cache.values()))["contract"]["contract_id"]
                                  if cache else "?"),
                     "rubric": PERSON_RUBRIC_VERSION,
+                    "min_year": args.min_year,
                     "norm_method": ("z-score within sex over CANONICAL scores, film-blind"
                                     if not args.per_family else
                                     "z-score within (judge family, sex), film-blind")},
@@ -250,6 +260,11 @@ def main() -> int:
                 for (f, s, qq, per), v in pop.items():
                     if qq != row["qid"]:
                         continue
+                    # The trajectory obeys the same scope floor as the board.
+                    # Without this a person scored in 1978 for a pairing the
+                    # floor removed still stretched the shared x-axis to 1978.
+                    if int(per) < args.min_year:
+                        continue
                     nv = norm.get((f, s, qq, per))
                     ser.setdefault(int(per), []).append((float(v), float(nv) if nv is not None else None))
                 row["series"] = [
@@ -262,7 +277,7 @@ def main() -> int:
                                   "r2": volume_confound(rows), "rows": rows})
             print(f"  {gl} — {dl}: {len(rows)} ranked")
 
-    years = sorted({int(p) for (_f, _s, _q, p) in pop})
+    years = sorted({int(p) for (_f, _s, _q, p) in pop if int(p) >= args.min_year})
     out["meta"]["year_min"] = years[0] if years else None
     out["meta"]["year_max"] = years[-1] if years else None
     out["meta"]["people_ranked"] = len({r["qid"] for b in out["boards"] for r in b["rows"]})

@@ -121,6 +121,7 @@ footer code{font-family:var(--mono);font-size:11.5px}
 <section id="board"></section>
 
 <footer>
+  <p id="scope"></p>
   <p id="cover"></p>
   <p>Contract <code id="ct"></code>. Ranked by <b>average</b>, the mean across a person's romances,
     so it rewards who they were with rather than how many. <b>Cumulative</b> adds them all.
@@ -265,6 +266,11 @@ document.getElementById("eyebrow").textContent =
 document.getElementById("ct").textContent=M.contract+" / "+M.rubric;
 if(M.person_years){
   const pct=Math.round(M.with_evidence/M.person_years*100);
+  document.getElementById("scope").innerHTML = M.min_year
+    ? `Films from <b>${M.min_year}</b> onward. Four performers whose careers are mostly
+       earlier &mdash; Audrey Hepburn, Sophia Loren, Paul Newman and Robert Redford &mdash;
+       are outside this scope, because scoring them only after ${M.min_year} would rank
+       them on how they looked in their sixties.` : "";
   document.getElementById("cover").innerHTML =
     `A dated published ranking exists for <b>${pct}%</b> of the
      ${M.person_years.toLocaleString()} person-years scored here. The rest rest on the

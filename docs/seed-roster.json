@@ -1,0 +1,50 @@
+{
+ "version": "seed-roster-2026-09-16",
+ "selected_on": "2026-09-15",
+ "selection_basis": "Performers who headlined romantic leads AND were themselves the subject of published appearance rankings, balanced by sex, spanning the 1980s to the 2020s. Chosen on that basis BEFORE any check of how easy each is to score, and before any pairing graph existed. This is a SEED, not the final cohort: scripts/identify_couples.py surfaces partners who are not on it, and those are added in later rounds.",
+ "known_limits": [
+  "Anglophone and film-centric. Musicians and television-first performers enter only as discovered partners.",
+  "Nobody here was chosen because they would rank well. Tuning the cohort to produce a result is forbidden; see docs/SOURCE-HUNT.md."
+ ],
+ "men": [
+  "Brad Pitt",
+  "George Clooney",
+  "Leonardo DiCaprio",
+  "Johnny Depp",
+  "Tom Cruise",
+  "Denzel Washington",
+  "Ryan Gosling",
+  "Chris Hemsworth",
+  "Idris Elba",
+  "Richard Gere",
+  "Ben Affleck",
+  "Matthew McConaughey",
+  "Hugh Grant"
+ ],
+ "women": [
+  "Angelina Jolie",
+  "Julia Roberts",
+  "Nicole Kidman",
+  "Charlize Theron",
+  "Halle Berry",
+  "Scarlett Johansson",
+  "Jennifer Aniston",
+  "Michelle Pfeiffer",
+  "Julia Ormond",
+  "Monica Bellucci",
+  "Margot Robbie",
+  "Zendaya",
+  "Ana de Armas"
+ ],
+ "scope": "Films from 1990 onward. Stated as SCOPE, not hidden: the board covers the modern era and says so on the page.",
+ "removed_2026_09_16": {
+  "who": [
+   "Audrey Hepburn",
+   "Paul Newman",
+   "Robert Redford",
+   "Sophia Loren"
+  ],
+  "why": "Their careers are mostly before the 1990 floor, so keeping them would rank Paul Newman on how he looked at 65 and Robert Redford at 54. Hepburn has no film after 1989 at all. Leaving them in with the floor applied was measured: Redford would keep 10 pairings, Newman 2 and Loren 2, every one of them from their fifties onward.",
+  "cost": "This is a roster change made partly for presentation, which docs/SOURCE-HUNT.md warns against. It is acceptable ONLY because it is a stated scope rather than a silent exclusion. Do not extend this reasoning to drop anyone whose SCORE is inconvenient."
+ }
+}

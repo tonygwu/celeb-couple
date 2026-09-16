@@ -40,6 +40,10 @@ def main() -> int:
     ap.add_argument("--couples", default="data/imdb/couples_cache.json")
     ap.add_argument("--bridge", default="data/imdb/person_bridge.json")
     ap.add_argument("--graph", default="data/imdb/seed_graph.json")
+    ap.add_argument("--min-year", type=int, default=1990,
+                    help="SCOPE, not a filter of convenience: the board covers films "
+                         "from this year on, and the page says so. Applied here so the "
+                         "scorer never pays for a person-year the board cannot show.")
     ap.add_argument("--out", default="data/imdb/imdb_pairings.json")
     args = ap.parse_args()
 
@@ -68,6 +72,9 @@ def main() -> int:
         for p in entry["pairs"]:
             if p["weight"] == "incidental":
                 dropped["incidental"] += 1
+                continue
+            if film["year"] < args.min_year:
+                dropped[f"film before the {args.min_year} scope floor"] += 1
                 continue
             a, b = p["a"], p["b"]
             if a not in qid_of or b not in qid_of:
@@ -105,6 +112,7 @@ def main() -> int:
     tuples = {(p["male_qid"], p["period"]) for p in pairings} | \
              {(p["female_qid"], p["period"]) for p in pairings}
     out = {
+        "min_year": args.min_year,
         "counts": {
             "films_graded": len(couples), "pairings": len(pairings),
             "distinct_people": len(people), "person_years_needed": len(tuples),

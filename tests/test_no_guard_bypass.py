@@ -59,7 +59,7 @@ _EXEMPT = {
     "extract_prose_mentions.py": "reads the cohort and Wikipedia; writes mentions",
     "run_pilot.py": "reads records and observations; writes a fresh scoring run",
     "score_evidenced.py": "reads observations, cohort and joint coverage; writes scores",
-    # Reads docs/seed-30.json, a HAND-WRITTEN roster, and the external IMDb
+    # Reads docs/seed-roster.json, a HAND-WRITTEN roster, and the external IMDb
     # dumps. Neither is produced by a rubric, so there is no contract id on
     # either and nothing that could go stale. It reads no scored artifact.
     "build_imdb_graph.py": "reads a hand-written roster and the IMDb dumps; writes a pairing graph",

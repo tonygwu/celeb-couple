@@ -322,6 +322,32 @@ is what those runs pinned. The time is NOT recoverable and is NOT back-filled
 from file mtime, which records when a file was touched rather than when a
 judgment was made. `tests/test_grading_provenance.py` forbids that back-fill.
 
+### Scope: films from 1990 onward (2026-09-16)
+
+`docs/seed-roster.json` holds 26 people, not the original 30. **Audrey Hepburn,
+Sophia Loren, Paul Newman and Robert Redford were removed**, and every pairing
+before 1990 is dropped by a `--min-year` floor in both
+`build_imdb_pairings.py` and `rebuild_boards.py`.
+
+**Why, measured.** The operator's first proposal was to drop anyone with no
+film after 1990. That removes Hepburn alone: Loren worked to 2020, Newman to
+2008, Redford to 2018. Their EARLY films stay, so the shared x-axis would have
+reached **1954** once scoring caught up. Applying only the year floor was worse
+in a different way: Redford would keep 10 pairings, Newman 2 and Loren 2, every
+one from their fifties onward, which ranks Paul Newman on how he looked at 65.
+
+**The cost, stated plainly.** `docs/SOURCE-HUNT.md` says *do not select the
+roster to fit the evidence* -- the roster was chosen on prominence BEFORE
+anything was scored, deliberately. This removal is partly for presentation, so
+it is acceptable ONLY as a stated scope. The page names all four and says the
+board covers 1990 onward. `tests/test_scope_floor.py` fails if that sentence
+disappears, if a removal loses its recorded reason, or if the two floors drift
+apart. **Do not extend this reasoning to drop anyone whose SCORE is
+inconvenient.**
+
+The floor lives in `build_imdb_pairings.py` as well as the board, so
+`score_person_periods.py` never pays for a person-year the board cannot show.
+
 ## Plan v4: the pairing boards
 
 `docs/PLAN-v4.md`. The scoring layer changes and everything downstream carries

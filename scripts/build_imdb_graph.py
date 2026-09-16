@@ -64,7 +64,7 @@ def main() -> int:
         description="Build seed filmographies and their billed cast from the "
                     "local IMDb dumps. Free.")
     ap.add_argument("--dumps", default=None, help="directory holding the .tsv.gz files")
-    ap.add_argument("--roster", default="docs/seed-30.json")
+    ap.add_argument("--roster", default="docs/seed-roster.json")
     ap.add_argument("--min-votes", type=int, default=1000,
                     help="drop a seed film below this many IMDb votes. Reported, "
                          "not silent: the cut count is written into the artifact.")
