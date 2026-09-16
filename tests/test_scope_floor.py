@@ -85,3 +85,15 @@ def test_the_floor_does_not_gut_one_persons_prime():
     assert "1990" in note and "Pfeiffer" in note, (
         "the reason 1990 was rejected must stay recorded, or someone will "
         "raise the floor again for the same wrong reason")
+
+
+def test_removal_from_the_roster_is_not_a_ban():
+    """They are off the SEED list, so their filmographies are not pulled. They
+    are not excluded from the data: Robert Redford still appears opposite
+    Michelle Pfeiffer in Up Close & Personal, and counts like any other
+    non-seed partner. The page must not claim otherwise."""
+    assert "what_removal_means" in ROSTER["removed_2026_09_16"]
+    html = (REPO / "web/board.html").read_text()
+    assert "not excluded" in html, (
+        "the page says four people are outside the scope; it must also say they "
+        "still count where they appear opposite someone we follow")

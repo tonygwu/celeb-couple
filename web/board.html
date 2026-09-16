@@ -269,8 +269,10 @@ if(M.person_years){
   document.getElementById("scope").innerHTML = M.min_year
     ? `Films from <b>${M.min_year}</b> onward. Four performers whose careers are mostly
        earlier &mdash; Audrey Hepburn, Sophia Loren, Paul Newman and Robert Redford &mdash;
-       are outside this scope: their careers are mostly earlier, and scoring them only
-       after ${M.min_year} would rank them on how they looked in their sixties.` : "";
+       are not among the people whose filmographies we follow, because scoring them only
+       from ${M.min_year} would rank them on how they looked in their sixties. They are
+       not excluded: where one of them appears opposite someone we do follow, the pairing
+       counts like any other.` : "";
   document.getElementById("cover").innerHTML =
     `A dated published ranking exists for <b>${pct}%</b> of the
      ${M.person_years.toLocaleString()} person-years scored here. The rest rest on the
