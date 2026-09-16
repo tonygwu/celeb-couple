@@ -40,8 +40,10 @@ reversed only as far as necessary and no further:
   that is the judge's per-pairing assessment, never a curve applied by code.
   A test asserts no age term exists anywhere in the scoring path.
 
-The repository stays private. Publishing is a separate decision that this plan
-does not ask for and does not prepare.
+The repository was private when this plan was written. Publishing it is a
+separate decision that this plan does not ask for and does not prepare. If the
+repository is public when you read this, that decision was taken elsewhere and
+nothing in this plan should be read as having authorised it.
 
 ## 3. The metric — unchanged, and already built
 

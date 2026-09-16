@@ -734,22 +734,29 @@ fired on a downstream number. Neither would have surfaced on its own.
   to pass `--force` by reflex.
 - **CI is configured and has never once executed.** `.github/workflows/tests.yml`
   was added 2026-09-14 and treats any non-zero exit as failure, pytest's 5
-  included. Every one of its 30 runs has failed in about 2 seconds with:
+  included. Every one of its runs has been refused at GitHub's billing gate in
+  about 2 seconds, before reaching pytest.
 
-  > The job was not started because recent account payments have failed or your
-  > spending limit needs to be increased.
+  So the workflow file itself is untested, and the repository's Actions state
+  reads **red while the suite is green** — which is worse than having no CI,
+  because a red badge that means "billing" looks exactly like a red badge that
+  means "the tests fail".
 
-  So the job is blocked at GitHub's billing gate and never reaches pytest. The
-  workflow file itself is untested, and the repository's Actions state reads
-  **red while the suite is green** — which is worse than having no CI, because
-  a red badge that means "billing" looks exactly like a red badge that means
-  "the tests fail".
+  Two routes clear it, and they are not equivalent. Settling the account's
+  Actions billing fixes it for a private repository. **Making the repository
+  public also fixes it**, because Actions minutes on public repositories are
+  free on standard runners — so if this repository is published, this entry
+  closes by itself and the badge starts telling the truth.
 
-  Only the operator can clear this: Settings → Billing & plans. Private
-  repositories consume billable Actions minutes, and this one must stay
-  private, so going public is not the workaround.
+  Simulated on 2026-09-16 rather than assumed, because the workflow has still
+  never run for real: fresh clone with no `data/`, `python3 -m venv`,
+  `pip install -r requirements.txt`, `python -m pytest tests -q`. It FAILED on
+  `test_there_are_verdicts_to_validate`, which asserts a corpus that `data/`
+  being gitignored guarantees is absent. Fixed; the same simulation now exits 0
+  on Python 3.12.4 and 3.14.7 with 1020 passed, 83 skipped.
 
-  Until then **the real gate is local**: `.venv/bin/python -m pytest tests -q`.
+  Until the gate actually runs, **the real gate is local**:
+  `.venv/bin/python -m pytest tests -q`.
 
   **The workflow file itself is no longer untested** (2026-09-14). It cannot be
   run, so it is checked instead. `tests/test_ci_workflow.py` asserts the parts
