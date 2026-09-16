@@ -40,7 +40,7 @@ def main() -> int:
     ap.add_argument("--couples", default="data/imdb/couples_cache.json")
     ap.add_argument("--bridge", default="data/imdb/person_bridge.json")
     ap.add_argument("--graph", default="data/imdb/seed_graph.json")
-    ap.add_argument("--min-year", type=int, default=1990,
+    ap.add_argument("--min-year", type=int, default=1980,
                     help="SCOPE, not a filter of convenience: the board covers films "
                          "from this year on, and the page says so. Applied here so the "
                          "scorer never pays for a person-year the board cannot show.")

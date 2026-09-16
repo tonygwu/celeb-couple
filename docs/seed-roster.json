@@ -36,7 +36,7 @@
   "Zendaya",
   "Ana de Armas"
  ],
- "scope": "Films from 1990 onward. Stated as SCOPE, not hidden: the board covers the modern era and says so on the page.",
+ "scope": "Films from 1980 onward. Stated as SCOPE, not hidden: the board covers the modern era and says so on the page.",
  "removed_2026_09_16": {
   "who": [
    "Audrey Hepburn",
@@ -44,7 +44,8 @@
    "Robert Redford",
    "Sophia Loren"
   ],
-  "why": "Their careers are mostly before the 1990 floor, so keeping them would rank Paul Newman on how he looked at 65 and Robert Redford at 54. Hepburn has no film after 1989 at all. Leaving them in with the floor applied was measured: Redford would keep 10 pairings, Newman 2 and Loren 2, every one of them from their fifties onward.",
-  "cost": "This is a roster change made partly for presentation, which docs/SOURCE-HUNT.md warns against. It is acceptable ONLY because it is a stated scope rather than a silent exclusion. Do not extend this reasoning to drop anyone whose SCORE is inconvenient."
+  "why": "Their careers are mostly before the scope floor. Hepburn has no film after 1989 at all, and her 1961 point sat 22 years before the next one, stretching every chart. Removing these four is what fixed the axis: with them gone the corpus runs continuously from 1977, with no gap.",
+  "cost": "This is a roster change made partly for presentation, which docs/SOURCE-HUNT.md warns against. It is acceptable ONLY because it is a stated scope rather than a silent exclusion. Do not extend this reasoning to drop anyone whose SCORE is inconvenient.",
+  "floor_note": "The floor was first set to 1990 and that was WRONG. It cut 101 pairings, and the loss was not spread evenly: Michelle Pfeiffer lost 33% of her romances, Richard Gere 27% and Tom Cruise 25%, while 17 of the 26 seeds lost nothing. It took Dangerous Liaisons, Scarface, Top Gun and An Officer and a Gentleman -- the prime years of the three oldest remaining seeds. That is the same distortion the four removals were meant to avoid. 1980 costs 8 pairings instead of 101."
  }
 }

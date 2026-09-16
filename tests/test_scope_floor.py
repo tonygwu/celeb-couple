@@ -1,4 +1,4 @@
-"""The board covers 1990 onward, and SAYS SO.
+"""The board covers 1980 onward, and SAYS SO.
 
 Four performers were removed because their careers are mostly earlier. That is
 a roster change made partly for presentation, which docs/SOURCE-HUNT.md warns
@@ -46,7 +46,7 @@ def test_both_stages_default_to_the_same_floor():
     a = (REPO / "scripts/build_imdb_pairings.py").read_text()
     b = (REPO / "scripts/rebuild_boards.py").read_text()
     for src in (a, b):
-        assert '"--min-year", type=int, default=1990' in src
+        assert '"--min-year", type=int, default=1980' in src
 
 
 def test_the_trajectory_obeys_the_floor_too():
@@ -75,3 +75,13 @@ def test_the_stage_that_spends_applies_the_floor_first():
     pays for a person-year the board cannot show."""
     src = (REPO / "scripts/build_imdb_pairings.py").read_text()
     assert src.index("--min-year") < src.index("person_years_needed")
+
+
+def test_the_floor_does_not_gut_one_persons_prime():
+    """The floor was first set to 1990. It cut 101 pairings and the loss landed
+    on three people: Pfeiffer -33%, Gere -27%, Cruise -25%, while 17 of 26
+    seeds lost nothing. A floor whose cost is that concentrated is a bias."""
+    note = ROSTER["removed_2026_09_16"].get("floor_note", "")
+    assert "1990" in note and "Pfeiffer" in note, (
+        "the reason 1990 was rejected must stay recorded, or someone will "
+        "raise the floor again for the same wrong reason")

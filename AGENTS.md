@@ -322,11 +322,11 @@ is what those runs pinned. The time is NOT recoverable and is NOT back-filled
 from file mtime, which records when a file was touched rather than when a
 judgment was made. `tests/test_grading_provenance.py` forbids that back-fill.
 
-### Scope: films from 1990 onward (2026-09-16)
+### Scope: films from 1980 onward (2026-09-16)
 
 `docs/seed-roster.json` holds 26 people, not the original 30. **Audrey Hepburn,
 Sophia Loren, Paul Newman and Robert Redford were removed**, and every pairing
-before 1990 is dropped by a `--min-year` floor in both
+before 1980 is dropped by a `--min-year` floor in both
 `build_imdb_pairings.py` and `rebuild_boards.py`.
 
 **Why, measured.** The operator's first proposal was to drop anyone with no
@@ -335,6 +335,19 @@ film after 1990. That removes Hepburn alone: Loren worked to 2020, Newman to
 reached **1954** once scoring caught up. Applying only the year floor was worse
 in a different way: Redford would keep 10 pairings, Newman 2 and Loren 2, every
 one from their fifties onward, which ranks Paul Newman on how he looked at 65.
+
+**The floor was first set to 1990, and that was WRONG.** It cut 101 pairings and
+the loss was not spread evenly: **Michelle Pfeiffer lost 33% of her romances,
+Richard Gere 27% and Tom Cruise 25%, while 17 of the 26 seeds lost nothing.**
+It took Dangerous Liaisons, Scarface, Top Gun, Rain Man and An Officer and a
+Gentleman -- the prime years of the three oldest remaining seeds. That is the
+SAME distortion the four removals were meant to avoid, in a smaller package.
+
+Removing those four is what actually fixed the axis. With them gone the corpus
+runs **continuously from 1977** with no gap at all: 3, 2, 3, 3, 2, 8, 8, 5, 8,
+10, 13, 23 pairings per year through 1988. The 22-year void was Audrey Hepburn
+alone. At 1980 the floor costs **8 pairings** rather than 101, and every one of
+them is Richard Gere's first three films.
 
 **The cost, stated plainly.** `docs/SOURCE-HUNT.md` says *do not select the
 roster to fit the evidence* -- the roster was chosen on prominence BEFORE

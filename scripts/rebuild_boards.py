@@ -101,7 +101,7 @@ def main() -> int:
                     help="repeatable. The IMDb graph is on-screen ONLY, so the "
                          "real-life boards stay empty unless the Wikidata "
                          "relationship graph is passed too.")
-    ap.add_argument("--min-year", type=int, default=1990,
+    ap.add_argument("--min-year", type=int, default=1980,
                     help="scope floor, applied AFTER the merge so it covers every "
                          "source. Reported, never silent.")
     ap.add_argument("--families", default="fable,astra")
