@@ -98,9 +98,14 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Rebuild the boards from the cache. Free.")
     ap.add_argument("--cache", action="append", default=None)
     ap.add_argument("--graph", action="append", default=None,
-                    help="repeatable. The IMDb graph is on-screen ONLY, so the "
-                         "real-life boards stay empty unless the Wikidata "
-                         "relationship graph is passed too.")
+                    help="repeatable. Append '#domain' to take only that domain "
+                         "from a source, e.g. "
+                         "'data/roster100/run/pairing_scores.json#real_life'. "
+                         "The IMDb graph is on-screen only, so the real-life "
+                         "boards stay empty unless a relationship graph is "
+                         "passed too -- but that graph's ON-SCREEN half is raw "
+                         "co-starring with no romance check, so take only "
+                         "real_life from it.")
     ap.add_argument("--min-pairings", type=int, default=3,
                     help="a person needs this many scored romances to appear. "
                          "DISPLAY ONLY: the pairings stay in the data, and a "
@@ -123,11 +128,18 @@ def main() -> int:
                                   "data/roster100/run/person_period_cache_astra.json"])
     sources = args.graph or ["data/roster100/run/pairing_scores.json"]
     loaded = []
-    for rel in sources:
+    for spec in sources:
+        rel, _, only = spec.partition("#")
         if not (REPO / rel).exists():
             print(f"  (no {rel}; skipping)")
             continue
-        loaded.append((rel, require(REPO, rel)["pairings"]))
+        rows = require(REPO, rel)["pairings"]
+        if only:
+            keep = [p for p in rows if p.get("domain") == only]
+            print(f"  {rel}: taking domain {only!r} only "
+                  f"({len(keep):,} of {len(rows):,})")
+            rows = keep
+        loaded.append((spec, rows))
     # Semantic identity, NOT pairing_id: the IMDb graph names a film by tconst
     # and the Wikidata graph names the same film by QID, so the two ids differ
     # for one romance. See modules/pairing/merge.py.

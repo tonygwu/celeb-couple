@@ -49,11 +49,16 @@ fi
 
 run "pairings " $PY scripts/build_imdb_pairings.py
 run "gradings " $PY scripts/build_person_gradings.py
-# The IMDb graph is on-screen ONLY. The real-life pairings live in the Wikidata
-# relationship graph, so both are passed or the real-life boards render empty.
+# The IMDb graph is on-screen ONLY, and the relationship graph supplies real
+# life. Take ONLY real_life from the latter: its on-screen half is raw
+# co-starring with no romance check, and 21 of its 75 on-screen pairs were never
+# checked at all -- they include documentaries (Exit Through the Gift Shop),
+# award specials, and films that have not been released (The Batman: Part II,
+# 2028). That is how Idris Elba ended up "paired" with Scarlett Johansson in
+# Avengers: Age of Ultron and The Jungle Book.
 run "boards   " $PY scripts/rebuild_boards.py \
       --graph data/imdb/imdb_pairings.json \
-      --graph data/roster100/run/pairing_scores.json \
+      --graph 'data/roster100/run/pairing_scores.json#real_life' \
       --cache data/imdb/person_period_cache_opus.json \
       --cache data/roster100/run/person_period_cache.json \
       --cache data/roster100/run/person_period_cache_astra.json \

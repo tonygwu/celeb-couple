@@ -39,8 +39,10 @@ def test_the_graph_flag_is_repeatable_so_real_life_boards_can_fill():
 def test_the_refresh_passes_both_graphs():
     src = (REPO / "scripts/refresh_boards.sh").read_text()
     assert "--graph data/imdb/imdb_pairings.json" in src
-    assert "--graph data/roster100/run/pairing_scores.json" in src, (
-        "without the Wikidata graph the two real-life boards render empty")
+    # real_life ONLY: that graph's on-screen half is raw co-starring with no
+    # romance check. See tests/test_graph_domains.py.
+    assert "pairing_scores.json#real_life" in src, (
+        "without the relationship graph the two real-life boards render empty")
 
 
 def test_normalized_is_the_default_view():
