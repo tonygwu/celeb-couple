@@ -69,6 +69,15 @@ PRODUCERS = {
         "scripts/score_pairings.py  [spends quota]",
     "data/roster100/records/onscreen_candidates.json":
         "scripts/fetch_onscreen_candidates.py --cohort docs/roster-100.json  (see AGENTS.md)",
+    "data/roster100/run/person_period_cache.json":
+        "scripts/score_person_periods.py  [spends quota]",
+    "data/roster100/run/person_period_cache_astra.json":
+        "scripts/score_person_periods.py --judges astra  [spends quota]",
+    "data/roster100/run/extra_gradings.json":
+        "gradings from one-off comparison runs; no single script owns it",
+    "data/roster100/run/person_gradings.json": "scripts/build_person_gradings.py",
+    "data/imdb/seed_graph.json": "scripts/build_imdb_graph.py --dumps <dir>",
+    "data/imdb/couples_cache.json": "scripts/identify_couples.py  [spends quota]",
 }
 
 

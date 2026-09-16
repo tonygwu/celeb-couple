@@ -218,6 +218,7 @@ running anything in the first group.
 | `scripts/derive_pairings.py` | derives every pairing gap by SUBTRACTING two cached person-year scores, so an already-judged pair costs nothing; a pairing whose two people are not both cached is emitted with `gap: null` and a reason rather than dropped | no |
 | `scripts/expand_roster.py` | snowballs a roster over co-stars (P161) and real-life partners (P26/P451), bounded, recording what each round added and what each bound cut. `--roster docs/roster-100.json --out docs/roster-expanded.json` | no |
 | `scripts/build_imdb_graph.py` | seed filmographies + full billed cast from the local IMDb dumps. Needs `--dumps <dir>` or `CELEB_IMDB_DIR`; the ~2GB `.tsv.gz` files are NEVER committed. Person-first on purpose: billing order is unreliable for picking a couple and reliable for listing a person's films | no |
+| `scripts/build_person_gradings.py` | averages EVERY grading of a person-year into one canonical score, carrying `n`, `spread` and the models behind it. `--exclude-model claude-sonnet-5` drops one without re-grading anything | no |
 | `scripts/scaling_report.py` | pilot vs full roster; does coverage scale | no |
 | `scripts/source_requirement.py` | how deep a source would have to be | no |
 | `scripts/reachable_products.py` | what can be built with the evidence that exists | no |
@@ -282,6 +283,41 @@ and he has one scene, so weight is `incidental`. A filter on confidence alone
 put that pair on the board as a Julia Roberts row. Board rows come from
 `central` and `substantial`; `incidental` is recorded and excluded so the
 exclusion stays countable. `tests/test_couples.py` pins this.
+
+### One canonical score per person-year, averaged (2026-09-16)
+
+A person-year may be graded several times by several models. The operator's
+rule: keep every grading, and make the canonical score their **mean**.
+
+**Opus may now grade person-years, and it is the default.** Measured on five
+tuples: Opus differed from Fable by a mean of 0.18, while Fable differed from
+ITSELF by 0.12 on a re-run, against a Fable-to-astra floor of 0.307. So Opus is
+inside the noise. Sonnet measured 0.35 and failed 1 of 5 on schema, so it is
+named in `NOISY_MODELS` -- its four gradings still count, and
+`--exclude-model claude-sonnet-5` reverses that without re-grading anything.
+
+This matters because **Fable has its own weekly allowance**, separate from the
+general pool and usually the scarcest window on the account. Moving person-year
+scoring to Opus takes the whole pipeline off it. Keep Fable as a second family:
+the cross-family spread is what made this measurable.
+
+Three things the canonical score carries, deliberately:
+
+- **`n`** -- 18 person-years rest on one grading, 187 on two, five on four or
+  more. Those are not equally precise and the artifact says so.
+- **`spread`** -- max minus min. Mean 0.226 over the 192 multiply-graded
+  tuples, max **2.0** (Kathy Bates 2002, fable against astra).
+- **`models`** -- so a later decision to drop one costs no calls.
+
+**An unjudged grading is a refusal, not a zero.** astra refused 23 of its 215,
+and averaging those in as 0.0 would drag every one to the bottom of the board.
+`canonical_scores` skips them; `tests/test_canonical.py` pins it.
+
+**Gradings written before 2026-09-16 carry no model and no timestamp.** 430 of
+444. The model is recovered from the family through `MODEL_FOR_FAMILY`, which
+is what those runs pinned. The time is NOT recoverable and is NOT back-filled
+from file mtime, which records when a file was touched rather than when a
+judgment was made. `tests/test_grading_provenance.py` forbids that back-fill.
 
 ## Plan v4: the pairing boards
 

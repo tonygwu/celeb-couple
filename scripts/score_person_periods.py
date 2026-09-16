@@ -48,6 +48,7 @@ from packages.llmkit.contract import PERSON_RUBRIC_VERSION, load_contract  # noq
 from packages.llmkit.judges import ClaudeJudge, CodexJudge, JudgeError    # noqa: E402
 from modules.pairing.person import (ParseError, cache_key,                # noqa: E402
                                     parse_person_verdict, person_period_id)
+from modules.pairing.canonical import MODEL_FOR_FAMILY     # noqa: E402
 
 RUBRIC = REPO / "rubrics/person/PERSON.md"
 SCHEMA = REPO / "rubrics/person/person.schema.json"
@@ -114,10 +115,16 @@ def main() -> int:
         description="Judge person-years, film-blind and cached. SPENDS MODEL QUOTA.")
     ap.add_argument("--from-scores", action="append",
                     default=None, help="pairing artifacts whose people to judge")
-    ap.add_argument("--judges", default="fable")
+    ap.add_argument("--judges", default="opus",
+                    help="comma-separated judge families. Defaults to opus: "
+                         "Opus was measured inside Fable's own run-to-run noise "
+                         "and does not spend Fable's scarcer separate window.")
     ap.add_argument("--account", default=None)
     ap.add_argument("--astra-account", default=None)
-    ap.add_argument("--model", default="claude-fable-5-1")
+    ap.add_argument("--model", default=None,
+                    help="override the model. By default each family uses its "
+                         "own pinned model from MODEL_FOR_FAMILY, so --judges "
+                         "and --model cannot silently disagree.")
     ap.add_argument("--observations", default="data/roster100/observations/observations.json")
     ap.add_argument("--cache", default="data/roster100/run/person_period_cache.json")
     ap.add_argument("--raw", default="data/roster100/run/raw_person")
@@ -162,12 +169,28 @@ def main() -> int:
     raw_dir = REPO / args.raw
     raw_dir.mkdir(parents=True, exist_ok=True)
 
+    def model_for(family: str) -> str:
+        """--model wins; otherwise the family's pinned model.
+
+        A family name and a model name that disagree would stamp the artifact
+        with a model that did not produce it, which is exactly the provenance
+        this run exists to record.
+        """
+        if args.model:
+            return args.model
+        try:
+            return MODEL_FOR_FAMILY[family]
+        except KeyError:
+            raise SystemExit(
+                f"no pinned model for judge family {family!r}. Pass --model, or "
+                f"add it to MODEL_FOR_FAMILY. Known: {sorted(MODEL_FOR_FAMILY)}")
+
     judges = {}
     for j in names:
         judges[j] = (CodexJudge("astra", "gpt-6-astra", effort="high",
                                 config_dir=resolve_codex_home(args.astra_account))
                      if j == "astra" else
-                     ClaudeJudge(j, args.model, config_dir=resolve_account(args.account)))
+                     ClaudeJudge(j, model_for(j), config_dir=resolve_account(args.account)))
     budgets = {j: Budget(max_calls=args.max_calls) for j in names}
     tax: Counter = Counter()
     done = failed = 0
@@ -201,6 +224,11 @@ def main() -> int:
             "evidence_available": [o["observation_id"] for o in ev],
             "reasoning": v.reasoning, "cannot_judge_reason": v.cannot_judge_reason,
             "contract": contract.as_dict(),
+            # Provenance, added 2026-09-16. Entries written before this carry
+            # neither field, and it is NOT back-filled from file mtime: mtime
+            # is when a file was touched, not when the judgment was made.
+            "model": model_for(j),
+            "graded_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
         done += 1
         # Written EVERY time, not at the end. A run the machine sleeps through

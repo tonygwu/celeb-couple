@@ -149,6 +149,10 @@ if [[ "$MODE" == "reports" || "$MODE" == "all" ]]; then
   # Plan v4 §4a. Derives every pairing gap from the cached person-year scores,
   # so a pairing between two already-judged people costs no model call. Must run
   # BEFORE build_boards.py, which reads what this writes.
+  # Averages every grading of a person-year into one canonical score, so a
+  # tuple graded by fable, astra and opus becomes one number with an n and
+  # a spread. BEFORE derive_pairings.py, which subtracts those scores.
+  [ -f data/roster100/run/person_period_cache.json ] && run scripts/build_person_gradings.py
   [ -f data/roster100/run/person_period_cache.json ] && run scripts/derive_pairings.py
   [ -f data/roster100/run/pairing_scores.json ] && run scripts/build_boards.py
   # Renders the HTML from the cache. Last, because it reads what every
