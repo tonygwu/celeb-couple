@@ -423,6 +423,28 @@ Everything above is free. `scripts/score_roster_joint.py` then scores only the
 dossiers the jointly covered pairings need, which is about nine rather than the
 127 a full pass would cost.
 
+## IMDb is in scope as of 2026-09-15
+
+Plan v3 §3 listed IMDb as `Out`, on its terms clause about data "repurposed to
+create any kind of online/offline database of movie information". **The
+operator reversed that on 2026-09-15, for full use including the published
+page.** The reasoning, and what did not change, are in `docs/SOURCE-HUNT.md`.
+
+Two things an agent needs from that decision:
+
+- **Never commit a `.tsv.gz` dump.** They are ~2 GB and not ours to
+  redistribute. Derived artifacts commit normally.
+- **The restricted publishers are unaffected.** People Inc./people.com, Ziff
+  Davis/askmen.com, Maxim and Condé Nast/Glamour stay out by every route,
+  archives included. IMDb was never on that list.
+
+One correction worth keeping, because it cost a turn: an agent asserted this
+restriction was written in `AGENTS.md` and in a `docs/PLAN-v3.md`. Neither was
+true. Plan v3 lives outside the repo, in the plan-mode file, so a subagent
+grepping the checkout found nothing and the agent then over-corrected to "the
+restriction never existed". **A constraint you remember but cannot cite is
+neither confirmed nor refuted by its absence from the repo.** Say which it is.
+
 ## Two ways Wikidata answers wrongly and looks fine
 
 Both were found on 2026-09-15 and both had already shipped a number. Use

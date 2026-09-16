@@ -279,3 +279,51 @@ will have learned that for 40 calls instead of 1200.
 
 **Stop after M1** and show the 10-actor board with its error bars. M2 onward
 needs a second approval, and M3 needs its free sizing fetch first.
+
+## 11. AMENDMENT (2026-09-15): IMDb admitted, and why the roster was the bottleneck
+
+### The problem this solves
+
+§6's boards are thin. Five people on the men's on-screen board. The method is
+sound after §4a, and the corpus is not there.
+
+The cause is not the judging and not the budget. It is that **Wikidata records
+`cast member` (P161) but almost never records who played the love interest.**
+So roster expansion had to snowball over co-starring, which ranks people by how
+often they appear beside someone already on the list. That ranking does not
+track romantic billing. Drew Barrymore came in at rank 169. Minnie Driver came
+in at rank 455 and had to be named by hand. A bigger cap does not fix a ranking
+that is measuring the wrong thing.
+
+### What changed
+
+Plan v3 §3 listed IMDb as `Out` over its terms clause about repurposing the
+data into a movie database. **The operator reversed that on 2026-09-15**, for
+full use including the published page. `docs/SOURCE-HUNT.md` carries the
+reasoning and the cost that was named before the choice.
+
+### Why it is the right lever
+
+`title.principals.tsv.gz` gives billing order for every title, so "the two
+top-billed leads, one `actor` and one `actress`" becomes a mechanical rule over
+the whole corpus rather than a snowball. Three things arrive with it:
+
+- **`ordering`** — billing position, which is what "lead" means.
+- **`category`** — literally `actor` or `actress`, so sex comes from the file
+  and not from an inference over first names.
+- **`characters`** — character names, a second signal for a romance beyond
+  billing and genre.
+
+### What this does NOT change
+
+- The judgment stays **film-blind**, per §4a. The judge is never told the film.
+  IMDb decides *who* gets scored and never *what the score is*.
+- The restricted publishers stay restricted, by every route.
+- Every score stays keyed on `(person, year, family)` and stays cached, so
+  widening the roster costs only the person-years that are new.
+
+### The open question this re-opens
+
+§8's budget was sized against a 100-name roster. A corpus built on billing
+order will be larger. The budget has to be re-derived from the new graph before
+anything is judged, and the operator sets the number.

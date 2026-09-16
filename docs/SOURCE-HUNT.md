@@ -122,3 +122,42 @@ winner.
 - Do not select the roster to fit the evidence. The 100-name roster was chosen
   on prominence before any scorability check, deliberately, and rebuilding it
   around FHM's coverage would manufacture a board out of a sampling choice.
+
+## IMDb: the bulk datasets, admitted 2026-09-15
+
+**Plan v3 §3 listed IMDb as `Out`. The operator reversed that on 2026-09-15,
+for full use including the published page.** The reversal is recorded here
+because this file, not the plan, is what an agent reads before fetching
+anything.
+
+### What the restriction was
+
+Plan v3's source matrix gave one reason: IMDb's terms permit the bulk datasets
+for personal and non-commercial use, and forbid data "repurposed to create any
+kind of online/offline database of movie information". A public leaderboard
+built from the dumps is arguably that database. The restriction was never a
+crawler question. The bulk files are the one IMDb route with no robots.txt
+issue at all, because they are published for download.
+
+### What was decided instead
+
+Full use. The dumps may drive roster construction, pairing discovery, and the
+film titles and years shown on the board. The concern above was put to the
+operator with that cost named, and the operator chose this option anyway. It is
+their call and it is deliberate, not an oversight.
+
+### What did NOT change
+
+The restricted publishers are untouched and stay untouched: **People Inc. /
+people.com, Ziff Davis / askmen.com, Maxim, Condé Nast / Glamour.** Never
+fetched, by any route, archives included. IMDb was never on that list; it sat
+in the plan's matrix for an unrelated reason.
+
+### Operating rules for the dumps
+
+- The `.tsv.gz` files are **never committed**. They are ~2 GB and they are not
+  ours to redistribute. Point the loader at a local path.
+- Derived artifacts commit normally. A pairing graph is our output.
+- `title.principals` carries `category`, which is `actor` or `actress`. That is
+  the sex signal the board needs, and it comes from the file rather than from
+  an inference over names.
