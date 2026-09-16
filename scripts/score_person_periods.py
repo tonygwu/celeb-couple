@@ -184,14 +184,15 @@ def main() -> int:
             res = judges[j](build_prompt(name, per, ppid, ev, rubric, schema))
         except JudgeError as exc:
             tax[exc.args[0]] += 1; failed += 1
-            print(f"  [{i}/{len(backlog)}] {name} {per} {j}  FAILED {exc.args[0]}")
+            print(f"  [{i}/{len(backlog)}] {name} {per} {j}  FAILED {exc.args[0]}",
+                  flush=True)
             continue
         (raw_dir / f"{ppid}__{j}.txt").write_text(res.text)
         try:
             v = parse_person_verdict(res.text, ppid)
         except ParseError as exc:
             tax["schema"] += 1; failed += 1
-            print(f"  [{i}/{len(backlog)}] {name} {per} {j}  SCHEMA {exc}")
+            print(f"  [{i}/{len(backlog)}] {name} {per} {j}  SCHEMA {exc}", flush=True)
             continue
         cache[cache_key(q, per, j)] = {
             "person_id": q, "person": name, "period": per, "family": j,
@@ -208,7 +209,7 @@ def main() -> int:
         cache_path.write_text(json.dumps(cache, indent=2, sort_keys=True))
         mark = "ev" if v.evidence_used else "  "
         print(f"  [{i}/{len(backlog)}] {name[:24]:<24} {per} {j:<6} {mark} "
-              f"-> {v.score if v.judged else 'UNJUDGED'}")
+              f"-> {v.score if v.judged else 'UNJUDGED'}", flush=True)
 
     print(f"\nattempted {done+failed}  cached {done}  failed {failed}  {dict(tax)}")
     print(f"cache now holds {len(cache)} entries; "

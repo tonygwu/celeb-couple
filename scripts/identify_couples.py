@@ -97,7 +97,7 @@ def main() -> int:
             failed += 1
             kind = getattr(exc, "error_type", type(exc).__name__)
             taxonomy[kind] = taxonomy.get(kind, 0) + 1
-            print(f"  [{i}/{len(todo)}] {f['title'][:34]:<35} FAILED {kind}")
+            print(f"  [{i}/{len(todo)}] {f['title'][:34]:<35} FAILED {kind}", flush=True)
             continue
         keep, drop = board_pairs(verdict), excluded_pairs(verdict)
         cache[cache_key(t, family)] = {
@@ -113,7 +113,7 @@ def main() -> int:
         cache_path.write_text(json.dumps(cache, indent=1))
         succeeded += 1
         print(f"  [{i}/{len(todo)}] {f['title'][:34]:<35} "
-              f"{len(keep)} board, {len(drop)} incidental")
+              f"{len(keep)} board, {len(drop)} incidental", flush=True)
 
     print(f"\nattempted {attempted}  succeeded {succeeded}  failed {failed}  {taxonomy}")
     if attempted != succeeded + failed:
