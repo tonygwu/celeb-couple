@@ -5,7 +5,12 @@ These are evaluations, not gates. The script always exits 0 unless it could not
 run; a stress finding is a finding, not a build failure.
 
     .venv/bin/python scripts/run_stress.py --out data/pilot/stress \
-        --fable-account /Users/tonygwu/.claude-e --max-astra 10
+        --fable-account "$CELEB_ACCOUNT" --max-astra 10
+
+There is no default account and there must not be one: see
+`packages/llmkit/accounts.py`, which refuses and names the config dirs it can
+see rather than guessing at one. Pass a Claude config directory, or the keyword
+`default` for the account bare `claude` uses.
 """
 
 from __future__ import annotations
