@@ -789,7 +789,17 @@ commits at the time of the audit. Every commit author is the GitHub noreply
 address. No `data/` path and no `.tsv`/`.tsv.gz` has ever been in history, and
 the largest blob ever committed is 119 KB. Those categories are closed.
 
-### B1. A personal email sits in one pushed commit MESSAGE — `9234a510`
+### B1. RESOLVED 2026-09-16 — the email is gone from every clone and from origin
+
+The message of `9234a510` was rewritten to redact the account id and address, and
+the 9 commits from it to HEAD were replayed. Verified afterwards: 0 occurrences on
+`main`, 0 on `origin/main`, 0 in repo-0/1/2/3 after re-syncing them, and
+`git diff backup main` was EMPTY, so only messages changed and no content moved.
+All three sibling clones held 0 unpushed commits, so the force-push discarded
+nobody's work. `refs/original` and the backup branch were deleted and the reflog
+expired, or the old message would have survived locally.
+
+~~Original entry:~~ 
 
 **Caused by this audit, in the commit that fixed the underlying problem.**
 `9234a510` quotes `.wrangler/cache/wrangler-account.json` verbatim to explain
@@ -813,7 +823,9 @@ coordinated across `repo-1`..`repo-3` or done when no other agent is working.
 rewrite. After publication it cannot be fixed at all, because forks, caches and
 archives keep the old message.
 
-### B2. No LICENSE, and no preference recorded anywhere
+### B2. RESOLVED 2026-09-16 — MIT, the operator's choice. See `LICENSE`.
+
+~~Original entry:~~ 
 
 `git grep` finds no licence statement in any tracked file and `pyproject.toml`
 has no `license` field. A public repository with no LICENSE grants nobody any
@@ -821,7 +833,32 @@ permission, which is legal but usually not what was intended. README.md and
 CONTRIBUTING.md both say so plainly rather than leaving it silent. Choosing one
 is an operator decision.
 
-### B3. The boards rank named people, some of whom are private individuals
+### B3. CLOSED 2026-09-16 — the operator decided not to drop anyone
+
+**Decided with the measurement in hand, not in the abstract.** Wikidata occupation
+(P106) puts 26 of the 281 people on the real-life side outside any performing
+occupation: spouses such as Luciana Barroso, Cooke Maroney and Katherine
+Schwarzenegger, plus athletes and businesspeople.
+
+Two rules were measured. Dropping a pairing when either side is a non-performer
+cuts 27 pairings and removes Cameron Diaz, Keanu Reeves, Will Smith, Chris Pratt
+and five others from the board — it punishes the celebrity for the privacy of the
+non-celebrity, which is backwards. Declining to RANK non-performers while keeping
+them as partners costs 0 pairings and removes exactly ONE person, Alex Rodriguez,
+who is a public figure. The operator judged that not worth doing.
+
+**Two earlier framings of this were wrong and are recorded so they are not
+repeated.** Ojani Noa and Cris Judd were named as private individuals; P106 says
+model and dancer/choreographer, both performers. And a first measurement used
+"has an on-screen pairing in this corpus" as the performer test, which labelled
+Amy Poehler, Lupita Nyong'o, Megan Fox and Ana de Armas non-performers — the
+on-screen corpus only covers the 30 seeds' films, so it is not a test of what
+anyone does for a living.
+
+If this is ever reopened, the cheap half-step is initials for non-performers in
+the expanded detail: it keeps every number and removes the name.
+
+~~Original entry:~~ 
 
 `docs/BOARDS.md` publishes attractiveness rankings of real named people, and
 says of itself that no source backs any number in it. Several partners named
@@ -844,7 +881,17 @@ this question is partly live whatever the repository's visibility is.
 If any is an unreleased or internal vendor codename, publishing the repository
 publishes it. This audit could not determine that. Confirm before publishing.
 
-### B5. A private Figma file key is published in three tracked files
+### B5. RESOLVED 2026-09-16 — files moved out; the operator is deleting the Figma file
+
+`docs/design/FIGMA-HANDOFF.md` and `.app-ux-design/` moved to `../design-private/`,
+outside every checkout, and both paths are gitignored. The key remains in history
+from `7cef44f` onward, across 51 commits. No rewrite is needed: the operator is
+deleting the Figma file itself, which makes the key an identifier pointing at
+nothing. A file key is a capability, not a credential — what it opens depends on
+that file's sharing settings — so retiring the file is a complete fix and a
+51-commit rewrite is not.
+
+~~Original entry:~~ 
 
 `docs/design/FIGMA-HANDOFF.md`, `.app-ux-design/design-brief.md` and
 `.app-ux-design/state-ledger.json` all carry the same Figma file key, which is
