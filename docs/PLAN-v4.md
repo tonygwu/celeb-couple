@@ -273,7 +273,12 @@ will have learned that for 40 calls instead of 1200.
   and M1 is designed to find it early and cheaply. If it happens, the honest
   product is a board with wide intervals and few distinguishable ranks, which is
   still more than anyone else has.
-- **It is a ranked list of real people by attractiveness.** Private is private.
+- **It is a ranked list of real people by attractiveness.** This was mitigated
+  by keeping it private. That mitigation ENDED on 2026-09-16, when the boards
+  went live at https://celebrities.tonygwu.com/. What replaces it is disclosure
+  rather than secrecy: the page states that these are model judgments, that a
+  published ranking backs 4.7% of them, and that adjacent rows are routinely
+  not separable. That is a weaker mitigation and it should be read as one.
   Publishing is a separate decision with separate consequences, and this plan
   neither asks for it nor prepares it.
 

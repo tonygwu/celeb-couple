@@ -410,8 +410,14 @@ def main() -> int:
       "artifact will do it — so the fingerprint is a reason to read the diff, "
       "not a claim about what is in it.")
     w("")
-    w("**Private pilot. Nothing here is published, ranked, or deployed. Every "
-      "relationship and every on-screen pairing is an UNVERIFIED candidate.**")
+    # The boards went live at celebrities.tonygwu.com on 2026-09-16, so the old
+    # "nothing here is deployed" line stopped being true. This report covers the
+    # M0 PILOT corpus, which is a different and smaller thing than what is
+    # published, and saying so is more useful than either old sentence.
+    w("**This report covers the M0 pilot corpus, which is NOT what is published. "
+      "The live boards at https://celebrities.tonygwu.com/ are built from a later "
+      "and larger run. Every relationship and every on-screen pairing below is an "
+      "UNVERIFIED candidate.**")
     w("")
     w("This report covers the 14-person pilot. Three companion documents cover "
       "what came after it:")

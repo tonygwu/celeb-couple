@@ -307,9 +307,15 @@ The conventions that matter to an outside reader are short.
 
 ## Status and licence
 
-This is a completed research pilot published for its negative result. It is not
-a product, it is not deployed, and there is no ranking anybody is invited to
-take seriously.
+This is a research pilot, published for its negative result as much as for its
+rankings. It is not a product.
+
+The boards are deployed, at **<https://celebrities.tonygwu.com/>**. That page
+carries the same caveats this README does, and they are the point rather than
+boilerplate: the numbers are model judgments, a published ranking backs only
+4.7% of them, and two judge families disagree by enough that adjacent rows are
+routinely not separable. Read a row as "a model, shown no photograph, guessed
+this" and not as a finding about anybody.
 
 **MIT.** See [`LICENSE`](LICENSE). The licence covers the code in this
 repository. It says nothing about the scored corpus under `data/`, which is

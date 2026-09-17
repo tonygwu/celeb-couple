@@ -4,7 +4,7 @@ Generated 2026-09-17 from the run artifacts under `data/pilot/`, input fingerpri
 
 The fingerprint, not the date, is this report's identity: it hashes the artifacts with their `generated_at_utc` stamps removed, so re-running the chain over unchanged inputs produces an identical file. A changed fingerprint means an input changed, not that the chain ran again. An input can change without any rendered number moving — a new field in an artifact will do it — so the fingerprint is a reason to read the diff, not a claim about what is in it.
 
-**Private pilot. Nothing here is published, ranked, or deployed. Every relationship and every on-screen pairing is an UNVERIFIED candidate.**
+**This report covers the M0 pilot corpus, which is NOT what is published. The live boards at https://celebrities.tonygwu.com/ are built from a later and larger run. Every relationship and every on-screen pairing below is an UNVERIFIED candidate.**
 
 This report covers the 14-person pilot. Three companion documents cover what came after it:
 
