@@ -61,6 +61,18 @@ mkdir -p site
 cp "$HTML" site/index.html
 echo "staged   ./site/index.html"
 
+# The social card. Without it the og:image in index.html points at a 404 and
+# the link unfurls on Twitter and LinkedIn with no picture. Regenerate it with
+# scripts/render_og.sh after changing web/og-card.html.
+OG="$(dirname "$0")/../web/og.png"
+if [ -f "$OG" ]; then
+  cp "$OG" site/og.png
+  echo "staged   ./site/og.png ($(wc -c < site/og.png | tr -d ' ') bytes)"
+else
+  echo "REFUSING: web/og.png is missing, so og:image would 404" >&2
+  exit 1
+fi
+
 if [ "$DRY" -eq 1 ]; then
   echo "--dry-run: staged ./site, published nothing"
   exit 0

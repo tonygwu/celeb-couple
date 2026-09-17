@@ -224,6 +224,7 @@ running anything in the first group.
 | `bash scripts/refresh_boards.sh` | the whole free chain over whatever has landed: bridge (only if new people appeared) → pairings → canonical gradings → HTML. Safe to run WHILE the paid runs are still writing | no |
 | `bash scripts/deploy_site.sh` | publishes the board `refresh_boards.sh` last rendered to https://celebrities.tonygwu.com/ , as Cloudflare Worker `celebrity-couple`. Renders nothing itself, so run `refresh_boards.sh` first. Refuses a source under 400KB or missing its title or DATA blob, then re-fetches the live URL and refuses if what came back is not this board. `--dry-run` stages `./site` and publishes nothing | no |
 | `scripts/build_reallife_pairings.py` | EVERY scorable episode becomes a real-life pairing. Not `select_m1_slice.py`, which narrows to 10 focal actors and is why the real-life boards showed 4 people when the episodes file held 228 relationships | no |
+| `bash scripts/render_og.sh` | renders `web/og-card.html` to `web/og.png` at 1200x630, the picture Twitter and LinkedIn show. Deliberately carries NO scores so it cannot go stale; re-run only when the card changes | no |
 | `scripts/scaling_report.py` | pilot vs full roster; does coverage scale | no |
 | `scripts/source_requirement.py` | how deep a source would have to be | no |
 | `scripts/reachable_products.py` | what can be built with the evidence that exists | no |
