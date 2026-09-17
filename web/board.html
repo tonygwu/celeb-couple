@@ -77,7 +77,7 @@ footer code{font-family:var(--mono);font-size:11.5px}
  font-variant-numeric:tabular-nums;width:26px}
 .trend .tl.r{text-align:left}
 .trend .none{font-family:var(--mono);font-size:10.5px;color:var(--mute)}
-.sexpick{display:flex;justify-content:center;gap:6px;margin:0 0 2px}
+.sexpick{display:flex;justify-content:center;gap:6px;margin:0 0 15px}
 .sexpick button{font-family:var(--serif);font-weight:400;font-size:clamp(24px,4.4vw,34px);
  line-height:1.15;background:none;border:0;color:var(--mute);cursor:pointer;
  padding:4px 22px 9px;border-bottom:2px solid transparent;transition:color .12s}
@@ -89,7 +89,9 @@ footer code{font-family:var(--mono);font-size:11.5px}
 /* 34 and 140 are the chart's first and last PLOTTED x, not its box edges:
    spark() insets the line by PADX so the end dots are not clipped. */
 .axis i{font-style:normal}
-.lede{max-width:64ch;margin:0}
+.lede{max-width:64ch;margin:15px 0 0}
+.lede.src{margin-top:13px;font-size:14px;color:var(--mute)}
+.sub{margin-bottom:0}
 .lede b{font-weight:600}
 /* Hide the CELL, not only the chart inside it. Hiding just .trend left an
    empty 79px column in every body row with no header above it, so every
@@ -107,12 +109,15 @@ footer code{font-family:var(--mono);font-size:11.5px}
     Fable and Astra judge their normalized attractiveness in a given year. We then compute
     how much each A-lister punched above their weight in landing an on-screen dating resume.</p>
   <p class="lede" id="lede"></p>
+  <p class="lede src">Every roster, rubric and script behind these numbers is open source:
+    <a href="https://github.com/tonygwu/celeb-couple">github.com/tonygwu/celeb-couple</a>, MIT licensed.</p>
 </header>
 
 <div>
   <div class="sexpick" id="sexpick" role="group" aria-label="Men or women"></div>
   <div class="picker">
     <div class="seg" id="dompick" role="group" aria-label="On screen or real life"></div>
+    <div class="seg" id="rankpick" role="group" aria-label="Rank by"></div>
     <div class="seg" role="group" aria-label="Score basis">
       <button id="bNorm" data-basis="norm" aria-pressed="true">Normalized</button>
       <button id="bRaw" data-basis="raw" aria-pressed="false">Raw</button>
@@ -128,8 +133,6 @@ footer code{font-family:var(--mono);font-size:11.5px}
   <p>Contract <code id="ct"></code>. Ranked by <b>average</b>, the mean across a person's romances,
     so it rewards who they were with rather than how many. <b>Cumulative</b> adds them all.
     Negative is a normal answer and is the point. Click any row for the pairings behind the number.</p>
-  <p>The roster, the rubrics, the scoring pipeline and this page are all in one
-    repository: <a href="https://github.com/tonygwu/celeb-couple">github.com/tonygwu/celeb-couple</a>, MIT licensed.</p>
 </footer>
 </div>
 <script>
@@ -138,7 +141,7 @@ const f2 = v => (v>0?"+":v<0?"\u2212":"") + Math.abs(v).toFixed(2);
 const s2 = v => v==null ? "\u2013" : v.toFixed(2);
 const cls = v => v>0?"pos":v<0?"neg":"";
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let gsel="male", dsel="on_screen", basis="norm";
+let gsel="male", dsel="on_screen", basis="norm", rank="avg";
 /* The x-axis of every chart in ONE board. Shared across its rows so they
    line up, and recomputed per board so a tab is not stretched by years no
    row in it uses. */
@@ -150,6 +153,9 @@ const OTHER= c => basis==="norm" ? c.other_n : c.other_abs;
 const TOT  = r => basis==="norm" ? r.n_total : r.paw_total;
 const AVG  = r => basis==="norm" ? r.n_rate  : r.paw_rate;
 const PT   = p => basis==="norm" ? p.n : p.raw;
+/* Whichever column the board is ranked by. ONE accessor, so the sort, the tie
+   brackets, the bar and the lede can never disagree about it. */
+const RANKV= r => rank==="cum" ? TOT(r) : AVG(r);
 /* The gap the detail line PRINTS, recomputed from the two rounded numbers
    printed beside it. Using the stored gap made 38% of lines fail the
    subtraction they show: Sofia Vergara (9.42) minus Jon Favreau (6.90) came
@@ -192,7 +198,7 @@ function spark(r, vmin, vmax, vmid){
 function ties(rows){
   const g=[]; let cur=[0];
   for(let i=1;i<rows.length;i++){
-    const a=AVG(rows[i-1]), b=AVG(rows[i]);
+    const a=RANKV(rows[i-1]), b=RANKV(rows[i]);
     if(a!=null&&b!=null&&Math.abs(a-b)<DATA.meta.floor) cur.push(i); else {g.push(cur);cur=[i];}
   }
   g.push(cur); return g;
@@ -201,7 +207,7 @@ function ties(rows){
 function topOf(gender,domain){
   const b=DATA.boards.find(x=>x.gender===gender&&x.domain===domain);
   if(!b) return null;
-  const r=[...b.rows].filter(x=>AVG(x)!=null).sort((x,y)=>AVG(y)-AVG(x))[0];
+  const r=[...b.rows].filter(x=>RANKV(x)!=null).sort((x,y)=>RANKV(y)-RANKV(x))[0];
   return r?{r,b}:null;
 }
 /* Named from the data, so the claim cannot drift from the board below it. */
@@ -219,10 +225,10 @@ function lede(){
 function render(){
   lede();  /* it quotes numbers off these boards, so it is rebuilt with them */
   const b=DATA.boards.find(x=>x.gender===gsel&&x.domain===dsel)||DATA.boards[0];
-  const rows=[...b.rows].filter(r=>AVG(r)!=null).sort((x,y)=>AVG(y)-AVG(x));
+  const rows=[...b.rows].filter(r=>RANKV(r)!=null).sort((x,y)=>RANKV(y)-RANKV(x));
   const grp=ties(rows), pos={};
   grp.forEach(g=>g.length>1&&g.forEach((i,k)=>pos[i]=k===0?"top":k===g.length-1?"bot":"mid"));
-  const span=Math.max(...rows.map(r=>Math.abs(AVG(r)??0)),0.5);
+  const span=Math.max(...rows.map(r=>Math.abs(RANKV(r)??0)),0.5);
   const tied=grp.filter(g=>g.length>1).reduce((n,g)=>n+g.length-1,0);
   const all=rows.flatMap(r=>(r.series||[]).map(PT)).filter(v=>v!=null);
   const vmin=all.length?Math.min(...all):0, vmax=all.length?Math.max(...all):1;
@@ -236,7 +242,7 @@ function render(){
       <span class="axis"><i>${AX.y0 ?? ""}</i><i>${AX.y1 ?? ""}</i></span></th>
     <th>Romances</th><th>Average</th><th>Cumulative</th><th class="l">Spread</th></tr></thead><tbody>`;
   rows.forEach((r,i)=>{
-    const o=open.has(b.label+r.qid), a=AVG(r)??0;
+    const o=open.has(b.label+r.qid), a=RANKV(r)??0;
     const w=Math.abs(a)/span*50, left=a<0?50-w:50;
     h+=`<tr class="person" tabindex="0" data-q="${esc(r.qid)}" aria-expanded="${o}">
       <td class="tiecell">${pos[i]?`<i class="tie ${pos[i]}"></i>`:""}</td>
@@ -244,8 +250,8 @@ function render(){
       <td class="who"><span class="chev">${o?"\u25be":"\u25b8"}</span>${esc(r.name)}</td>
       <td class="trendc"><div class="trend">${spark(r,vmin,vmax,vmid)}</div></td>
       <td class="num" style="color:var(--mute)">${r.pairings}</td>
-      <td class="num big ${cls(a)}">${f2(a)}</td>
-      <td class="num ${cls(TOT(r)??0)}">${TOT(r)==null?"\u2013":f2(TOT(r))}</td>
+      <td class="num ${rank==="avg"?"big":""} ${cls(AVG(r)??0)}">${AVG(r)==null?"\u2013":f2(AVG(r))}</td>
+      <td class="num ${rank==="cum"?"big":""} ${cls(TOT(r)??0)}">${TOT(r)==null?"\u2013":f2(TOT(r))}</td>
       <td><div class="bar"><i style="left:${left}%;width:${w}%;background:${a>0?"var(--up)":"var(--down)"}"></i><span class="z"></span></div></td></tr>`;
     if(o){
       const cs=[...r.contributions].sort((x,y)=>(G(y)??0)-(G(x)??0));
@@ -283,6 +289,10 @@ function tabs(){
     `<button data-d="${esc(d.d)}" aria-pressed="${d.d===dsel}">${esc(d.l)}</button>`).join("");
   document.querySelectorAll("#sexpick button").forEach(el=>el.onclick=()=>{gsel=el.dataset.g;tabs();render();});
   document.querySelectorAll("#dompick button").forEach(el=>el.onclick=()=>{dsel=el.dataset.d;tabs();render();});
+  document.getElementById("rankpick").innerHTML =
+    [["avg","Average"],["cum","Cumulative"]].map(([k,l])=>
+      `<button data-r="${k}" aria-pressed="${k===rank}">${l}</button>`).join("");
+  document.querySelectorAll("#rankpick button").forEach(el=>el.onclick=()=>{rank=el.dataset.r;tabs();render();});
 }
 document.querySelectorAll(".seg [data-basis]").forEach(el=>el.onclick=()=>{
   basis=el.dataset.basis;
