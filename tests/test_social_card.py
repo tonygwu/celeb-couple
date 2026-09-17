@@ -71,3 +71,16 @@ def test_the_card_carries_no_scores_so_it_cannot_go_stale():
     regenerating on every refresh, and will silently stop matching the board."""
     card = (REPO / "web/og-card.html").read_text()
     assert not re.search(r"[+−-]\d+\.\d\d", card), "the card quotes a score"
+
+
+def test_the_card_type_survives_a_compact_thumbnail():
+    """LinkedIn and Slack often render a ~255px thumbnail, about 21% scale.
+    The first card had a 19px eyebrow, 27px body and 16px chips, which came out
+    at 4.0, 5.7 and 3.4px - only the headline was readable. Nothing under 42px
+    earns its place on this image."""
+    card = (REPO / "web/og-card.html").read_text()
+    sizes = [int(m) for m in re.findall(r"font-size:(\d+)px", card)]
+    assert sizes, "no font sizes found; the selector changed"
+    too_small = [s for s in sizes if s < 42]
+    assert not too_small, (
+        f"{too_small} would render under 9px in a 255px thumbnail")
