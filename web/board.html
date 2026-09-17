@@ -21,31 +21,21 @@ h1{font-family:var(--serif);font-weight:400;font-size:clamp(36px,7vw,60px);line-
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
  color:var(--mute);margin:0 0 14px}
 .sub{color:var(--mute);max-width:60ch;margin:0}
-
-
-
-
-
-
-
-
-
-
-
-
+a{color:inherit}
+footer a{text-decoration:underline;text-underline-offset:2px;text-decoration-color:var(--rule)}
+footer a:hover{text-decoration-color:var(--ink)}
 .note{font-size:13px;color:var(--mute);max-width:66ch;margin:0}
 .note b{color:var(--ink)}
-.controls{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
-nav{display:flex;flex-wrap:wrap;gap:2px;border-bottom:1px solid var(--rule);flex:1}
-nav button{font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--mute);background:none;
- border:0;border-bottom:2px solid transparent;padding:9px 14px;cursor:pointer;margin-bottom:-1px}
-nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
-nav button:hover{color:var(--ink)}
 .seg{display:flex;border:1px solid var(--rule)}
 .seg button{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
  background:none;border:0;color:var(--mute);padding:6px 11px;cursor:pointer;white-space:nowrap}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 button:focus-visible{outline:2px solid var(--up);outline-offset:-2px}
+a:focus-visible{outline:2px solid var(--up);outline-offset:2px}
+/* Rows are focusable, so they need a focus ring from the palette. Without one
+   the browser default is the only marker, a fixed blue that comes from no
+   token and nearly disappears on the dark paper. */
+tr.person:focus-visible{outline:2px solid var(--up);outline-offset:-2px}
 .scroller{overflow-x:auto}
 table{border-collapse:collapse;width:100%;min-width:600px}
 th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);
@@ -73,18 +63,14 @@ tr.detail td{padding:0;background:var(--faint)}
 .line .yr{font-family:var(--mono);font-size:12px;color:var(--mute);min-width:88px}
 .line .eq{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px}
 .line .res{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
-.line .wk{color:var(--mute);font-size:12px;width:100%;padding-left:88px}
-.vol{font-size:13px;color:var(--mute);line-height:1.5;margin:14px 0 0;padding-left:13px;
- border-left:2px solid var(--rule)}
-.vol.hot{border-left-color:var(--down)}
-.vol b{color:var(--ink)}
 .tienote{font-size:12.5px;color:var(--mute);margin:10px 0 0}
 footer{border-top:1px solid var(--rule);padding-top:18px;font-size:12.5px;color:var(--mute);line-height:1.6}
 footer code{font-family:var(--mono);font-size:11.5px}
-@media (max-width:560px){.dl{padding-left:14px}.line .wk{padding-left:0}.line .yr{min-width:0}}
+@media (max-width:560px){.dl{padding-left:14px}.line .yr{min-width:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
-/* trajectory column: every row shares one x-axis, set from the whole population */
+/* trajectory column: every row in a board shares one x-axis, drawn from the
+   years that board's rows use */
 .trend{white-space:nowrap;display:flex;align-items:center;gap:6px}
 .trend svg{display:block;flex:0 0 auto}
 .trend .tl{font-family:var(--mono);font-size:10.5px;color:var(--mute);
@@ -99,11 +85,16 @@ footer code{font-family:var(--mono);font-size:11.5px}
 .sexpick button:hover{color:var(--ink)}
 .sexpick .sym{font-size:.78em;margin-right:.36em;opacity:.6;font-family:var(--sans)}
 .picker{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:2px}
-.axis{font-family:var(--mono);font-size:9.5px;letter-spacing:0;color:var(--mute);opacity:.6;font-weight:400;text-transform:none;margin-top:3px;padding-left:32px;width:142px;display:flex;justify-content:space-between}
+.axis{font-family:var(--mono);font-size:9.5px;letter-spacing:0;color:var(--mute);opacity:.6;font-weight:400;text-transform:none;margin-top:3px;padding-left:34px;width:140px;display:flex;justify-content:space-between}
+/* 34 and 140 are the chart's first and last PLOTTED x, not its box edges:
+   spark() insets the line by PADX so the end dots are not clipped. */
 .axis i{font-style:normal}
 .lede{max-width:64ch;margin:0}
 .lede b{font-weight:600}
-@media (max-width:720px){.trend{display:none}th.trendh{display:none}}
+/* Hide the CELL, not only the chart inside it. Hiding just .trend left an
+   empty 79px column in every body row with no header above it, so every
+   column to its right sat one place off. */
+@media (max-width:720px){th.trendh,td.trendc{display:none}}
 </style></head><body>
 <div class="wrap">
 <header>
@@ -119,7 +110,7 @@ footer code{font-family:var(--mono);font-size:11.5px}
 </header>
 
 <div>
-  <div class="sexpick" id="sexpick" role="tablist" aria-label="Men or women"></div>
+  <div class="sexpick" id="sexpick" role="group" aria-label="Men or women"></div>
   <div class="picker">
     <div class="seg" id="dompick" role="group" aria-label="On screen or real life"></div>
     <div class="seg" role="group" aria-label="Score basis">
@@ -137,12 +128,14 @@ footer code{font-family:var(--mono);font-size:11.5px}
   <p>Contract <code id="ct"></code>. Ranked by <b>average</b>, the mean across a person's romances,
     so it rewards who they were with rather than how many. <b>Cumulative</b> adds them all.
     Negative is a normal answer and is the point. Click any row for the pairings behind the number.</p>
+  <p>The roster, the rubrics, the scoring pipeline and this page are all in one
+    repository: <a href="https://github.com/tonygwu/celeb-couple">github.com/tonygwu/celeb-couple</a>, MIT licensed.</p>
 </footer>
 </div>
 <script>
 const DATA = __DATA__;
 const f2 = v => (v>0?"+":v<0?"\u2212":"") + Math.abs(v).toFixed(2);
-const s2 = v => v==null ? "\u2014" : v.toFixed(2);
+const s2 = v => v==null ? "\u2013" : v.toFixed(2);
 const cls = v => v>0?"pos":v<0?"neg":"";
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let gsel="male", dsel="on_screen", basis="norm";
@@ -157,10 +150,19 @@ const OTHER= c => basis==="norm" ? c.other_n : c.other_abs;
 const TOT  = r => basis==="norm" ? r.n_total : r.paw_total;
 const AVG  = r => basis==="norm" ? r.n_rate  : r.paw_rate;
 const PT   = p => basis==="norm" ? p.n : p.raw;
+/* The gap the detail line PRINTS, recomputed from the two rounded numbers
+   printed beside it. Using the stored gap made 38% of lines fail the
+   subtraction they show: Sofia Vergara (9.42) minus Jon Favreau (6.90) came
+   out as +2.53, because the true operands are 9.4249 and 6.8999. The Average
+   and Cumulative columns still use the unrounded gaps. */
+const r2   = v => Math.round(v*100)/100;
+const SHOWN= c => {const o=OTHER(c), s=SELF(c);
+  return (o==null||s==null) ? G(c) : r2(r2(o)-r2(s));};
 
-/* One trajectory chart per person. The x-axis is the WHOLE corpus's year range
-   and the y-axis is the whole board's score range, so two rows can be compared
-   to each other rather than each being drawn to its own scale. */
+/* One trajectory chart per person. Both axes belong to the whole BOARD: the
+   x-axis is every year its rows use and the y-axis is every score they reach,
+   so two rows can be compared to each other rather than each being drawn to
+   its own scale. */
 /* Deliberately NEUTRAL. Green and red already mean "dated up" and "dated down"
    in the number columns. Colouring the line by whether a person got more or
    less attractive over time gave one colour two unrelated meanings, which reads
@@ -169,16 +171,19 @@ const PT   = p => basis==="norm" ? p.n : p.raw;
    itself. */
 function spark(r, vmin, vmax, vmid){
   const S=(r.series||[]).map(p=>({y:p.y,v:PT(p)})).filter(p=>p.v!=null);
-  if(!S.length) return `<span class="none">\u2014</span>`;
-  const y0=AX.y0, y1=AX.y1, W=110, H=26, PAD=4;
-  const X=y=>y1===y0?W/2:((y-y0)/(y1-y0))*(W-2)+1;
+  if(!S.length) return `<span class="none">\u2013</span>`;
+  const y0=AX.y0, y1=AX.y1, W=110, H=26, PAD=4, PADX=2;
+  /* PADX is the dot radius plus its stroke. Without it the first and last
+     dots of a person whose span reaches an end of the axis were drawn half
+     outside the viewBox and clipped. */
+  const X=y=>y1===y0?W/2:((y-y0)/(y1-y0))*(W-2*PADX)+PADX;
   const Y=v=>vmax===vmin?H/2:H-PAD-((v-vmin)/(vmax-vmin))*(H-2*PAD);
   const pts=S.map(p=>`${X(p.y).toFixed(1)},${Y(p.v).toFixed(1)}`).join(" ");
   const dots=S.map(p=>`<circle cx="${X(p.y).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="1.6" fill="currentColor"/>`).join("");
   const mid=vmid==null?"":`<line x1="0" x2="${W}" y1="${Y(vmid).toFixed(1)}" y2="${Y(vmid).toFixed(1)}" stroke="currentColor" stroke-width="1" opacity="0.18" stroke-dasharray="2 3"/>`;
   return `<span class="tl">${S[0].v.toFixed(1)}</span>`+
     `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" style="color:var(--mute)"
-       aria-label="score from ${S[0].y} to ${S[S.length-1].y}">`+mid+
+       aria-label="${esc(r.name)}: ${S[0].v.toFixed(1)} in ${S[0].y} to ${S[S.length-1].v.toFixed(1)} in ${S[S.length-1].y}">`+mid+
     (S.length>1?`<polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.4"
        stroke-linejoin="round" stroke-linecap="round" opacity="0.9"/>`:"")+dots+`</svg>`+
     `<span class="tl r">${S[S.length-1].v.toFixed(1)}</span>`;
@@ -212,6 +217,7 @@ function lede(){
 }
 
 function render(){
+  lede();  /* it quotes numbers off these boards, so it is rebuilt with them */
   const b=DATA.boards.find(x=>x.gender===gsel&&x.domain===dsel)||DATA.boards[0];
   const rows=[...b.rows].filter(r=>AVG(r)!=null).sort((x,y)=>AVG(y)-AVG(x));
   const grp=ties(rows), pos={};
@@ -236,17 +242,17 @@ function render(){
       <td class="tiecell">${pos[i]?`<i class="tie ${pos[i]}"></i>`:""}</td>
       <td class="rank">${i+1}</td>
       <td class="who"><span class="chev">${o?"\u25be":"\u25b8"}</span>${esc(r.name)}</td>
-      <td><div class="trend">${spark(r,vmin,vmax,vmid)}</div></td>
+      <td class="trendc"><div class="trend">${spark(r,vmin,vmax,vmid)}</div></td>
       <td class="num" style="color:var(--mute)">${r.pairings}</td>
       <td class="num big ${cls(a)}">${f2(a)}</td>
-      <td class="num ${cls(TOT(r)??0)}">${TOT(r)==null?"\u2014":f2(TOT(r))}</td>
+      <td class="num ${cls(TOT(r)??0)}">${TOT(r)==null?"\u2013":f2(TOT(r))}</td>
       <td><div class="bar"><i style="left:${left}%;width:${w}%;background:${a>0?"var(--up)":"var(--down)"}"></i><span class="z"></span></div></td></tr>`;
     if(o){
       const cs=[...r.contributions].sort((x,y)=>(G(y)??0)-(G(x)??0));
       h+=`<tr class="detail"><td colspan="8"><div class="dl">`+cs.map(c=>
         `<div class="line"><span class="yr">${esc(c.work||"Relationship")} (${esc(c.period)}):</span>
           <span class="eq">${esc(c.other)} (${s2(OTHER(c))}) \u2212 ${esc(r.name)} (${s2(SELF(c))}) =</span>
-          <span class="res ${cls(G(c))}">${f2(G(c))}</span></div>`).join("")+`</div></td></tr>`;
+          <span class="res ${cls(SHOWN(c))}">${f2(SHOWN(c))}</span></div>`).join("")+`</div></td></tr>`;
     }
   });
   h+=`</tbody></table></div>`;
@@ -256,7 +262,7 @@ function render(){
      of them only because scoring has not reached their other romances`:""}.
      They still appear as partners on the rows above.</p>`;
   if(tied) h+=`<p class="tienote">${tied} adjacent ${tied===1?"pair is":"pairs are"} closer than the
-     ${DATA.meta.floor.toFixed(2)} floor. Bracketed rows are not separable \u2014 read them as tied.</p>`;
+     ${DATA.meta.floor.toFixed(2)} floor. Bracketed rows are not separable, so read them as tied.</p>`;
   document.getElementById("board").innerHTML=h;
   document.querySelectorAll("tr.person").forEach(el=>{
     const t=()=>{const k=b.label+el.dataset.q; open.has(k)?open.delete(k):open.add(k); render();};
@@ -271,8 +277,8 @@ function tabs(){
     if(!doms.some(x=>x.d===b.domain))  doms.push({d:b.domain,  l:b.domain_label||b.domain});
   });
   document.getElementById("sexpick").innerHTML = sexes.map(s=>
-    `<button role="tab" data-g="${esc(s.g)}" aria-pressed="${s.g===gsel}"
-       aria-selected="${s.g===gsel}"><span class="sym" aria-hidden="true">${SYM[s.g]||""}</span>${esc(s.l)}</button>`).join("");
+    `<button data-g="${esc(s.g)}" aria-pressed="${s.g===gsel}"><span class="sym"
+       aria-hidden="true">${SYM[s.g]||""}</span>${esc(s.l)}</button>`).join("");
   document.getElementById("dompick").innerHTML = doms.map(d=>
     `<button data-d="${esc(d.d)}" aria-pressed="${d.d===dsel}">${esc(d.l)}</button>`).join("");
   document.querySelectorAll("#sexpick button").forEach(el=>el.onclick=()=>{gsel=el.dataset.g;tabs();render();});
@@ -300,9 +306,9 @@ if(M.person_years){
        the data, and still appears as a partner on the rows above.` : "";
   document.getElementById("cover").innerHTML =
     `A dated published ranking exists for <b>${pct}%</b> of the
-     ${M.person_years.toLocaleString()} person-years scored here. The rest rest on the
+     ${M.person_years.toLocaleString()} person-years scored here. The rest rely on the
      model&rsquo;s own knowledge of how each person was seen at the time. These are model
      judgments, not measurements.`;
 }
-tabs(); lede(); render();
+tabs(); render();
 </script></body></html>
