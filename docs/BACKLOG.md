@@ -874,7 +874,17 @@ picking people to delete is exactly the roster-selection-for-presentation that
 Note that `scripts/deploy_site.sh` now publishes a board to a public URL, so
 this question is partly live whatever the repository's visibility is.
 
-### B4. Judge and model identifiers may not be public names
+### B4. CLOSED 2026-09-17 — the operator confirms these are public model names
+
+`claude-fable-5-1`, `claude-opus-5` and `claude-sonnet-5` are published API model
+ids. `fable` and `astra` are this repository's OWN judge-family labels, invented
+here, not vendor names. `gpt-6-astra` is the string these scripts pass to
+`codex exec`; the operator confirms it is a well-known public model name.
+
+Nothing to scrub. Note that no artifact naming any of them is in the repository
+anyway: `data/` is gitignored.
+
+~~Original entry:~~ 
 
 `fable`, `astra`, `gpt-6-astra`, `claude-fable-5-1`, `claude-opus-5` and
 `claude-sonnet-5` appear throughout the code, the artifacts and `web/board.html`.

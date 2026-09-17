@@ -91,6 +91,14 @@ footer code{font-family:var(--mono);font-size:11.5px}
  font-variant-numeric:tabular-nums;width:26px}
 .trend .tl.r{text-align:left}
 .trend .none{font-family:var(--mono);font-size:10.5px;color:var(--mute)}
+.sexpick{display:flex;justify-content:center;gap:6px;margin:0 0 2px}
+.sexpick button{font-family:var(--serif);font-weight:400;font-size:clamp(24px,4.4vw,34px);
+ line-height:1.15;background:none;border:0;color:var(--mute);cursor:pointer;
+ padding:4px 22px 9px;border-bottom:2px solid transparent;transition:color .12s}
+.sexpick button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.sexpick button:hover{color:var(--ink)}
+.sexpick .sym{font-size:.78em;margin-right:.36em;opacity:.6;font-family:var(--sans)}
+.picker{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:2px}
 .axis{font-family:var(--mono);font-size:9.5px;letter-spacing:0;color:var(--mute);opacity:.6;font-weight:400;text-transform:none;margin-top:3px;padding-left:32px;width:142px;display:flex;justify-content:space-between}
 .axis i{font-style:normal}
 .lede{max-width:64ch;margin:0}
@@ -110,11 +118,14 @@ footer code{font-family:var(--mono);font-size:11.5px}
   <p class="lede" id="lede"></p>
 </header>
 
-<div class="controls">
-  <nav id="tabs" role="tablist" aria-label="Leaderboards"></nav>
-  <div class="seg" role="group" aria-label="Score basis">
-    <button id="bNorm" data-basis="norm" aria-pressed="true">Normalized</button>
-    <button id="bRaw" data-basis="raw" aria-pressed="false">Raw</button>
+<div>
+  <div class="sexpick" id="sexpick" role="tablist" aria-label="Men or women"></div>
+  <div class="picker">
+    <div class="seg" id="dompick" role="group" aria-label="On screen or real life"></div>
+    <div class="seg" role="group" aria-label="Score basis">
+      <button id="bNorm" data-basis="norm" aria-pressed="true">Normalized</button>
+      <button id="bRaw" data-basis="raw" aria-pressed="false">Raw</button>
+    </div>
   </div>
 </div>
 
@@ -134,7 +145,7 @@ const f2 = v => (v>0?"+":v<0?"\u2212":"") + Math.abs(v).toFixed(2);
 const s2 = v => v==null ? "\u2014" : v.toFixed(2);
 const cls = v => v>0?"pos":v<0?"neg":"";
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let active=0, basis="norm";
+let gsel="male", dsel="on_screen", basis="norm";
 /* The x-axis of every chart in ONE board. Shared across its rows so they
    line up, and recomputed per board so a tab is not stretched by years no
    row in it uses. */
@@ -201,7 +212,7 @@ function lede(){
 }
 
 function render(){
-  const b=DATA.boards[active];
+  const b=DATA.boards.find(x=>x.gender===gsel&&x.domain===dsel)||DATA.boards[0];
   const rows=[...b.rows].filter(r=>AVG(r)!=null).sort((x,y)=>AVG(y)-AVG(x));
   const grp=ties(rows), pos={};
   grp.forEach(g=>g.length>1&&g.forEach((i,k)=>pos[i]=k===0?"top":k===g.length-1?"bot":"mid"));
@@ -213,7 +224,7 @@ function render(){
   const yrs=rows.flatMap(r=>(r.series||[]).map(p=>p.y));
   AX = yrs.length ? {y0:Math.min(...yrs), y1:Math.max(...yrs)}
                   : {y0:DATA.meta.year_min, y1:DATA.meta.year_max};
-  let h=`<h2 style="font-family:var(--serif);font-weight:400;font-size:29px;margin:0 0 4px">${esc(b.label)}</h2>
+  let h=`<h2 style="font-family:var(--serif);font-weight:400;font-size:29px;margin:0 0 4px">${esc(b.gender_label||"")}, ${esc((b.domain_label||"").toLowerCase())}</h2>
     <div class="scroller"><table><thead><tr><th class="l"></th><th class="l"></th><th class="l">Person</th>
     <th class="l trendh">Attractiveness over time
       <span class="axis"><i>${AX.y0 ?? ""}</i><i>${AX.y1 ?? ""}</i></span></th>
@@ -248,14 +259,24 @@ function render(){
      ${DATA.meta.floor.toFixed(2)} floor. Bracketed rows are not separable \u2014 read them as tied.</p>`;
   document.getElementById("board").innerHTML=h;
   document.querySelectorAll("tr.person").forEach(el=>{
-    const t=()=>{const k=DATA.boards[active].label+el.dataset.q; open.has(k)?open.delete(k):open.add(k); render();};
+    const t=()=>{const k=b.label+el.dataset.q; open.has(k)?open.delete(k):open.add(k); render();};
     el.onclick=t; el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();t();}};
   });
 }
+const SYM={male:"\u2642", female:"\u2640"};
 function tabs(){
-  document.getElementById("tabs").innerHTML=DATA.boards.map((b,i)=>
-    `<button role="tab" aria-selected="${i===active}" data-i="${i}">${esc(b.label)}</button>`).join("");
-  document.querySelectorAll("#tabs button").forEach(el=>el.onclick=()=>{active=+el.dataset.i;tabs();render();});
+  const sexes=[], doms=[];
+  DATA.boards.forEach(b=>{
+    if(!sexes.some(x=>x.g===b.gender)) sexes.push({g:b.gender, l:b.gender_label||b.gender});
+    if(!doms.some(x=>x.d===b.domain))  doms.push({d:b.domain,  l:b.domain_label||b.domain});
+  });
+  document.getElementById("sexpick").innerHTML = sexes.map(s=>
+    `<button role="tab" data-g="${esc(s.g)}" aria-pressed="${s.g===gsel}"
+       aria-selected="${s.g===gsel}"><span class="sym" aria-hidden="true">${SYM[s.g]||""}</span>${esc(s.l)}</button>`).join("");
+  document.getElementById("dompick").innerHTML = doms.map(d=>
+    `<button data-d="${esc(d.d)}" aria-pressed="${d.d===dsel}">${esc(d.l)}</button>`).join("");
+  document.querySelectorAll("#sexpick button").forEach(el=>el.onclick=()=>{gsel=el.dataset.g;tabs();render();});
+  document.querySelectorAll("#dompick button").forEach(el=>el.onclick=()=>{dsel=el.dataset.d;tabs();render();});
 }
 document.querySelectorAll(".seg [data-basis]").forEach(el=>el.onclick=()=>{
   basis=el.dataset.basis;

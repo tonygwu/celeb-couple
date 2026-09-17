@@ -313,7 +313,8 @@ def main() -> int:
                 if q and r0.get("domain") == dom:
                     in_graph[q] = in_graph.get(q, 0) + 1
             pending = sum(1 for r in below if in_graph.get(r["qid"], 0) >= bar)
-            out["boards"].append({"below_bar": len(below),
+            out["boards"].append({"gender_label": gl, "domain_label": dl,
+                                  "below_bar": len(below),
                                   "below_bar_pending": pending, "bar": bar,
                                   "gender": gender, "domain": dom, "label": f"{gl} — {dl}",
                                   "r2": volume_confound(rows), "rows": rows})
