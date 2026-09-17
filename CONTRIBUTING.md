@@ -94,5 +94,5 @@ that decide who is ranked are mechanical and print what they hide.
 
 ## Licence
 
-No licence has been chosen yet, so default copyright applies and no permission
-to reuse is granted. Open an issue if you need one before contributing.
+MIT. See [`LICENSE`](LICENSE). By sending a pull request you agree your
+contribution is released under the same licence.

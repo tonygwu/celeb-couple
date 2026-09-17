@@ -311,6 +311,7 @@ This is a completed research pilot published for its negative result. It is not
 a product, it is not deployed, and there is no ranking anybody is invited to
 take seriously.
 
-**No licence has been chosen yet.** Until a `LICENSE` file is added, default
-copyright applies and no permission to reuse is granted. Open an issue if you
-need one.
+**MIT.** See [`LICENSE`](LICENSE). The licence covers the code in this
+repository. It says nothing about the scored corpus under `data/`, which is
+gitignored and not distributed here, and nothing about the third-party sources
+the pipeline reads.
